@@ -67,3 +67,29 @@ Intended users:
 
 ## Repository Structure
 
+```
+├── data/
+│   ├── mock_fields.json        # Synthetic input — safe to share publicly
+│   ├── mock_fields.xlsx        # Human-readable version of the same input
+│   └── sample_output.xlsx      # Example of what the final review file looks like
+├── prompts/
+│   ├── grounding_universal.txt        # Shared context injected into every prompt
+│   ├── prompt_a_flagged_fields.txt    # For fields with clear quality failures
+│   └── prompt_b_uncertain_fields.txt  # For fields that may or may not be acceptable
+├── scripts/
+│   ├── 01_ingest_classify_send.py     # Extract, classify, call LLM, produce review file
+│   └── 02_deploy_approved.py          # Read approvals, write to Salesforce
+├── wiki/
+│   ├── 01_project_overview.md
+│   ├── 02_how_it_works.md
+│   ├── 03_experiment_and_validation.md
+│   ├── 04_human_review_process.md
+│   └── 05_architecture_and_reproducibility.md
+├── .gitignore
+├── README.md
+├── config.example.yml                 # Copy, rename to config.yml, edit before running
+└── requirements.txt
+```
+
+
+
