@@ -31,6 +31,9 @@ a better one."           If not, suggest             involved.                fo
 [3] Merge all results — FLAGGED + UNCERTAIN + PASSED + SKIPPED
                  ↓
 [4] review_queue_{timestamp}.xlsx — three tabs, one row per field
+         Tab A — Fields that were FLAGGED (AI wrote a new description)
+         Tab B — Fields that were UNCERTAIN (AI suggested a revision)
+         Tab C — Fields that PASSED or were SKIPPED (no action needed, for reference only)
                  ↓
          ── HUMAN STEP ──
 [5] Admin opens the spreadsheet and reviews Tab A and Tab B
