@@ -31,9 +31,11 @@ Nothing is written to Salesforce without explicit human approval.
 Salesforce Agentforce does not ask humans what a field means.
 It reads the description.
 
-When a field description is missing, the AI guesses.
-When it is vague, the AI misinterprets.
-When it contradicts the actual field configuration, the AI acts on wrong information.
+- When a field description is missing, the **AI guesses.**
+
+- When it is vague, the **AI misinterprets.**
+
+- When it contradicts the actual field configuration, the **AI acts on wrong information.**
 
 This is not a cosmetic problem. Poor metadata causes wrong answers, wrong actions,
 and support escalations in AI-powered orgs.
@@ -45,7 +47,7 @@ This tool makes the cleanup systematic, reviewable, and repeatable.
 
 ## Human Control by Design
 
-This tool is a supervised automation pipeline, not an autonomous agent.
+This tool is **a supervised automation pipeline, not an autonomous agent.**
 It prepares suggestions and waits. It cannot act on its own.
 
 The only change it can make to Salesforce is updating the description text
