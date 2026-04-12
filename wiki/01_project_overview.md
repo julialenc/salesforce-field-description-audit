@@ -18,6 +18,10 @@ It extracts field metadata from a Salesforce org, classifies every field
 description by quality, uses an LLM to generate suggested rewrites, presents
 results to a human reviewer, and writes approved changes back to Salesforce.
 
+This tool is a **human-supervised automation pipeline, not an autonomous agent**.
+It prepares suggestions and waits. It cannot act unless a human opens a spreadsheet,
+makes a decision (approve / edit / reject) row by row, and explicitly triggers the write-back script.
+
 Nothing is written to Salesforce without explicit human approval.
 
 ---
@@ -39,14 +43,17 @@ This tool makes the cleanup systematic, reviewable, and repeatable.
 
 ---
 
-## What This Tool Does Not Do
+## Human Control by Design
 
-- It does not write anything to Salesforce automatically
-- It does not make decisions without a human in the loop
-- It does not require the reviewer to write descriptions from scratch
-- It does not overwrite previous output files when run again
+This tool is a supervised automation pipeline, not an autonomous agent.
+It prepares suggestions and waits. It cannot act on its own.
 
-The human reviewer reads, judges, and approves. The tool does the rest.
+The only change it can make to Salesforce is updating the description text
+of existing fields. It cannot delete fields, hide fields, or alter field
+configuration of any kind.
+
+The admin opens the review file, decides row by row — approve, edit, or reject —
+and manually triggers the write-back script. Nothing reaches Salesforce before that.
 
 ---
 
@@ -69,9 +76,9 @@ Intended users:
 
 ```
 ├── data/
-│   ├── mock_fields.json        # Synthetic input — safe to share publicly
-│   ├── mock_fields.xlsx        # Human-readable version of the same input
-│   └── sample_output.xlsx      # Example of what the final review file looks like
+│   ├── <to update>             # Synthetic input — safe to share publicly
+│   ├── sf_classified.json      # The output of the Classifier (script 1) - The input with FLAGGED, UNCERTAIN, PASSED, SKIPPED status assigned to each field 
+│   └── <to update>             # Example of what the final review file looks like
 ├── prompts/
 │   ├── grounding_universal.txt        # Shared context injected into every prompt
 │   ├── prompt_a_flagged_fields.txt    # For fields with clear quality failures
