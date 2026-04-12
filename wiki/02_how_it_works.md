@@ -8,45 +8,55 @@ Salesforce Org
       ↓
 [1] Extract field metadata — Tooling API
       ↓
-[2] Classify the description of every field — 10 rule-based checks
+[2] Classify the description of every field — 10 rule-based checks (described at the end of the file)
       ↓                          ↓                        ↓                        ↓
   FLAGGED                   UNCERTAIN                  PASSED                  SKIPPED
 (clear failure)         (possible failure)           (no issues)          (system fields —
                                                                           read-only, cannot
                                                                           be overwritten)
       ↓                          ↓                        ↓                        ↓
-  Prompt A                   Prompt B                 No LLM                   No LLM
-"This description        "Is this description        Field is kept            Field is kept
-is bad. Write            good enough?                as-is. No AI             as-is. Logged
-a better one."           If not, suggest             involved.                for visibility
-                         an improvement."                                     only.
-      ↓                          ↓
-   Sent to AI              Sent to AI
-      ↓                          ↓
-   AI writes a             AI evaluates and
-   new description         suggests a revision
-      ↓                          ↓
-      └──────────┬───────────────┘
-                 ↓
+      └──────────────────────────┴────────────────────────┴────────────────────────┘
+                                             ↓
+                              data/sf_classified.json
+                          (all fields, one status each)
+                                             ↓
+                 ┌───────────────────────────┼────────────────────────┐
+                 ↓                           ↓                        ↓
+             FLAGGED                     UNCERTAIN               PASSED + SKIPPED
+                 ↓                           ↓                        ↓
+           Prompt A                      Prompt B                  No LLM
+    "This description             "Is this description         PASSED fields used
+    is bad. Write                 good enough?                 as few-shot examples
+    a better one."                If not, suggest              in Prompt A and B.
+                                  an improvement."             SKIPPED logged only.
+                 ↓                           ↓
+          Sent to AI                  Sent to AI
+                 ↓                           ↓
+          AI writes a              AI evaluates and
+          new description          suggests a revision
+                 ↓                           ↓
+                 └──────────┬───────────────┘
+                            ↓
 [3] Merge all results — FLAGGED + UNCERTAIN + PASSED + SKIPPED
-                 ↓
+                            ↓
 [4] review_queue_{timestamp}.xlsx — three tabs, one row per field
          Tab A — Fields that were FLAGGED (AI wrote a new description)
          Tab B — Fields that were UNCERTAIN (AI suggested a revision)
          Tab C — Fields that PASSED or were SKIPPED (no action needed, for reference only)
-                 ↓
-         ── HUMAN STEP ──
+                            ↓
+                    ── HUMAN STEP ──
 [5] Admin opens the spreadsheet and reviews Tab A and Tab B
     For every row: Approve / Edit / Reject the AI suggestion
-                 ↓
+                            ↓
 [6] Admin saves the completed file and triggers Script 2
-                 ↓
+                            ↓
 [7] Script 2 reads decisions and writes approved descriptions
     back to Salesforce — Metadata API
-                 ↓
-         write_log_{timestamp}.xlsx
-         (record of every change made)
+                            ↓
+                    write_log_{timestamp}.xlsx
+                    (record of every change made)
 </pre>
+
 
 ### Step 1 — Ingestion
 `01_ingest_classify_send.py`
@@ -94,6 +104,18 @@ severe status wins — **FLAGGED takes priority over UNCERTAIN**.
 
 > The LLM does not rewrite anything at this stage. Classification is fully rule-based and
 > deterministic. The LLM is only involved in the next step.
+
+### Classifier Output
+
+The result of classification is saved locally as `data/sf_classified.json`.
+This file contains every field processed in Step 1, each annotated with its assigned status:
+`FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
+
+All statuses are stored in a single file. The split into Prompt A (FLAGGED) and Prompt B
+(UNCERTAIN) happens at runtime in the next step — not at storage. PASSED fields are also
+read from this file when building few-shot examples for the LLM.
+
+This file is the single source of truth between the classification step and the LLM step.
 
 ---
 
