@@ -262,8 +262,6 @@ produces its own log and no previous log is ever overwritten.
 
 ## The 10 Rule-based Checks
 
----
-
 ### Rule 1 — NULL
 **The description is completely empty.**
 
