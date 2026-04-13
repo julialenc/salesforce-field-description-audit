@@ -78,16 +78,17 @@ Intended users:
 
 ```
 ├── data/
-│   ├── <to update>             # Synthetic input — safe to share publicly
-│   ├── sf_classified.json      # The output of the Classifier (script 1) - The input with FLAGGED, UNCERTAIN, PASSED, SKIPPED status assigned to each field 
-│   └── <to update>             # Example of what the final review file looks like
+│   ├── sf_metadata_raw.json         # Raw field metadata extracted from Salesforce
+│   ├── sf_classified.json           # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED
+│   └── llm_response.json            # Raw LLM suggestions before human review
 ├── prompts/
-│   ├── grounding_universal.txt        # Shared context injected into every prompt
-│   ├── prompt_a_flagged_fields.txt    # For fields with clear quality failures
-│   └── prompt_b_uncertain_fields.txt  # For fields that may or may not be acceptable
+│   ├── system_prompt.md             # Quality criteria and instructions — injected once per session
+│   ├── golden_examples.json         # Hand-picked perfect field descriptions used for few-shot grounding
+│   ├── prompt_a_flagged_fields.md   # Instruction for FLAGGED fields — clear quality failures
+│   └── prompt_b_uncertain_fields.md # Instruction for UNCERTAIN fields — borderline cases
 ├── scripts/
-│   ├── 01_ingest_classify_send.py     # Extract, classify, call LLM, produce review file
-│   └── 02_deploy_approved.py          # Read approvals, write to Salesforce
+│   ├── 01_ingest_classify_send.py   # Extract from Salesforce, classify, call LLM, produce review file
+│   └── 02_deploy_approved.py        # Read human approvals, write approved descriptions back to Salesforce
 ├── wiki/
 │   ├── 01_project_overview.md
 │   ├── 02_how_it_works.md
@@ -96,7 +97,7 @@ Intended users:
 │   └── 05_architecture_and_reproducibility.md
 ├── .gitignore
 ├── README.md
-├── config.example.yml                 # Copy, rename to config.yml, edit before running
+├── config.example.yml               # Copy, rename to config.yml, fill in credentials and object list before running
 └── requirements.txt
 ```
 
