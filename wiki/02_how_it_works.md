@@ -119,9 +119,65 @@ This file is the single source of truth between the classification step and the 
 
 ---
 
+### Step 3 — LLM Routing and Processing
+`01_ingest_classify_send.py`
+
+The input for this step is `data/sf_classified.json` — the file produced by the Classifier in
+Step 2. Every field in that file carries a status: FLAGGED, UNCERTAIN, PASSED, or SKIPPED.
+
+Before any field is sent to the LLM, the script assembles a system prompt from three static
+files in `prompts/`:
+
+- `system_prompt.md` — defines what a good field description looks like, sets the expected
+  tone, length, and format, and instructs the LLM how to behave
+- `golden_examples.json` — a curated set of hand-written reference descriptions injected as
+  examples of correct output
+- `prompt_a_flagged_fields.md` or `prompt_b_uncertain_fields.md` — the task instruction
+  specific to the field type being processed
+
+The system prompt is assembled once per session. Only the fields themselves change between
+API calls.
+
+Routing logic:
+
+| Status | What happens |
+|---|---|
+| **FLAGGED** | Sent to the LLM with `prompt_a_flagged_fields.md` — the LLM is instructed to discard the existing description and write a new one from scratch |
+| **UNCERTAIN** | Sent to the LLM with `prompt_b_uncertain_fields.md` — the LLM is instructed to evaluate the existing description and suggest an improvement only if one is needed |
+| **PASSED** | Not sent to the LLM — used as few-shot examples within the system prompt to show the LLM what acceptable output looks like |
+| **SKIPPED** | Not sent to the LLM and not used as examples — passed through untouched |
+
+Fields are sent in batches of 50 per API call. Raw responses are written to
+`data/llm_response.json` before any further processing. This ensures that if anything fails
+downstream, the LLM output is not lost.
+
+---
+
+### Step 4 — Merge and Output
+`01_ingest_classify_send.py`
+
+Once all LLM responses are received and stored in `data/llm_response.json`, the script merges
+them with the original classified data from `data/sf_classified.json` and assembles a single
+Excel file for human review:
+
+`review_queue_{timestamp}.xlsx`
+
+The file contains three tabs:
+
+| Tab | Contents | Reviewer action required |
+|---|---|---|
+| **Tab A — FLAGGED** | Original description + AI-written replacement | Approve, edit, or reject each row |
+| **Tab B — UNCERTAIN** | Original description + AI-suggested revision | Approve, edit, or reject each row |
+| **Tab C — PASSED / SKIPPED** | Original description only, no AI suggestion | No action required — included for full visibility |
+
+The timestamp in the filename ensures that multiple runs do not overwrite each other, and
+every review file can be traced back to the exact run that produced it.
+
+This file is the only output a human reviewer needs to open. Nothing in it touches Salesforce.
+It is a proposal, not an action.
 
 
-
+---
 
 
 
