@@ -179,7 +179,86 @@ It is a proposal, not an action.
 
 ---
 
+### Step 5 — Human Review *(manual step)*
+`data/review_queue_{timestamp}.xlsx`
 
+At the end of Step 4, Script 1 saves the review file to the `data/` folder. This folder is
+excluded from version control — the file exists on the Admin's machine only and is never
+committed to the repository.
+
+The Admin opens `data/review_queue_{timestamp}.xlsx` and works through **Tab A** and
+**Tab B** — one row per field. For every row, the Admin enters one of three decisions in the
+**Approve / Edit / Reject** column:
+
+| Decision | What it means | What happens next |
+|---|---|---|
+| **Approve** | The AI suggestion is accepted as written | Script 2 will write it to Salesforce exactly as shown |
+| **Edit** | The AI suggestion needs adjustment | Admin writes the preferred description in the **Admin Version** column. Script 2 will use that text instead. |
+| **Reject** | The AI suggestion is discarded | Script 2 skips this field. Nothing is written to Salesforce. |
+
+**Tab C** requires no input. It contains PASSED and SKIPPED fields, included for full
+visibility only.
+
+> Every row in Tab A and Tab B must have a decision before Script 2 can run.
+> Script 2 will not proceed if any decision is missing.
+
+Once all rows have a decision, the Admin saves the file. The filename must not be changed —
+Script 2 identifies the correct file by its name and timestamp.
+
+> **Nothing in this step touches Salesforce. The review file is a proposal, not an action.**
+
+---
+
+### Step 6 — Write-Back
+`02_deploy_approved.py`
+
+The input for this step is the completed `data/review_queue_{timestamp}.xlsx` — the file the
+Admin saved at the end of Step 5 with every row in Tab A and Tab B carrying a decision.
+
+Script 2 begins with a validation pass before writing anything. It checks that:
+
+- Every row in Tab A and Tab B has a value in the **Approve / Edit / Reject** column
+- Every row marked **Edit** has a non-empty value in the **Admin Version** column
+- No approved or edited description exceeds 255 characters — the Salesforce field limit
+
+If any of these checks fail, the script stops and reports the problem. Nothing is written to
+Salesforce until the file passes validation in full.
+
+Once validation passes, the script processes each row according to the Admin's decision:
+
+| Decision | What Script 2 does |
+|---|---|
+| **Approve** | Writes the value from the **LLM Suggestion** column to Salesforce |
+| **Edit** | Writes the value from the **Admin Version** column to Salesforce |
+| **Reject** | Skips the field — no change is made |
+
+Fields in **Tab C** are never written to, regardless of any content in that tab.
+
+Write-back is performed using the **Metadata API** via `02_deploy_approved.py`. Each field
+is updated individually. If a single field update fails — for example due to a permissions
+issue or a locked field — the script logs the failure and continues processing the remaining
+fields. A partial failure does not stop the run.
+
+Every field processed in this step is recorded in:
+
+`data/write_log_{timestamp}.xlsx`
+
+| Column | Contents |
+|---|---|
+| Object | Salesforce object API name |
+| Field | Field API name |
+| Old Description | The description that existed in Salesforce before this run |
+| New Description | The description written by this run |
+| Decision | Approve or Edit — as entered by the Admin |
+| Status | `SUCCESS` or `FAILED` |
+| Timestamp | Date and time the write was attempted |
+
+The timestamp in the filename matches the convention used for the review queue — each run
+produces its own log and no previous log is ever overwritten.
+
+> This log is the audit trail for every change made to Salesforce. Keep it.
+
+---
 
 ## The 10 Rule-based Checks
 
