@@ -19,6 +19,20 @@ Salesforce Org
                               data/`sf_classified.json`
                           (all fields, one status each)
                                              ↓
+
+                        Shared prompt context
+                (assembled once per session for all LLM calls)
+                         ┌───────────────────────────────┐
+                         │ `system_prompt.md`            │
+                         │ universal rules for           │
+                         │ good field descriptions       │
+                         ├───────────────────────────────┤
+                         │ `golden_examples.json`        │
+                         │ curated high-quality examples │
+                         │ for few-shot grounding        │
+                         └───────────────────────────────┘
+                                             ↓
+
                  ┌───────────────────────────┼────────────────────────┐
                  ↓                           ↓                        ↓
              FLAGGED                     UNCERTAIN               PASSED + SKIPPED
@@ -30,6 +44,9 @@ Salesforce Org
     If it exists, replace         an improvement."             SKIPPED logged only.
     it with a better one."
                  ↓                           ↓                        ↓
+      Shared prompt context        Shared prompt context
+       + Prompt A + fields          + Prompt B + fields
+                 ↓                           ↓
           Sent to AI                  Sent to AI
                  ↓                           ↓
           AI writes a              AI evaluates and
@@ -132,29 +149,31 @@ This file is the single source of truth between the classification step and the 
 `01_ingest_classify_send.py`
 
 The input for this step is `data/sf_classified.json` — the file produced by the Classifier in
-Step 2. Every field in that file carries a status: FLAGGED, UNCERTAIN, PASSED, or SKIPPED.
+Step 2. Every field in that file carries a status: `FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
 
-Before any field is sent to the LLM, the script assembles a system prompt from three static
-files in `prompts/`:
+Before any fields are sent to the LLM, Script 1 assembles a reusable instruction layer for the session:
 
-- `system_prompt.md` — defines what a good field description looks like, sets the expected
-  tone, length, and format, and instructs the LLM how to behave
-- `golden_examples.json` — a curated set of hand-written reference descriptions injected as
-  examples of correct output
-- `prompt_a_flagged_fields.md` or `prompt_b_uncertain_fields.md` — the task instruction
-  specific to the field type being processed
+- `system_prompt.md` — the universal definition of a good field description, including the expected tone, length, format, and quality criteria
+- `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding
 
-The system prompt is assembled once per session. Only the fields themselves change between
-API calls.
+This shared context is injected once per session. For each batch, the script then adds the relevant
+task instruction — `prompt_a_flagged_fields.md` or `prompt_b_uncertain_fields.md` — together with
+the field data for that batch.
+
+This means the LLM does not receive field data alone. Each call is built from three parts:
+
+1. the shared session context (`system_prompt.md` + `golden_examples.json`)
+2. the task-specific instruction (Prompt A or Prompt B)
+3. the batch of fields being processed
 
 Routing logic:
 
 | Status | What happens |
 |---|---|
-| **FLAGGED** | Sent to the LLM with `prompt_a_flagged_fields.md` — the LLM is instructed to discard the existing description and write a new one from scratch |
-| **UNCERTAIN** | Sent to the LLM with `prompt_b_uncertain_fields.md` — the LLM is instructed to evaluate the existing description and suggest an improvement only if one is needed |
-| **PASSED** | Not sent to the LLM — used as few-shot examples within the system prompt to show the LLM what acceptable output looks like |
-| **SKIPPED** | Not sent to the LLM and not used as examples — passed through untouched |
+| **FLAGGED** | Sent to the LLM with `prompt_a_flagged_fields.md` — if the description is missing, the LLM writes a new one from metadata; if the description exists but is unusable, the LLM replaces it |
+| **UNCERTAIN** | Sent to the LLM with `prompt_b_uncertain_fields.md` — the LLM evaluates the existing description and suggests an improvement only if one is needed |
+| **PASSED** | Not sent to the LLM — carried forward without change |
+| **SKIPPED** | Not sent to the LLM — logged for visibility only and carried forward without change |
 
 Fields are sent in batches of 50 per API call. Raw responses are written to
 `data/llm_response.json` before any further processing. This ensures that if anything fails
