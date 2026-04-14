@@ -78,9 +78,10 @@ Intended users:
 
 ```
 ├── data/
-│   ├── sf_metadata_raw.json         # Raw field metadata extracted from Salesforce
-│   ├── sf_classified.json           # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED
-│   └── llm_response.json            # Raw LLM suggestions before human review
+│   ├── sf_metadata_raw.json         # Raw field metadata — in production, extracted from Salesforce; in experiment mode, loaded from this file
+│   ├── sf_classified.json           # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED. Committed as experiment reference only
+│   ├── llm_response.json            # Raw LLM suggestions before human review. Committed as experiment reference only
+│   └── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs. Committed as experiment reference only
 ├── prompts/
 │   ├── system_prompt.md             # Quality criteria and instructions — injected once per session
 │   ├── golden_examples.json         # Hand-picked perfect field descriptions used for few-shot grounding
