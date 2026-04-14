@@ -82,10 +82,10 @@ Once the object list is confirmed, the Admin opens a terminal window, goes to th
 
 Script 1:
 
-extracts field metadata
-classifies the descriptions
-sends the relevant fields to the LLM
-creates the Excel review file
+- extracts field metadata
+- classifies the descriptions
+- sends the relevant fields to the LLM
+- creates the Excel review file
 
 The output is a timestamped spreadsheet stored in the data/ folder:
 
