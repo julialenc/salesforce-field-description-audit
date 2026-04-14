@@ -26,7 +26,7 @@ Salesforce Org
                  ↓                           ↓                        ↓
            Prompt A                      Prompt B                  No LLM
     "This description             "Is this description         PASSED fields used
-    is bad. Write                 good enough?                 as few-shot examples
+    is null or bad. Write          good enough?                 as few-shot examples
     a better one."                If not, suggest              in Prompt A and B.
                                   an improvement."             SKIPPED logged only.
                  ↓                           ↓
