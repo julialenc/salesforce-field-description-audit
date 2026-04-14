@@ -171,10 +171,6 @@ If the field is a Picklist, the description must reference the values or explain
 **Type alignment**
 The description must be consistent with the field type. A Checkbox must not be described as if it stores freeform text.
 
-### Confidence Scoring
-
-Each LLM suggestion is assigned a confidence score during evaluation. Scores below the threshold defined in `config.yml` are flagged for closer review. Human reviewers should apply additional scrutiny to low-confidence rows rather than approving them without reading.
-
 \---
 
 ## Definition of Done
