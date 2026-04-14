@@ -1,5 +1,4 @@
-
-## How the Tool Works
+# How the Tool Works
 
 ### High-Level Process Overview
 
@@ -17,7 +16,7 @@ Salesforce Org
       ↓                          ↓                        ↓                        ↓
       └──────────────────────────┴────────────────────────┴────────────────────────┘
                                              ↓
-                              data/sf_classified.json
+                              data/`sf_classified.json`
                           (all fields, one status each)
                                              ↓
                  ┌───────────────────────────┼────────────────────────┐
@@ -25,11 +24,12 @@ Salesforce Org
              FLAGGED                     UNCERTAIN               PASSED + SKIPPED
                  ↓                           ↓                        ↓
            Prompt A                      Prompt B                  No LLM
-    "This description             "Is this description         PASSED fields used
-    is null or bad. Write          good enough?                 as few-shot examples
-    a better one."                If not, suggest              in Prompt A and B.
-                                  an improvement."             SKIPPED logged only.
-                 ↓                           ↓
+    "If the description          "Is this description         PASSED fields used
+    is missing, write a           good enough?                 as few-shot examples
+    new one from metadata.        If not, suggest              in Prompt A and B.
+    If it exists, replace         an improvement."             SKIPPED logged only.
+    it with a better one."
+                 ↓                           ↓                        ↓
           Sent to AI                  Sent to AI
                  ↓                           ↓
           AI writes a              AI evaluates and
@@ -39,7 +39,7 @@ Salesforce Org
                             ↓
 [3] Merge all results — FLAGGED + UNCERTAIN + PASSED + SKIPPED
                             ↓
-[4] review_queue_{timestamp}.xlsx — three tabs, one row per field
+[4] `review_queue_{timestamp}.xlsx` — three tabs, one row per field
          Tab A — Fields that were FLAGGED (AI wrote a new description)
          Tab B — Fields that were UNCERTAIN (AI suggested a revision)
          Tab C — Fields that PASSED or were SKIPPED (no action needed, for reference only)
@@ -53,8 +53,9 @@ Salesforce Org
 [7] Script 2 reads decisions and writes approved descriptions
     back to Salesforce — Metadata API
                             ↓
-                    write_log_{timestamp}.xlsx
+                    `write_log_{timestamp}.xlsx`
                     (record of every change made)
+
 </pre>
 
 
@@ -62,8 +63,16 @@ Salesforce Org
 `01_ingest_classify_send.py`
 
 Script 1 begins by reading `config.yml` to determine which Salesforce objects to process.
-This is the only file an Admin needs to edit before running the tool. It contains the list
-of object names — for example Account, Contact, Case — and nothing else.
+
+The repository provides `config.example.yml` as a safe, shareable template. It shows the full configuration structure and the values each user needs to supply.
+
+Before running the tool:
+1. take `config.example.yml` from the repository
+2. create a local copy named `config.yml`
+3. fill in your own values
+4. run the scripts
+
+The scripts always read from `config.yml`, not from `config.example.yml`. The `config.yml` file is local-only, must remain uncommitted, and should never be pushed to the repository.
 
 Once the object list is confirmed, the script connects to Salesforce using the **Tooling API**
 and pulls the field metadata for every field on those objects. For each field, it retrieves:
