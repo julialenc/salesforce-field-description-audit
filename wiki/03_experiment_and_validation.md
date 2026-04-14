@@ -93,8 +93,8 @@ The input file (`data/sf_metadata_raw.json`) is a generated dataset **designed t
 * Descriptions that contradict observable field configuration (Rule 8 — Contradictory)
 * Descriptions written for end users rather than systems (Rule 9 — Audience Mismatch)
 * Descriptions that are technically present but meaningless without context (Rule 10 — Ambiguous)
-* Fields with genuinely good descriptions (expected to **PASS**)
-* System fields that cannot be written via the Metadata API (expected to be **SKIPPED**)
+* Fields with genuinely good descriptions (expected to be classified as **PASSED**)
+* System fields that cannot be written via the Metadata API (expected to be classified as **SKIPPED**)
 
 This dataset is committed to the repository and safe to share publicly. It contains no real org data.
 
