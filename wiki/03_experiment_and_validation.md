@@ -1,10 +1,9 @@
-## Experiment and Validation
+# Experiment and Validation
 
-### Purpose of This Document
+## Purpose of This Document
 
 This document describes how to validate the pipeline before pointing it at a real Salesforce org. It explains what the experiment tests, what tech stack it uses, how to run it, and what "good enough" looks like before the tool is considered ready for production use.
 
-\---
 
 ### What the Experiment Tests
 
@@ -16,7 +15,8 @@ The pipeline has two components that require validation before they can be trust
 
 The experiment is not about achieving a perfect score. It is about building enough evidence that the Classifier catches the right things and the prompts produce suggestions a human reviewer can actually use.
 
-\---
+
+
 
 ### What the Experiment Does NOT Test
 
@@ -26,7 +26,7 @@ The experiment is not about achieving a perfect score. It is about building enou
 
 These are intentionally excluded. The experiment uses synthetic data and a local or simulated LLM so that the pipeline can be run and re-run publicly, without credentials, without cost, and without risk to any org.
 
-\---
+---
 
 ## Experiment Mode vs Production Mode
 
@@ -42,7 +42,7 @@ Everything between those seams — classification logic, routing, prompt assembl
 
 This means the experiment validates the real pipeline, not a toy version of it.
 
-\---
+---
 
 ## Experiment Tech Stack
 
@@ -77,7 +77,7 @@ objects:
 
 Setting `mode: experiment` tells Script 2 to run in dry-run — decisions are validated and logged, but no call is made to the Salesforce Metadata API.
 
-\---
+---
 
 ## Synthetic Input Dataset
 
@@ -98,7 +98,7 @@ The input file (`data/sf_metadata_raw.json`) is a generated dataset **designed t
 
 This dataset is committed to the repository and safe to share publicly. It contains no real org data.
 
-\---
+---
 
 ## How to Run the Experiment
 
@@ -122,7 +122,7 @@ This dataset is committed to the repository and safe to share publicly. It conta
 6. Run Script 2: `python scripts/02_deploy_approved.py`
 7. Review the generated `data/write_log_{timestamp}.xlsx` — no changes will have been written to Salesforce
 
-\---
+---
 
 ## Classifier Validation
 
@@ -135,7 +135,7 @@ Before reviewing LLM output, verify the Classifier is firing correctly by checki
 
 If a rule misfires — either missing a case it should catch or flagging a case it should not — the classifier logic in `01_ingest_classify_send.py` should be corrected before evaluating LLM output.
 
-\---
+---
 
 ## Prompt Evaluation
 
@@ -171,7 +171,7 @@ If the field is a Picklist, the description must reference the values or explain
 **Type alignment**
 The description must be consistent with the field type. A Checkbox must not be described as if it stores freeform text.
 
-\---
+---
 
 ## Definition of Done
 
@@ -205,7 +205,7 @@ The experiment is complete when all of the following are true:
 
 * A second person can clone the repository, configure `config.yml`, and run the full experiment without any guidance beyond this wiki and the README
 
-\---
+---
 
 ## Experiment Setup
 
@@ -223,7 +223,7 @@ Model:
 Temperature setting:
 ```
 
-\---
+---
 
 ## What the Results Showed
 
@@ -240,7 +240,7 @@ Prompt changes made during iteration:
 Notable failure patterns:
 ```
 
-\---
+---
 
 *This document will be updated after the first experiment run.*
 
