@@ -17,9 +17,7 @@ It also covers **reproducibility**, including how the project is designed to rem
 
 ## One Pipeline, Three Operating Stages
 
-This project is built as **one pipeline**, not as separate codebases for experiment, MVP, and production.
-
-The same core scripts and decision logic are used throughout. What changes between stages is a small set of surrounding seams: where the input comes from, which LLM provider is called, whether write-back is simulated or real, and how the user interacts with the system.
+This project uses **one pipeline** across experiment, MVP, and production. The core scripts and decision logic remain the same; what changes is a small set of seams: the data source, the LLM provider, the write-back mode, and the runtime interface.
 
 ### What Changes Between Stages
 
@@ -33,32 +31,15 @@ The same core scripts and decision logic are used throughout. What changes betwe
 | Human review | Required | Required | Required |
 | Core pipeline logic | Same | Same | Same |
 
-### Experiment
+### Experiment, MVP, and Production
 
-The **experiment** is the safe validation stage. It is used to test the classifier, prompts, review flow, and reproducibility without touching a live Salesforce org.
+- **Experiment** validates the pipeline safely without touching a live Salesforce org.
+- **MVP** is the first real operational version, with live ingestion, real LLM calls, and real write-back.
+- **Production** is the same pipeline operated through a stronger shell, typically with better interfaces, security, and execution controls.
 
-### MVP
+### Stable Core and Configurable Seams
 
-The **MVP** is the first real operational version of the project. It uses live Salesforce ingestion, real LLM calls, and real write-back, while keeping the same human review gate and the same core pipeline logic.
-
-### Production
-
-**Production** is not a new pipeline. It is the same pipeline with a more robust operational shell around it.
-
-Typical production changes may include:
-- replacing direct `config.yml` editing with a more user-friendly interface
-- stronger authentication and secret handling
-- more managed execution
-- better logging and observability
-- stricter access control and approval governance
-- more structured storage and retention of review and audit artifacts
-- stronger handling of retries, reruns, and partial failures
-
-In other words, production changes the **operational shell**, not the **core decision logic**.
-
-### What Stays the Same
-
-Across experiment, MVP, and production, the stable core remains the same:
+Across all three stages, the stable core remains the same:
 - the rule-based classifier
 - the `FLAGGED` / `UNCERTAIN` / `PASSED` / `SKIPPED` model
 - the prompt assembly and routing structure
@@ -66,23 +47,17 @@ Across experiment, MVP, and production, the stable core remains the same:
 - the validation gate before write-back
 - the audit trail created after deployment
 
-This continuity is what makes the architecture coherent. Validation work done in experiment mode carries forward into MVP, and MVP carries forward into production.
-
-### Configurable Seams
-
-The differences between operating stages are expressed through a small number of **configurable seams**, rather than through different codebases.
-
-These seams include:
+The differences between stages are expressed through a small number of **configurable seams**:
 - the **data source**
 - the **LLM provider**
 - the **write-back mode**
 - the **runtime interface**
 
-In the current implementation, these seams are controlled mainly through `config.yml`. Later, the same seams may be exposed through command-line parameters or a more user-friendly interface, while the underlying pipeline remains the same.
-
-This project uses **one pipeline with swappable seams**, not separate tools for experiment and production.
+In the current implementation, these seams are controlled mainly through `config.yml`. Later, they may be exposed through command-line parameters or a more user-friendly interface, while the underlying pipeline remains the same.
 
 ---
+
+## High-Level Architecture Overview
 
 ## High-Level Architecture Overview
 
@@ -201,29 +176,26 @@ Shared prompt context      Shared prompt context
 
 #### Important notes
 
-- **Script 1** prepares proposals but cannot modify Salesforce
-- **Human review** layer is the approval gate
-- **Script 2** validates and executes only approved outcomes ---> the only live write happens at the Metadata API step
+- **Script 1** prepares proposals but cannot modify Salesforce.
+- **Human review** is the approval gate, and **Script 2** is the only stage that can trigger live write-back through the Metadata API.
 
 ---
 
 ## Main Architectural Components
 
-The system can be understood as a small set of architectural layers. Each layer has a defined responsibility and a clear handoff to the next one.
+The system can be understood as a small set of architectural layers with clear handoffs between them.
 
 ### Configuration Layer
 
 The **configuration layer** defines the runtime scope of the pipeline.
 
-In the current implementation, runtime configuration is stored in `config.yml`, created locally from `config.example.yml`. The scripts always read from `config.yml`, not from the template file. This layer controls which Salesforce objects are processed, which operating mode is active, and which provider settings are used.
-
-Its architectural role is to separate runtime settings from pipeline logic.
+In the current implementation, runtime settings live in `config.yml`, created locally from `config.example.yml`. This layer controls which Salesforce objects are processed, which operating mode is active, and which provider settings are used.
 
 ### Data Input Layer
 
 The **data input layer** supplies raw field metadata to the pipeline.
 
-This layer is intentionally designed as a seam:
+It is intentionally designed as a seam:
 - in **experiment**, it reads from `data/sf_metadata_raw.json`
 - in **MVP** and **production**, it reads from Salesforce through the **Tooling API**
 
@@ -233,90 +205,55 @@ As long as the input structure remains consistent, the downstream pipeline does 
 
 The **classification layer** is the deterministic control layer of the system.
 
-It applies the 10 rule-based checks and assigns each field exactly one status:
+It applies the 10 rule-based checks and assigns each field one status:
 - `FLAGGED`
 - `UNCERTAIN`
 - `PASSED`
 - `SKIPPED`
 
-Its output is stored in `data/sf_classified.json`, which acts as the persisted handoff between rule-based processing and the LLM layer.
+Its output is stored in `data/sf_classified.json`.
 
 ### Prompt and LLM Layer
 
 The **prompt and LLM layer** generates suggestions only where the classifier says they are needed.
 
 It combines:
-- a **shared session context** assembled once per session
-- a **task-specific prompt** selected by classification bucket
-
-The shared session context consists of:
-- `system_prompt.md`
-- `golden_examples.json`
-
-The task-specific prompts are:
-- `prompt_a_flagged_fields.md`
-- `prompt_b_uncertain_fields.md`
+- shared session context: `system_prompt.md` and `golden_examples.json`
+- task-specific prompts: `prompt_a_flagged_fields.md` and `prompt_b_uncertain_fields.md`
 
 This keeps the LLM in a narrow role: grounded suggestion generation under explicit routing rules.
 
-### Review Artifact Layer
-
-The **review artifact layer** transforms internal pipeline output into a structured human review object.
+### Review Artifact and Human Decision Layers
 
 After LLM processing, Script 1 merges `FLAGGED`, `UNCERTAIN`, `PASSED`, and `SKIPPED` into:
 
 `data/review_queue_{timestamp}.xlsx`
 
-This file is the formal handoff between machine processing and human review. It contains:
+This file is the formal handoff between machine processing and human review:
 - **Tab A** — `FLAGGED`
 - **Tab B** — `UNCERTAIN`
 - **Tab C** — `PASSED / SKIPPED`
 
-### Human Decision Layer
-
-The **human decision layer** is the approval gate of the architecture.
-
-The Admin reviews the spreadsheet and assigns one of three decisions to each actionable row:
+The Admin then assigns one of three decisions to each actionable row:
 - **Approve**
 - **Edit**
 - **Reject**
 
-This layer is where final authority sits. The machine prepares proposals; the human reviewer authorizes outcomes.
+This is the approval gate of the architecture: the machine prepares proposals, and the human reviewer authorizes outcomes.
 
-### Deployment Layer
+### Deployment and Audit Layers
 
-The **deployment layer** turns reviewed decisions into controlled write actions.
-
-Implemented by `02_deploy_approved.py`, it:
-- reads the completed review file
-- validates that it is complete and internally consistent
-- maps decisions to write actions
-- executes only permitted changes
+The **deployment layer**, implemented by `02_deploy_approved.py`, reads the completed review file, validates it, maps decisions to write actions, and executes only permitted changes.
 
 This layer is also a seam:
 - in **experiment**, it runs as a dry-run
 - in **MVP** and **production**, it writes through the **Metadata API**
 
-It is the only layer that can modify Salesforce.
-
-### Audit and Logging Layer
-
-The **audit and logging layer** records what the system did and what happened as a result.
-
-Its primary output is:
+Its primary audit output is:
 
 `data/write_log_{timestamp}.xlsx`
 
-This log records the attempted write, the decision behind it, and the success or failure of each operation.
-
-More broadly, the architecture persists key artifacts across the run:
-- raw metadata
-- classified output
-- raw LLM output
-- review queue
-- write log
-
-That is what makes the pipeline inspectable rather than opaque.
+Together, the deployment and logging layers ensure that write attempts are controlled, traceable, and reviewable.
 
 ---
 
@@ -380,21 +317,17 @@ without changing its underlying logic.
 
 This chapter focuses on **how the pipeline is operated**, not on how its core logic changes.
 
-The move from MVP to production should not change the underlying decision model. It changes the operating layer around that model.
+From MVP to production, the decision model stays the same; what changes is the operating layer around it.
 
 ### MVP Workflow
 
-In the current **MVP workflow**, the pipeline is operated locally and directly.
-
-The flow is simple:
-- configuration is stored locally in `config.yml`
+In the current **MVP workflow**, the pipeline is operated locally and directly:
+- configuration is stored in `config.yml`
 - the scripts are run manually from the terminal
 - the Admin reviews a local Excel file
 - deployment is triggered manually after review is complete
 
-This workflow is intentionally lightweight. It is sufficient to prove that the pipeline works end to end against a real Salesforce org while keeping the implementation small and inspectable.
-
-At this stage, the pipeline is already real:
+This is intentionally lightweight, but the pipeline is already real:
 - live ingestion through the **Tooling API**
 - real LLM calls
 - human review in the spreadsheet
@@ -411,8 +344,6 @@ Typical production changes may include:
 - more formal authentication
 - more structured monitoring and operational control
 
-The point is not that all of these features already exist. The point is that the architecture is compatible with them.
-
 Production is therefore not a rewrite of the project. It is the same pipeline operated with stronger interfaces and tighter controls.
 
 ---
@@ -421,7 +352,7 @@ Production is therefore not a rewrite of the project. It is the same pipeline op
 
 Reproducibility is a design goal of this project.
 
-The pipeline is designed so that another person can inspect the repository, run the same stages in the same order, and review the artifacts produced at each step. In this sense, reproducibility comes from three design choices:
+The pipeline is designed so that another person can inspect the repository, run the same stages in the same order, and review the artifacts produced at each step. In practice, reproducibility comes from three design choices:
 - an explicit repository structure
 - prompt assets stored as files
 - persisted intermediate artifacts across the pipeline
@@ -435,12 +366,9 @@ The repository is organized so that each major part of the system has a visible 
 - `data/` contains input, intermediate, and output artifacts
 - `wiki/` documents the design, workflow, and validation logic
 
-This makes the system easier to inspect, explain, and reproduce.
-
 ### Prompt Assets Stored as Files
 
 The LLM layer is not assembled from hidden strings inside the code. Its prompt assets are stored explicitly in `prompts/`, including:
-
 - `system_prompt.md`
 - `golden_examples.json`
 - `prompt_a_flagged_fields.md`
@@ -459,20 +387,19 @@ This makes the experiment safe to run publicly, independent of credentials, and 
 The pipeline stores artifacts at each major stage instead of collapsing everything into a single final output.
 
 The main persisted artifacts are:
-
 - `sf_metadata_raw.json`
 - `sf_classified.json`
 - `llm_response.json`
 - `review_queue_{timestamp}.xlsx`
 - `write_log_{timestamp}.xlsx`
 
-These files make the system inspectable stage by stage, from raw input to classification, generation, review, and deployment outcome.
+Together, these files make the system inspectable from raw input to classification, generation, review, and deployment outcome.
 
 ### What Reproducibility Means Here
 
 In this project, reproducibility does **not** mean that every run produces identical wording.
 
-The **classifier** is deterministic, but the **LLM** is not fully deterministic, and the **human review step** is intentionally judgment-based. For that reason, reproducibility here means that the system preserves the same:
+The **classifier** is deterministic, but the **LLM** is not fully deterministic, and the **human review step** is intentionally judgment-based. Reproducibility therefore means preserving the same:
 - structure
 - rules
 - prompt assets
@@ -480,8 +407,6 @@ The **classifier** is deterministic, but the **LLM** is not fully deterministic,
 - review workflow
 
 With those elements held constant, repeated runs should lead to **comparable outcomes**, even if the exact wording of suggestions is not identical every time.
-
-That is the standard this architecture is designed to support: not perfect textual sameness, but a process that remains inspectable, repeatable, and auditable.
 
 ---
 
