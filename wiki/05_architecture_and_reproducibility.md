@@ -84,7 +84,7 @@ This project uses **one pipeline with swappable seams**, not separate tools for 
 
 ---
 
-### High-Level Architecture Overview
+## High-Level Architecture Overview
 
 <pre>
 ╔════════════════════════════════════════════════════════════╗
@@ -322,222 +322,137 @@ That is what makes the pipeline inspectable rather than opaque.
 
 ## Stable Core vs Swappable Seams
 
-The architecture is designed around a simple principle: the **core pipeline stays stable**, while a small number of **external seams can be swapped** depending on whether the system is running in experiment, MVP, or production.
+The architecture is built around a simple principle: the **core pipeline stays stable**, while a small number of **external seams remain replaceable**.
 
-This is what allows the project to evolve without becoming a different tool at each stage.
+This is what allows the project to evolve across experiment, MVP, and production without becoming a different tool at each stage.
 
 ### Stable Core
 
-The following parts of the system are intended to remain stable across experiment, MVP, and production:
+The following elements are intended to remain stable across all operating stages:
 
-- **classifier logic** — the same rule-based checks determine how field descriptions are evaluated
-- **status model** — the same four statuses are used throughout: `FLAGGED`, `UNCERTAIN`, `PASSED`, and `SKIPPED`
-- **prompt assembly structure** — the LLM layer is built in the same way: shared session context plus task-specific prompt plus field batch
-- **batching logic** — fields are grouped and sent to the LLM in the same batch-based pattern
-- **review queue structure** — the output remains the same review artifact with Tab A, Tab B, and Tab C
-- **Admin decision model** — the reviewer still decides row by row using **Approve**, **Edit**, or **Reject**
-- **validation rules** — the same pre-write checks apply before anything can be deployed
-- **write log structure** — the system still records the outcome of write attempts in a traceable audit artifact
+- **classifier logic**
+- **status model** — `FLAGGED`, `UNCERTAIN`, `PASSED`, `SKIPPED`
+- **prompt assembly structure**
+- **batching logic**
+- **review queue structure**
+- **Admin decision model** — **Approve**, **Edit**, **Reject**
+- **validation rules**
+- **write log structure**
 
-These stable elements form the **decision logic** of the project. They define how the pipeline thinks, how it presents work for review, and how it decides what is allowed to be written.
+Together, these elements define the project’s core decision logic: how fields are evaluated, how suggestions are prepared, how review is performed, and what is allowed to be written back.
 
 ### Why the Stable Core Matters
 
-The stable core is what makes the architecture coherent across stages.
+The stable core is what makes the architecture coherent over time.
 
-It means:
-- the experiment validates the same logic that the MVP will use
-- the MVP uses the same decision model that production will use
-- improvements to prompts, classifier rules, or review design carry forward instead of being discarded at the next stage
+It ensures that:
+- experiment validates the same logic later used in MVP
+- MVP uses the same decision model later retained in production
+- improvements to rules, prompts, and review design carry forward instead of being discarded at the next stage
 
-Without this stable core, each stage would become its own disconnected tool. With it, the project remains one pipeline that matures over time.
+Without a stable core, each stage would become its own disconnected implementation. With it, the system remains one pipeline that matures over time.
 
 ### Swappable Seams
 
-Around that stable core sit a small number of seams that can be changed without redesigning the pipeline.
+Around that stable core sit a small number of seams that can change without redesigning the pipeline:
 
-#### Data Source
+- **data source**
+- **LLM provider**
+- **write-back target**
+- **runtime interface**
 
-The **data source seam** determines where raw field metadata comes from.
-
-- in **experiment**, the source is a synthetic file such as `data/sf_metadata_raw.json`
-- in **MVP** and **production**, the source is Salesforce via the **Tooling API**
-
-The pipeline downstream of ingestion does not need to change as long as the metadata structure stays consistent.
-
-#### LLM Provider
-
-The **LLM provider seam** determines which model endpoint the pipeline calls.
-
-- in **experiment**, this may be a simulator or a local model such as AOAI API Simulator or Ollama
-- in **MVP**, this may be a real enterprise provider such as Azure OpenAI
-- in **production**, the same provider may remain, or another enterprise provider may be used
-
-Because the prompt assembly and routing logic stay the same, the provider can change without changing the rest of the architecture.
-
-#### Write-Back Target
-
-The **write-back seam** determines whether Script 2 performs a dry run or a real deployment.
-
-- in **experiment**, Script 2 validates and logs decisions but does not write to Salesforce
-- in **MVP** and **production**, Script 2 writes approved descriptions through the **Metadata API**
-
-This seam is what makes safe validation possible before enabling live change.
-
-#### Runtime Interface
-
-The **runtime interface seam** determines how the user interacts with the pipeline.
-
-- in the current **experiment** and **MVP**, the pipeline is run manually through scripts and local configuration in `config.yml`
-- in **production**, this may evolve into a more user-friendly interface such as command-line arguments, a wrapper application, or a simple web UI
-
-This seam changes how the system is operated, but not how the core pipeline behaves.
+These seams determine how the pipeline is connected and operated in a given stage, while leaving the core decision logic unchanged.
 
 ### Why the Swappable Seams Matter
 
 The swappable seams are what make the architecture adaptable.
 
-They allow the project to:
+They allow the same pipeline to:
 - run safely in experiment mode
 - operate for real in MVP
 - become more usable and robust in production
 
-without changing the central workflow:
-
-- ingest
-- classify
-- route
-- generate
-- review
-- validate
-- write back
-- log
-
-### Architectural Summary
-
-The stable core defines **what the system is**. The swappable seams define **how the system is connected and operated** in a given stage.
-
-This is the bridge between them: the core stays stable, while the seams around it evolve.
+without changing its underlying logic.
 
 ---
 
 ## MVP Workflow vs Production Workflow
 
-The move from MVP to production does not change the core pipeline. It changes how that pipeline is operated.
+This chapter focuses on **how the pipeline is operated**, not on how its core logic changes.
 
-This distinction matters. The architecture is designed so that the same decision logic can remain in place while the surrounding operating layer becomes more robust, more secure, and easier to use.
+The move from MVP to production should not change the underlying decision model. It changes the operating layer around that model.
 
 ### MVP Workflow
 
 In the current **MVP workflow**, the pipeline is operated locally and directly.
 
 The flow is simple:
-
 - configuration is stored locally in `config.yml`
 - the scripts are run manually from the terminal
 - the Admin reviews a local Excel file
 - deployment is triggered manually after review is complete
 
-This workflow is intentionally lightweight. It is enough to prove that the pipeline works end to end against a real Salesforce org while keeping the implementation small and inspectable.
+This workflow is intentionally lightweight. It is sufficient to prove that the pipeline works end to end against a real Salesforce org while keeping the implementation small and inspectable.
 
-From an architectural perspective, MVP is the first real operating form of the system:
+At this stage, the pipeline is already real:
 - live ingestion through the **Tooling API**
 - real LLM calls
 - human review in the spreadsheet
 - real write-back through the **Metadata API**
 
-The operating model is still manual, but the pipeline itself is real.
-
 ### Production Workflow
 
-In **production**, the same pipeline logic should remain in place.
+In **production**, the same pipeline remains in place, but it is operated through a more robust shell.
 
-The classifier still evaluates descriptions in the same way. The same status model still applies. The LLM is still called only where appropriate. The same review gate still exists. Nothing is written to Salesforce without explicit human approval.
+Typical production changes may include:
+- replacing direct `config.yml` editing with **CLI parameters**, a **service wrapper**, or a **simple web UI**
+- moving from manual terminal runs to **scheduled** or **managed execution**
+- stronger secret handling
+- more formal authentication
+- more structured monitoring and operational control
 
-What changes in production is the **operational shell** around that core.
+The point is not that all of these features already exist. The point is that the architecture is compatible with them.
 
-That shell may evolve in several ways:
-
-- local `config.yml` editing may be replaced by **CLI parameters**, a **service wrapper**, or a **simple web UI**
-- script execution may move from manual terminal runs to **scheduled** or **managed execution**
-- secret handling may become stronger and more centralized
-- authentication may move toward enterprise-grade patterns
-- operational monitoring and control may become more structured
-
-The point is not that all of these production features already exist. The point is that the architecture is compatible with them.
-
-### What Does Not Change
-
-The following elements should remain unchanged between MVP and production:
-
-- the core pipeline structure
-- the rule-based classifier
-- the `FLAGGED` / `UNCERTAIN` / `PASSED` / `SKIPPED` model
-- the prompt assembly logic
-- the review-first decision model
-- the validation gate before write-back
-- the principle that human approval is mandatory
-
-This is what keeps the system coherent as it matures.
-
-### Why This Distinction Matters
-
-Making the MVP-to-production transition explicit helps prevent a common misunderstanding.
-
-Production is not a future rewrite of the project. It is not a different tool with different logic. It is the same pipeline, operated with a stronger interface and tighter controls.
-
-That is why the path forward is concrete without pretending that the full production shell is already built.
-
-- **MVP** proves that the real pipeline works
-- **production** makes that same pipeline easier to operate, safer to manage, and more suitable for enterprise use.
+Production is therefore not a rewrite of the project. It is the same pipeline operated with stronger interfaces and tighter controls.
 
 ---
 
 ## Reproducibility by Design
 
-A key design goal of this project is **reproducibility**.
+Reproducibility is a design goal of this project.
 
-The pipeline is not intended to behave like a black box that produces suggestions and then disappears. It is designed so that another person can inspect the repository, understand how the system is assembled, run the same stages in the same order, and review the artifacts produced at each step.
-
-Reproducibility in this project comes from three main design choices:
+The pipeline is designed so that another person can inspect the repository, run the same stages in the same order, and review the artifacts produced at each step. In this sense, reproducibility comes from three design choices:
 - an explicit repository structure
-- versioned prompt assets stored as files
-- persisted intermediate artifacts at every major stage of the pipeline
+- prompt assets stored as files
+- persisted intermediate artifacts across the pipeline
 
 ### Explicit Repository Structure
 
 The repository is organized so that each major part of the system has a visible place:
 
 - `scripts/` contains the execution logic
-- `prompts/` contains the prompt assets used by the LLM layer
-- `data/` contains input, intermediate, and output artifacts generated by the pipeline
+- `prompts/` contains the LLM prompt assets
+- `data/` contains input, intermediate, and output artifacts
 - `wiki/` documents the design, workflow, and validation logic
 
-This structure makes the project easier to inspect, explain, and reproduce. A new reader does not have to infer where prompts live, where output files are created, or where the main scripts begin and end.
+This makes the system easier to inspect, explain, and reproduce.
 
-### Prompt Files Stored in `prompts/`
+### Prompt Assets Stored as Files
 
-The LLM layer is not assembled from hidden strings inside the code. Its prompt assets are stored explicitly in the `prompts/` directory.
+The LLM layer is not assembled from hidden strings inside the code. Its prompt assets are stored explicitly in `prompts/`, including:
 
-These include:
 - `system_prompt.md`
 - `golden_examples.json`
 - `prompt_a_flagged_fields.md`
 - `prompt_b_uncertain_fields.md`
 
-This matters for reproducibility because prompt behavior is part of the system design, not an invisible implementation detail. Another person can inspect the same files, understand the same instruction set, and run the same prompt architecture.
+This makes prompt behavior visible and reviewable rather than implicit.
 
 ### Synthetic Dataset for Experiment Mode
 
 In experiment mode, the pipeline uses a synthetic metadata dataset rather than a live Salesforce org.
 
-This makes the experiment:
-- safe to run publicly
-- independent of credentials
-- repeatable across environments
-- suitable for testing classifier behavior and prompt quality without risk to real metadata
-
-Because the dataset is synthetic and shareable, experiment runs can be repeated by other users without needing access to the original org.
+This makes the experiment safe to run publicly, independent of credentials, and repeatable across environments without risk to real metadata.
 
 ### Persisted Intermediate Artifacts
 
@@ -545,57 +460,28 @@ The pipeline stores artifacts at each major stage instead of collapsing everythi
 
 The main persisted artifacts are:
 
-- `sf_metadata_raw.json` — raw metadata input for the run
-- `sf_classified.json` — classifier output with one status per field
-- `llm_response.json` — raw LLM output before human review
-- `review_queue_{timestamp}.xlsx` — the review artifact presented to the Admin
-- `write_log_{timestamp}.xlsx` — the audit artifact created after Script 2
+- `sf_metadata_raw.json`
+- `sf_classified.json`
+- `llm_response.json`
+- `review_queue_{timestamp}.xlsx`
+- `write_log_{timestamp}.xlsx`
 
-These files make the system inspectable stage by stage.
-
-A reviewer can see:
-- what metadata entered the system
-- how that metadata was classified
-- what the LLM returned
-- what the human reviewer approved, edited, or rejected
-- what was ultimately written, or attempted, during deployment
-
-This is what makes the pipeline reproducible by design rather than only by intention.
+These files make the system inspectable stage by stage, from raw input to classification, generation, review, and deployment outcome.
 
 ### What Reproducibility Means Here
 
 In this project, reproducibility does **not** mean that every run produces identical wording.
 
-That would be the wrong standard, because the system combines three different kinds of behavior:
-
-- the **classifier** is deterministic
-- the **LLM** is not fully deterministic
-- the **human review step** is intentionally judgment-based
-
-For that reason, reproducibility here should be understood more carefully.
-
-It means that the system preserves the same:
+The **classifier** is deterministic, but the **LLM** is not fully deterministic, and the **human review step** is intentionally judgment-based. For that reason, reproducibility here means that the system preserves the same:
 - structure
 - rules
 - prompt assets
 - intermediate artifacts
 - review workflow
 
-And because those elements remain stable, repeated runs should lead to **comparable outcomes**, even if the exact wording of LLM suggestions is not identical every time.
+With those elements held constant, repeated runs should lead to **comparable outcomes**, even if the exact wording of suggestions is not identical every time.
 
-This distinction matters. It keeps the standard realistic while still demanding discipline in the design. The goal is not perfect textual sameness. The goal is that another person can inspect the same components, run the same pipeline, and understand how a comparable result was produced.
-
-### Why This Matters
-
-Because the system includes both LLM output and human review, reproducibility cannot rely on code alone. It also depends on preserving the context, inputs, and outputs of each stage.
-
-By storing prompt assets explicitly and persisting intermediate artifacts, the project makes it possible to:
-- rerun the same pipeline structure
-- inspect the source of a result
-- compare runs over time
-- review how a given output was produced
-
-In that sense, reproducibility here means more than “the scripts run again.” It means the pipeline leaves behind enough structure and evidence for another person to understand, evaluate, and validate what happened.
+That is the standard this architecture is designed to support: not perfect textual sameness, but a process that remains inspectable, repeatable, and auditable.
 
 ---
 
@@ -603,11 +489,9 @@ In that sense, reproducibility here means more than “the scripts run again.”
 
 The system is designed to **fail safely**.
 
-That principle matters because this pipeline can eventually write to live Salesforce metadata. A safe failure model means that errors do not result in silent write-back, incomplete deployment, or ambiguous system state. Instead, the pipeline is designed to stop, log, or skip in a way that remains visible to the operator. :contentReference[oaicite:0]{index=0}
+Because this pipeline can eventually write to live Salesforce metadata, failure handling must be controlled and visible. Errors should result in a stop, a skip, or a logged failure — never in silent write-back or ambiguous system state.
 
 ### No Silent Write-Back
-
-The architecture does not allow hidden or implicit writes.
 
 No change reaches Salesforce unless all of the following are true:
 
@@ -617,7 +501,7 @@ No change reaches Salesforce unless all of the following are true:
 - Script 2 has validated the review file
 - the write attempt is executed through the write-back layer
 
-This means there is no path from LLM output directly to Salesforce. Human review and validation sit between generation and deployment by design.
+There is no direct path from LLM output to Salesforce. Human review and validation sit between generation and deployment by design.
 
 ### Validation Blocks Incomplete Review Files
 
@@ -630,13 +514,11 @@ At minimum, the validation step checks that:
 
 If any of these checks fail, Script 2 stops and nothing is written.
 
-This is one of the most important safety controls in the system. It prevents incomplete review states from becoming partial or accidental metadata updates. :contentReference[oaicite:1]{index=1}
-
 ### Failed Field Writes Are Logged
 
-If a write attempt fails for an individual field, that failure is recorded rather than hidden.
+If an individual field write fails, that failure is recorded rather than hidden.
 
-The system is designed to keep a traceable record of:
+The system keeps a traceable record of:
 - which field was attempted
 - what decision led to the attempt
 - what text the system tried to write
@@ -644,19 +526,15 @@ The system is designed to keep a traceable record of:
 
 This record is stored in `data/write_log_{timestamp}.xlsx`.
 
-The write log is therefore not only an audit artifact. It is also part of the failure model: it makes unsuccessful writes visible and reviewable. :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}
-
 ### Partial Write Failure Does Not Corrupt the Rest of the Run
 
-The system is designed so that one failed field does not invalidate the rest of the deployment.
+A failed field update does not invalidate the rest of the deployment.
 
-If the Metadata API rejects an individual field update, that field is logged as failed and the pipeline continues with the remaining approved rows. A single write error does not corrupt the review file, erase earlier successes, or silently stop the run without trace.
-
-This behaviour is important in real orgs, where occasional field-level failures may happen because of permissions, write restrictions, or org-specific constraints. The architecture is designed to isolate those failures rather than turn them into opaque run-level outcomes. :contentReference[oaicite:4]{index=4}
+If the Metadata API rejects an individual field update, that field is logged as failed and the pipeline continues with the remaining approved rows. A single write error does not corrupt earlier successes or silently terminate the run.
 
 ### Experiment Mode Avoids Live Risk Entirely
 
-The safest failure mode is to avoid live write-back entirely when validating the pipeline.
+The safest failure mode is to avoid live write-back during validation.
 
 That is the purpose of **experiment mode**. In experiment mode:
 - input comes from synthetic metadata
@@ -664,20 +542,7 @@ That is the purpose of **experiment mode**. In experiment mode:
 - Script 2 validates and logs decisions
 - no call is made to the Salesforce Metadata API
 
-This makes it possible to test classification, prompting, review flow, and artifact generation without any risk to a live org. It also means that early failures in prompt design or review workflow can be surfaced before enabling real deployment. :contentReference[oaicite:5]{index=5}
-
-### Safe Failure as an Architectural Principle
-
-Safe failure in this project does not mean that errors never occur. It means errors are handled in a controlled and visible way.
-
-In practice, that means:
-- no silent write-back
-- incomplete review files are blocked before deployment
-- failed field writes are logged
-- partial failures do not corrupt the rest of the run
-- experiment mode provides a zero-risk validation path
-
-That combination is what makes the pipeline suitable for gradual maturation from experiment to MVP and then toward production.
+This allows classifier logic, prompt behavior, review flow, and artifact generation to be tested without risk to a live org.
 
 ---
 
@@ -685,7 +550,7 @@ That combination is what makes the pipeline suitable for gradual maturation from
 
 Authentication and secret handling should be understood differently in **MVP** and in a future **enterprise production** rollout.
 
-This section does not define the final enterprise authentication design. Instead, it sets out the current assumptions for MVP and the direction of travel for a more robust production model. That distinction is important because the project is still evolving from a locally operated pipeline toward a more production-ready operating shell. :contentReference[oaicite:6]{index=6}
+This section does not define a final enterprise authentication model. It states the current assumptions for MVP and the likely direction for a more robust production design.
 
 ### MVP Assumption: Local Trusted Execution
 
@@ -697,7 +562,7 @@ In practical terms, this means:
 - execution is script-driven
 - the operating environment is controlled by the user running the tool
 
-This is acceptable for an MVP because the goal at this stage is to prove the real pipeline against a live org, not yet to solve enterprise-scale identity and access management.
+This is acceptable for MVP because the immediate goal is to prove the real pipeline against a live org, not yet to solve enterprise-scale identity and access management.
 
 ### Credentials Must Never Live in Committed Files
 
@@ -706,12 +571,10 @@ Even in MVP, credentials and secrets must not be stored in committed project fil
 In particular:
 - credentials should not be stored in source code
 - credentials should not be committed to the repository
-- `config.example.yml` should remain a template only
+- `config.example.yml` must remain a template only
 - any real secrets used during execution must remain local and uncommitted
 
-This aligns with the broader architectural principle that the repository should remain safe to share publicly while local runtime configuration remains environment-specific.
-
-### Enterprise Rollout Requires Proper OAuth and Secret Handling
+### Enterprise Rollout Requires Stronger Authentication and Secret Handling
 
 For an enterprise production rollout, stronger authentication and secret handling will be required.
 
@@ -721,32 +584,16 @@ That future state is not yet defined as a hard commitment, but it will likely in
 - managed secret storage rather than local file-based handling
 - closer review of the integration user and its permissions
 
-The exact implementation should be defined with the architect at enterprise rollout stage, not assumed prematurely in the wiki. :contentReference[oaicite:7]{index=7}
+The exact implementation should be defined with the architect at enterprise rollout stage, not assumed prematurely in this wiki.
 
-### Why This Is Framed Carefully
+### Current Architectural Position
 
-It would be misleading to present a final enterprise authentication model as if it were already settled.
-
-At this stage, the architecture can honestly say:
+At this stage, the architecture can state the following clearly:
 
 - MVP assumes trusted local execution
 - secrets must never be committed
 - the future enterprise model will require stronger authentication and secret management
-- that production-grade design should be confirmed with the architect before rollout
-
-This keeps the documentation accurate without overstating what has already been implemented.
-
-### Architectural Summary
-
-Authentication and secret handling are part of the **operational shell**, not the core pipeline logic.
-
-That means the core architecture can remain stable while the security model matures over time:
-
-- **experiment** avoids live secrets entirely where possible
-- **MVP** operates locally in a trusted environment
-- **enterprise production** will require formal authentication and secret-handling design
-
-This is consistent with the broader architecture of the project: the pipeline logic remains stable, while the seams around execution and deployment become more robust as the system moves toward production.
+- the production-grade design should be confirmed with the architect before rollout
 
 ---
 
@@ -754,9 +601,7 @@ This is consistent with the broader architecture of the project: the pipeline lo
 
 The architecture is intentionally designed so that the system can evolve without replacing the core pipeline.
 
-That is one of its main strengths. The central logic of the project — ingest, classify, route, generate, review, validate, write back, and log — is meant to remain stable even as the surrounding operating layer becomes more capable.
-
-This means future improvements can be made as extensions around the core rather than as a redesign of the core itself.
+Its main strength is that future improvements can be made around the core rather than through a redesign of the core itself.
 
 Examples of future evolution include:
 
@@ -767,7 +612,7 @@ Examples of future evolution include:
   Additional field context can be introduced at ingestion time, such as richer configuration details, formula definitions, relationship targets, or other metadata that improves prompt quality.
 
 - **UI instead of configuration editing**  
-  The current local `config.yml` model can later be replaced by command-line options, a wrapper application, or a simple web UI without changing the decision logic of the pipeline.
+  The current local `config.yml` model can later be replaced by command-line options, a wrapper application, or a simple web UI.
 
 - **better authentication and secret handling**  
   The security model can mature from local trusted execution toward stronger enterprise authentication and managed secret storage.
@@ -778,8 +623,8 @@ Examples of future evolution include:
 - **richer audit and reporting**  
   The existing review queue and write log can be extended with better reporting, monitoring, summaries, and operational traceability.
 
-The important architectural point is that these changes improve the **operational shell** of the project, not the **core logic**.
+The key architectural point is that these changes improve the **operational shell** of the project, not the **core decision logic**.
 
-That is why the system can mature over time without turning into a different tool. The same pipeline that is validated in experiment mode, exercised for real in MVP, and hardened in production can remain recognizably the same system throughout.
+This is the intended long-term shape of the system: a stable core surrounded by replaceable and improvable edges.
 
-This is the intended long-term shape of the project: a stable core surrounded by replaceable and improvable edges.
+---
