@@ -59,8 +59,6 @@ In the current implementation, these seams are controlled mainly through `config
 
 ## High-Level Architecture Overview
 
-## High-Level Architecture Overview
-
 <pre>
 ╔════════════════════════════════════════════════════════════╗
 ║                         SCRIPT 1                           ║
