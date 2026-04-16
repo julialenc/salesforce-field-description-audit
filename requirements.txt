@@ -1,1 +1,76 @@
+# Salesforce Field Description Automation
+# Python: 3.10+ recommended
+#
+# This file covers:
+# 1) universal project dependencies
+# 2) experiment-mode dependencies
+# 3) MVP / production dependencies
+#
+# Notes:
+# - Some packages below are optional depending on how the scripts are implemented.
+# - Local LLM runtimes such as Ollama and AOAI API Simulator are NOT installed via pip here.
+#   They run as separate local services.
+# - Real production secret handling / enterprise auth may later move outside this file.
 
+# =========================================================
+# Universal core stack
+# =========================================================
+
+PyYAML>=6.0
+requests>=2.31.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+python-dateutil>=2.8.2
+
+# Optional but common quality-of-life packages
+tqdm>=4.66.0
+
+# =========================================================
+# Salesforce connectivity
+# Required for MVP / production
+# May also be used in local testing if real org access is enabled
+# =========================================================
+
+simple-salesforce>=1.12.0
+
+# =========================================================
+# LLM / API client stack
+# =========================================================
+
+# For Azure OpenAI / OpenAI-compatible usage in MVP or production
+openai>=1.30.0
+
+# For Amazon Bedrock usage in MVP or production
+boto3>=1.34.0
+
+# For Google Vertex AI usage in MVP or production
+google-cloud-aiplatform>=1.49.0
+
+# Optional alternative if you later implement direct HTTP-only model calls
+# httpx>=0.27.0
+
+# =========================================================
+# Experiment mode
+# =========================================================
+
+# No extra Python package is strictly required if experiment mode:
+# - reads from data/sf_metadata_raw.json
+# - calls AOAI API Simulator through requests/openai
+# - or calls Ollama through HTTP
+#
+# External tools used in experiment mode (installed separately, not via pip):
+# - AOAI API Simulator
+# - Ollama
+
+# =========================================================
+# MVP / Production notes
+# =========================================================
+
+# MVP / production typically rely on:
+# - simple-salesforce          -> Salesforce access / metadata retrieval
+# - openai                     -> Azure OpenAI or OpenAI-compatible LLM calls
+# - boto3                      -> Amazon Bedrock access
+# - google-cloud-aiplatform    -> Google Vertex AI access
+# - pandas + openpyxl          -> review queue and write log Excel files
+# - PyYAML                     -> config.example.yml / config.yml parsing
+# - requests                   -> direct HTTP integrations where needed
