@@ -1,3 +1,5 @@
+# !!! THIS IS WORK IN PROGRESS - DO NOT USE !!! 
+
 # Salesforce Field Description Automation
 
 Salesforce field descriptions are often **missing, vague, or outdated**. In AI-enabled orgs, this is no longer just a documentation problem, but a systems problem.
