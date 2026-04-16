@@ -1,1 +1,116 @@
+# =========================================================
+# Salesforce Field Description Automation
+# config.example.yml
+# =========================================================
+#
+# WHO THIS FILE IS FOR
+#
+# We assume three main user groups:
+#
+# 1. Developers and Architects evaluating the repo
+#    - They discover the project on GitHub
+#    - They want to understand the setup quickly
+#    - They usually start in experiment mode
+#
+# 2. Learners, contributors, and experimenters
+#    - They want to test the classifier, prompts, and workflow
+#    - They may not have Salesforce credentials
+#    - They use experiment mode with synthetic data
+#
+# 3. Real implementers testing on a Salesforce org
+#    - They often start in experiment mode first
+#    - Then they switch to live metadata ingestion and real LLM calls
+#    - They use this file as the bridge from experiment to MVP
+#
+# HOW TO USE THIS FILE
+#
+# 1. Copy this file to a new local file named: config.yml
+# 2. Fill in your own values
+# 3. Keep config.yml local only
+# 4. Never commit config.yml to GitHub
+#
+# The scripts always read from config.yml, not from config.example.yml.
+#
+# OPERATING MODES
+#
+# - experiment:
+#   Uses synthetic metadata from data/sf_metadata_raw.json
+#   and runs Script 2 in dry-run mode (no live Salesforce write-back).
+#
+# - production:
+#   Uses live Salesforce metadata via Tooling API and allows
+#   Script 2 to write approved descriptions back through Metadata API.
+#
+# In practice, this "production" mode is also the mode used for MVP:
+# the first real operational version of the pipeline.
+#
+# =========================================================
 
+mode: experiment   # experiment | production
+
+data_source:
+  # Used in experiment mode only
+  experiment_file: data/sf_metadata_raw.json
+
+llm:
+  # Supported providers:
+  # - aoai_simulator   -> local Azure OpenAI API simulator
+  # - ollama           -> local open-source model runtime
+  # - azure_openai     -> Azure OpenAI
+  # - openai           -> OpenAI-compatible API
+  # - bedrock          -> Amazon Bedrock
+  # - vertex_ai        -> Google Vertex AI
+  provider: aoai_simulator
+
+  # Examples:
+  # aoai_simulator -> http://localhost:8080
+  # ollama         -> http://localhost:11434
+  # azure_openai   -> https://YOUR-RESOURCE.openai.azure.com/
+  # openai         -> https://api.openai.com/v1
+  # bedrock / vertex_ai may not require the same endpoint style,
+  # but the field is kept here for a consistent config shape.
+  endpoint: http://localhost:8080
+
+  # Model name depends on provider
+  # Examples:
+  # - gpt-4o
+  # - llama3
+  # - claude-3-5-sonnet
+  # - gemini-1.5-pro
+  model: gpt-4o
+
+  # Keep local in config.yml only
+  # Not used by all providers in the same way
+  api_key: YOUR_API_KEY_HERE
+
+  # Optional generation controls
+  temperature: 0.2
+
+salesforce:
+  # Used in production / MVP mode
+  # Keep all values local in config.yml only
+  username: your_username@example.com
+  password: YOUR_PASSWORD
+  security_token: YOUR_SECURITY_TOKEN
+
+  # login = production org
+  # test  = sandbox
+  domain: login   # login | test
+
+objects:
+  # Salesforce objects to scan
+  # Start small for first runs
+  - Account
+  - Contact
+  - Case
+
+options:
+  # By default, only custom fields are processed.
+  # If true, standard fields may also be included where writable.
+  include_standard_fields: false
+
+  # Number of fields sent per LLM request
+  llm_batch_size: 50
+
+  # Keep intermediate JSON/XLSX artifacts for inspection and debugging
+  save_intermediate_artifacts: true
