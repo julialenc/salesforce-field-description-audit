@@ -128,6 +128,95 @@ Based on the results, every field is assigned one of four statuses:
 A field receives exactly one status. If multiple checks trigger on the same field, the most
 severe status wins — **FLAGGED takes priority over UNCERTAIN**.
 
+### Rule Evaluation Order and Status Priority
+
+The classifier does **not** treat all 10 rules as equal, and it does **not** always evaluate every field against all 10 rules.
+
+Instead, the rules are checked in a deliberate order from the **strongest and most certain failures** to the **softest and most context-dependent failures**.
+
+This serves two purposes:
+
+- it makes classification more **efficient**
+- it makes the final status more **predictable and reproducible**
+
+#### Status priority
+
+A field can receive only one final status:
+
+- `SKIPPED`
+- `FLAGGED`
+- `UNCERTAIN`
+- `PASSED`
+
+If multiple rules could apply to the same field, the most severe status wins.
+
+The priority is:
+
+`SKIPPED` → `FLAGGED` → `UNCERTAIN` → `PASSED`
+
+That means:
+- a field that cannot be written to is marked `SKIPPED` immediately
+- a field with any clear failure is marked `FLAGGED`
+- a field with no clear failure but with weaker signals is marked `UNCERTAIN`
+- only a field that triggers none of the checks is marked `PASSED`
+
+#### Evaluation hierarchy
+
+The rules are evaluated in this order:
+
+##### First: immediate stop conditions
+
+These checks are either high-confidence failures or hard exclusions. As soon as one of them applies, the classifier stops and assigns the result immediately.
+
+1. **SKIPPED** — the field is not writable or intentionally excluded from write-back
+2. **NULL**
+3. **Echo / Too Short**
+4. **Stale or Placeholder**
+5. **Audience Mismatch**
+6. **Wrong Type Hint**
+7. **Undefined Picklist**
+
+All of these produce `FLAGGED` except `SKIPPED`, which remains its own status.
+
+##### Second: softer checks
+
+If none of the stronger checks apply, the classifier evaluates the softer, more context-dependent rules:
+
+8. **Too Long**
+9. **Contradictory**
+10. **Jargon Without Context**
+11. **Ambiguous**
+
+These produce `UNCERTAIN`.
+
+If one or more of these checks apply, the field is marked `UNCERTAIN`.
+
+If none apply, the field is marked `PASSED`.
+
+#### Why the classifier stops early
+
+The classifier is intentionally designed to stop as soon as a strong `FLAGGED` condition is found.
+
+For example:
+
+- if a description is completely empty, there is no value in also checking whether it is too long or ambiguous
+- if a Picklist description clearly fails to explain the values, that strong failure takes priority over weaker signals such as excessive length
+- if a field is not writable, the classifier marks it `SKIPPED` immediately and does not continue evaluation
+
+This makes the runtime more efficient, especially when processing large numbers of fields, and avoids generating multiple competing statuses for the same row.
+
+#### Why this matters
+
+This hierarchy is part of the project’s transparency and reproducibility model.
+
+The classifier is not a black box. It follows a fixed evaluation order, applies deterministic checks, and resolves overlaps through an explicit severity rule:
+
+- stronger failures first
+- weaker failures second
+- one final status per field
+
+That design keeps the logic explainable both in the code and in the output artifacts.
+
 > The LLM does not rewrite anything at this stage. Classification is fully rule-based and
 > deterministic. The LLM is only involved in the next step.
 
@@ -311,7 +400,31 @@ A description under a minimum character threshold with no real content.
 
 ---
 
-### Rule 3 — Wrong Type Hint
+### Rule 3 — Stale or Placeholder
+**The description contains placeholder language or is clearly outdated.**
+
+Examples: *"TBD"*, *"to be confirmed"*, *"ask John"*, *"deprecated"*, *"no longer used"*.
+These were acceptable temporarily. In a live org read by AI, they are liabilities.
+
+| Classifier verdict | FLAGGED |
+|---|---|
+
+---
+
+### Rule 4 — Audience Mismatch
+**The description is written for end users, not for systems.**
+
+Example: *"Click here to select the account type. Choose the option that best describes
+your customer."* Field descriptions in Salesforce are not help text or tooltips.
+They are read by integrations, AI agents, and developers — not by the people filling in forms.
+UI instructions in a field description add noise and no signal.
+
+| Classifier verdict | FLAGGED |
+|---|---|
+
+---
+
+### Rule 5 — Wrong Type Hint
 **The description contradicts the field type.**
 
 Example: a Checkbox field described as *"Enter the customer's preferred contact method"*.
@@ -323,7 +436,7 @@ The description suggests the wrong data type, which misleads any system reading 
 
 ---
 
-### Rule 4 — Undefined Picklist
+### Rule 6 — Undefined Picklist
 **The field is a Picklist, but the description does not reference the values or their meaning.**
 
 Example: a Picklist field with values `Tier 1`, `Tier 2`, `Tier 3` and a description of
@@ -335,35 +448,12 @@ is incomplete. An AI reading this cannot interpret the values correctly.
 
 ---
 
-### Rule 5 — Too Long
+### Rule 7 — Too Long
 **The description exceeds a reasonable length and likely contains noise.**
 
 Salesforce allows up to 255 characters. Descriptions that approach or exceed this limit
 often contain instructions, historical notes, or multiple meanings merged into one field.
 This may indicate the field is doing too much, or the description was never maintained.
-
-| Classifier verdict | UNCERTAIN |
-|---|---|
-
----
-
-### Rule 6 — Stale or Placeholder
-**The description contains placeholder language or is clearly outdated.**
-
-Examples: *"TBD"*, *"to be confirmed"*, *"ask John"*, *"deprecated"*, *"no longer used"*.
-These were acceptable temporarily. In a live org read by AI, they are liabilities.
-
-| Classifier verdict | FLAGGED |
-|---|---|
-
----
-
-### Rule 7 — Jargon Without Context
-**The description uses internal acronyms or terms that are not explained.**
-
-Example: *"Used by the SFMC sync for BU segmentation"*.
-An AI — or a new team member — cannot interpret `SFMC` or `BU` without context.
-Internal shorthand that has never been documented creates silent knowledge gaps.
 
 | Classifier verdict | UNCERTAIN |
 |---|---|
@@ -383,15 +473,14 @@ These contradictions cannot be resolved by the tool — they require a human dec
 
 ---
 
-### Rule 9 — Audience Mismatch
-**The description is written for end users, not for systems.**
+### Rule 9 — Jargon Without Context
+**The description uses internal acronyms or terms that are not explained.**
 
-Example: *"Click here to select the account type. Choose the option that best describes
-your customer."* Field descriptions in Salesforce are not help text or tooltips.
-They are read by integrations, AI agents, and developers — not by the people filling in forms.
-UI instructions in a field description add noise and no signal.
+Example: *"Used by the SFMC sync for BU segmentation"*.
+An AI — or a new team member — cannot interpret `SFMC` or `BU` without context.
+Internal shorthand that has never been documented creates silent knowledge gaps.
 
-| Classifier verdict | FLAGGED |
+| Classifier verdict | UNCERTAIN |
 |---|---|
 
 ---
