@@ -14,7 +14,7 @@ Built for **Salesforce Developers and Architects**, it gives teams a reusable so
 
 ## Features
 
-- **Extract field metadata** via the **Tooling API**, with experiment mode supported through a synthetic input file.
+- **Extract field metadata** via the **Tooling API**, with experiment mode supported through synthetic input files.
 - **Classify description quality** with 10 rule-based checks that assign `FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
 - **Generate LLM-assisted rewrites** using shared prompt context plus task-specific prompts for `FLAGGED` and `UNCERTAIN` fields.
 - **Require human review**: every proposed change must be **approved, edited, or rejected** before deployment.
@@ -38,7 +38,8 @@ The result is not a temporary workaround for one interaction, but a durable meta
 
 <pre>
 [0] Salesforce metadata
- - Experiment: `data/sf_metadata_raw.json`
+ - Experiment: `data/sf_metadata_raw_training.json` (development)
+               `data/sf_metadata_raw_test.json`     (final validation)
  - MVP & Production: Tooling API
         ↓
 [1] Script 1                                        # ingests data, classifies fields, routes to LLM, saves LLM response
@@ -48,9 +49,9 @@ The result is not a temporary workaround for one interaction, but a durable meta
  Shared prompt context                              # universal rules for field description + curated examples
 `system_prompt.md` + `golden_examples.json`
         ↓
-FLAGGED   → Prompt A → LLM                          # fields with missing description or clear description failure
-UNCERTAIN → Prompt B → LLM                          # fields with possible description failure
-PASSED / SKIPPED → no LLM                           # fields meeting all criteria or system fields 
+FLAGGED   → Prompt A → LLM                          # fields with missing description or clear description failure (R1-R5)
+UNCERTAIN → Prompt B → LLM                          # fields with possible description failure (R6-R10)
+PASSED / SKIPPED → no LLM                           # fields meeting all criteria or system fields
         ↓
 `data/llm_response.json`                            # LLM suggestion for descriptions
         ↓
@@ -106,16 +107,18 @@ Then open `config.yml` and fill in your own values.
 ### First-Run Preparation
 
 Before running the scripts:
-- set mode: experiment
-- keep data_source.experiment_file: `data/sf_metadata_raw.json`
-- choose an LLM provider in the llm block
-- keep config.yml local only and never commit it
+- set `mode: experiment`
+- set `data_source.experiment_file` to `data/sf_metadata_raw_training.json` to start with the training set
+- choose an LLM provider in the `llm` block
+- keep `config.yml` local only and never commit it
+
+See `wiki/03_experiment_and_validation.md` for the full two-phase experiment methodology, including when to switch to the test set.
 
 ---
 
 ## Quick Start
 
-The simplest way to try the project is in **experiment mode**.
+The simplest way to try the project is in **experiment mode** using the training set.
 
 ### 1. Create your local config
 
@@ -127,7 +130,7 @@ cp config.example.yml config.yml
 Then update `config.yml` so that:
 
 - `mode: experiment`
-- `data_source.experiment_file` points to `data/sf_metadata_raw.json`
+- `data_source.experiment_file` points to `data/sf_metadata_raw_training.json`
 - `llm.provider` is set to your local or simulated provider
 
 ### 2. Run Script 1
@@ -158,7 +161,9 @@ Save the file without renaming it.
 
 ### 4. Run Script 2
 
-`python scripts/02_deploy_approved.py` 
+```bash
+python scripts/02_deploy_approved.py
+```
 
 In **experiment mode**, Script 2 runs as a **dry-run**:
 
@@ -189,7 +194,7 @@ For the full workflow, see:
 | Write-back | **Salesforce Metadata API** | Writes approved field descriptions back to Salesforce |
 | Review interface | **Excel (`.xlsx`)** | Human review artifact for Approve / Edit / Reject decisions |
 | Configuration | **YAML** (`config.example.yml` → `config.yml`) | Controls mode, data source, provider settings, and object scope |
-| Experiment input | **`data/sf_metadata_raw.json`** | Synthetic metadata dataset for safe experiment-mode runs |
+| Experiment input | **`data/sf_metadata_raw_training.json`** (288 fields) and **`data/sf_metadata_raw_test.json`** (144 fields) | Synthetic metadata datasets for safe experiment-mode runs — training set for development, test set for final validation |
 | LLM providers | **AOAI API Simulator, Ollama, Azure OpenAI, OpenAI-compatible APIs, Amazon Bedrock, Google Vertex AI** | Generates proposed field-description rewrites depending on runtime mode |
 | Prompt assets | **Markdown + JSON** (`system_prompt.md`, `golden_examples.json`, prompt templates) | Defines quality rules, examples, and task-specific instructions |
 | Artifacts | **JSON + Excel** | Stores classification output, raw LLM output, review queue, and write log |
@@ -204,7 +209,7 @@ Detailed documentation lives in the `wiki/` folder:
 
 - `wiki/01_project_overview.md` — problem statement, why it matters, and who the project is for
 - `wiki/02_how_it_works.md` — step-by-step pipeline logic, classifier routing, LLM flow, and write-back process
-- `wiki/03_experiment_and_validation.md` — experiment setup, validation approach, and definition of done
+- `wiki/03_experiment_and_validation.md` — two-phase experiment methodology (training and test sets), validation approach, and definition of done
 - `wiki/04_human_review_process.md` — Admin workflow for reviewing, approving, editing, or rejecting suggestions
 - `wiki/05_architecture_and_reproducibility.md` — architecture, operating stages, reproducibility, safety, and future evolution
 
@@ -219,10 +224,10 @@ This project is primarily for **Salesforce Developers and Architects** who want 
 Typical users include:
 
 - **Developers and Architects evaluating the repo**  
-  They discover the project on GitHub, want to understand the setup quickly, and usually start in **experiment mode**.
+  They discover the project on GitHub, want to understand the setup quickly, and usually start in **experiment mode** with the training set.
 
 - **Learners, contributors, and experimenters**  
-  They want to test the classifier, prompts, and review flow without needing Salesforce credentials, using the synthetic dataset in **experiment mode**.
+  They want to test the classifier, prompts, and review flow without needing Salesforce credentials, using the synthetic datasets in **experiment mode**.
 
 - **Real implementers testing on a Salesforce org**  
   They often begin in experiment mode, then switch to live metadata ingestion and real LLM calls in **MVP mode**.
@@ -244,5 +249,3 @@ Contribution guidelines are being finalized and will be added in `CONTRIBUTING.m
 ## License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
-
----
