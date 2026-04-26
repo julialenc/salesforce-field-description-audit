@@ -6,7 +6,7 @@ This chapter explains how the tool is structured technically, which parts of the
 
 It is written primarily for readers who want to understand the system as a whole: **Developers, Architects, advanced Admins**, and anyone evaluating whether the design is robust enough to move from local validation to production use.
 
-It covers the project’s **architecture**:
+It covers the project's **architecture**:
 - how the pipeline is structured end to end
 - how experiment mode, MVP, and production relate to the same codebase
 - how the human review step fits into the architecture rather than sitting outside it
@@ -24,7 +24,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 | Aspect | Experiment | MVP | Production |
 |---|---|---|---|
 | Purpose | Validate the pipeline safely | Prove the pipeline in a real org | Operate the same pipeline with a stronger operational shell |
-| Data source | Synthetic or mock file such as `data/sf_metadata_raw.json` | Live Salesforce metadata via **Tooling API** | Live Salesforce metadata via **Tooling API** |
+| Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live Salesforce metadata via **Tooling API** | Live Salesforce metadata via **Tooling API** |
 | LLM provider | Local or simulated provider, such as AOAI API Simulator or Ollama | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
 | Write-back | Dry-run only — no live write to Salesforce | Live write-back via **Metadata API** | Live write-back via **Metadata API** |
 | Runtime interface | Manual scripts, local configuration | Manual scripts, local configuration in `config.yml` | More user-friendly operating layer, such as CLI parameters, a service wrapper, or a simple web UI |
@@ -33,7 +33,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 
 ### Experiment, MVP, and Production
 
-- **Experiment** validates the pipeline safely without touching a live Salesforce org.
+- **Experiment** validates the pipeline safely without touching a live Salesforce org. It uses two synthetic datasets: a training set for development and iteration, and a held-out test set for final validation. See `wiki/03_experiment_and_validation.md` for the full methodology.
 - **MVP** is the first real operational version, with live ingestion, real LLM calls, and real write-back.
 - **Production** is the same pipeline operated through a stronger shell, typically with better interfaces, security, and execution controls.
 
@@ -68,7 +68,8 @@ In the current implementation, these seams are controlled mainly through `config
         `config.yml`
              ↓
 Salesforce metadata source
-(experiment: `data/sf_metadata_raw.json`
+(experiment: `data/sf_metadata_raw_training.json`
+             `data/sf_metadata_raw_test.json`
  MVP / production: Tooling API)
              ↓
 [1] Ingestion
@@ -81,7 +82,7 @@ Salesforce metadata source
      ↓               ↓               ↓               ↓
   FLAGGED         UNCERTAIN        PASSED          SKIPPED
 (clear failure) (possible failure) (no issues)   (read-only /
-                                                  not writable)
+R1-R5 trigger   R6-R10 trigger                    not writable)
      ↓               ↓               ↓               ↓
      └───────────────┴───────────────┴───────────────┘
                              ↓
@@ -194,20 +195,22 @@ In the current implementation, runtime settings live in `config.yml`, created lo
 The **data input layer** supplies raw field metadata to the pipeline.
 
 It is intentionally designed as a seam:
-- in **experiment**, it reads from `data/sf_metadata_raw.json`
+- in **experiment**, it reads from one of two local synthetic files:
+  - `data/sf_metadata_raw_training.json` — used during classifier development and prompt iteration
+  - `data/sf_metadata_raw_test.json` — used only for final held-out validation once the pipeline is stable
 - in **MVP** and **production**, it reads from Salesforce through the **Tooling API**
 
-As long as the input structure remains consistent, the downstream pipeline does not need to change.
+Which experiment file is active is controlled by `data_source.experiment_file` in `config.yml`. As long as the input structure remains consistent, the downstream pipeline does not need to change.
 
 ### Classification Layer
 
 The **classification layer** is the deterministic control layer of the system.
 
-It applies the 10 rule-based checks and assigns each field one status:
-- `FLAGGED`
-- `UNCERTAIN`
-- `PASSED`
-- `SKIPPED`
+It applies 10 rule-based checks in a fixed two-step sequence and assigns each field one status:
+- `FLAGGED` — Rules 1–5 (Step 1): clear, high-confidence failures
+- `UNCERTAIN` — Rules 6–10 (Step 2): softer signals requiring LLM judgment
+- `PASSED` — no rule fired
+- `SKIPPED` — system field, not writable
 
 Its output is stored in `data/sf_classified.json`.
 
@@ -274,7 +277,7 @@ The following elements are intended to remain stable across all operating stages
 - **validation rules**
 - **write log structure**
 
-Together, these elements define the project’s core decision logic: how fields are evaluated, how suggestions are prepared, how review is performed, and what is allowed to be written back.
+Together, these elements define the project's core decision logic: how fields are evaluated, how suggestions are prepared, how review is performed, and what is allowed to be written back.
 
 ### Why the Stable Core Matters
 
@@ -374,18 +377,21 @@ The LLM layer is not assembled from hidden strings inside the code. Its prompt a
 
 This makes prompt behavior visible and reviewable rather than implicit.
 
-### Synthetic Dataset for Experiment Mode
+### Synthetic Datasets for Experiment Mode
 
-In experiment mode, the pipeline uses a synthetic metadata dataset rather than a live Salesforce org.
+In experiment mode, the pipeline uses synthetic metadata rather than a live Salesforce org. Two files are provided:
 
-This makes the experiment safe to run publicly, independent of credentials, and repeatable across environments without risk to real metadata.
+- `data/sf_metadata_raw_training.json` — **288 fields** across four objects, used during classifier development and prompt iteration
+- `data/sf_metadata_raw_test.json` — **144 fields** across four objects, held out until the pipeline is considered stable, then used once for final validation
+
+Both files are safe to run publicly, independent of credentials, and repeatable across environments without risk to real metadata. The separation between training and test datasets ensures that validation reflects genuine generalisability rather than performance on data the system was tuned against.
 
 ### Persisted Intermediate Artifacts
 
 The pipeline stores artifacts at each major stage instead of collapsing everything into a single final output.
 
 The main persisted artifacts are:
-- `sf_metadata_raw.json`
+- `sf_metadata_raw_training.json` / `sf_metadata_raw_test.json`
 - `sf_classified.json`
 - `llm_response.json`
 - `review_queue_{timestamp}.xlsx`
@@ -549,5 +555,3 @@ Examples of future evolution include:
 The key architectural point is that these changes improve the **operational shell** of the project, not the **core decision logic**.
 
 This is the intended long-term shape of the system: a stable core surrounded by replaceable and improvable edges.
-
----
