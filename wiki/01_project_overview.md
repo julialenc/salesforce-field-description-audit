@@ -78,18 +78,20 @@ Intended users:
 
 ```
 ├── data/
-│   ├── sf_metadata_raw.json         # Raw field metadata — in production, extracted from Salesforce; in experiment mode, loaded from this file
-│   ├── sf_classified.json           # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED. Committed as experiment reference only
-│   ├── llm_response.json            # Raw LLM suggestions before human review. Committed as experiment reference only
-│   └── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs. Committed as experiment reference only
+│   ├── sf_metadata_raw_training.json  # Synthetic training set — 288 fields across 4 objects, used during classifier development and prompt iteration
+│   ├── sf_metadata_raw_test.json      # Synthetic test set — 144 fields across 4 objects, held out for final validation only
+│   ├── sf_classified.json             # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED. Committed as experiment reference only
+│   ├── llm_response.json              # Raw LLM suggestions before human review. Committed as experiment reference only
+│   ├── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs (FLAGGED, UNCERTAIN, PASSED/SKIPPED). Committed as experiment reference only
+│   └── write_log_{timestamp}.xlsx     # Deployment audit log — one row per field write attempt, with decision and outcome. Committed as experiment reference only
 ├── prompts/
-│   ├── system_prompt.md             # Quality criteria and instructions — injected once per session
-│   ├── golden_examples.json         # Hand-picked perfect field descriptions used for few-shot grounding
-│   ├── prompt_a_flagged_fields.md   # Instruction for FLAGGED fields — clear quality failures
-│   └── prompt_b_uncertain_fields.md # Instruction for UNCERTAIN fields — borderline cases
+│   ├── system_prompt.md               # Quality criteria and instructions — injected once per session for all LLM calls
+│   ├── golden_examples.json           # Hand-picked high-quality field descriptions used for few-shot grounding
+│   ├── prompt_a_flagged_fields.md     # Task instruction for FLAGGED fields — clear quality failures (Rules 1–5)
+│   └── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–10)
 ├── scripts/
-│   ├── 01_ingest_classify_send.py   # Extract from Salesforce, classify, call LLM, produce review file
-│   └── 02_deploy_approved.py        # Read human approvals, write approved descriptions back to Salesforce
+│   ├── 01_ingest_classify_send.py     # Extract from Salesforce (or synthetic file), classify, call LLM, produce review file
+│   └── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
 ├── wiki/
 │   ├── 01_project_overview.md
 │   ├── 02_how_it_works.md
@@ -98,9 +100,6 @@ Intended users:
 │   └── 05_architecture_and_reproducibility.md
 ├── .gitignore
 ├── README.md
-├── config.example.yml               # Copy, rename to config.yml, fill in credentials and object list before running
+├── config.example.yml                 # Copy, rename to config.yml, fill in credentials, object list, and experiment file path before running
 └── requirements.txt
 ```
-
-
-
