@@ -34,23 +34,41 @@
 # OPERATING MODES
 #
 # - experiment:
-#   Uses synthetic metadata from data/sf_metadata_raw.json
+#   Uses a local synthetic metadata file (see data_source below)
 #   and runs Script 2 in dry-run mode (no live Salesforce write-back).
 #
 # - production:
 #   Uses live Salesforce metadata via Tooling API and allows
 #   Script 2 to write approved descriptions back through Metadata API.
-#
-# In practice, this "production" mode is also the mode used for MVP:
-# the first real operational version of the pipeline.
+#   In practice, this mode is also used for MVP — the first real
+#   operational version of the pipeline. In production mode,
+#   experiment_file is ignored entirely.
 #
 # =========================================================
 
 mode: experiment   # experiment | production
 
 data_source:
-  # Used in experiment mode only
-  experiment_file: data/sf_metadata_raw.json
+  # Used in experiment mode only. Ignored in production mode,
+  # where data is pulled from Salesforce via the Tooling API.
+  #
+  # TWO SYNTHETIC FILES ARE PROVIDED FOR EXPERIMENT MODE:
+  #
+  # data/sf_metadata_raw_training.json  — 288 fields across 4 objects
+  #   Use this file during classifier development and prompt iteration.
+  #   This is the correct starting point for anyone running the
+  #   experiment for the first time.
+  #
+  # data/sf_metadata_raw_test.json      — 144 fields across 4 objects
+  #   Use this file only once, after the classifier and prompts are
+  #   stable on the training set. This is the held-out validation set.
+  #   Do not use it to tune the classifier or prompts — doing so
+  #   defeats the purpose of the separation.
+  #
+  # See wiki/03_experiment_and_validation.md for the full two-phase
+  # experiment methodology.
+  #
+  experiment_file: data/sf_metadata_raw_training.json
 
 llm:
   # Supported providers:
@@ -87,7 +105,7 @@ llm:
   temperature: 0.2
 
 salesforce:
-  # Used in production / MVP mode
+  # Used in production / MVP mode only
   # Keep all values local in config.yml only
   username: your_username@example.com
   password: YOUR_PASSWORD
@@ -102,6 +120,7 @@ objects:
   # Start small for first runs
   - Account
   - Contact
+  - Opportunity
   - Case
 
 options:
