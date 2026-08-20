@@ -2,75 +2,52 @@
 # Python: 3.10+ recommended
 #
 # This file covers:
-# 1) universal project dependencies
-# 2) experiment-mode dependencies
-# 3) MVP / production dependencies
+# 1) Experiment mode — the only packages needed to run the pipeline end-to-end
+#    against synthetic data with a local LLM
+# 2) MVP / production — additional packages needed when connecting to a live
+#    Salesforce org and an enterprise LLM provider
 #
 # Notes:
-# - Some packages below are optional depending on how the scripts are implemented.
-# - Local LLM runtimes such as Ollama and AOAI API Simulator are NOT installed via pip here.
-#   They run as separate local services.
-# - Real production secret handling / enterprise auth may later move outside this file.
+# - Local LLM runtimes (Ollama, AOAI API Simulator) are NOT installed via pip.
+#   They run as separate local services and are called via HTTP through requests.
+# - Real production secret handling and enterprise auth may later move outside this file.
 
 # =========================================================
-# Universal core stack
+# Experiment mode — minimum required to run both scripts
 # =========================================================
 
+# Config file parsing (config.yml)
 PyYAML>=6.0
+
+# HTTP client — used for all LLM calls (OpenAI-compatible, Azure OpenAI, Ollama)
 requests>=2.31.0
-pandas>=2.0.0
+
+# Excel generation — review queue and write log
 openpyxl>=3.1.0
-python-dateutil>=2.8.2
-
-# Optional but common quality-of-life packages
-tqdm>=4.66.0
 
 # =========================================================
-# Salesforce connectivity
-# Required for MVP / production
-# May also be used in local testing if real org access is enabled
+# MVP / Production — Salesforce connectivity
 # =========================================================
 
+# Tooling API (metadata ingestion) and Metadata API (write-back)
+# See _ingest_from_tooling_api() and _write_to_salesforce() in the scripts
+# for implementation guidance
 simple-salesforce>=1.12.0
 
 # =========================================================
-# LLM / API client stack
+# MVP / Production — LLM provider clients
 # =========================================================
 
-# For Azure OpenAI / OpenAI-compatible usage in MVP or production
+# Optional: openai Python SDK as an alternative to raw requests for
+# Azure OpenAI and OpenAI-compatible providers.
+# The current scripts use requests directly — install this only if you
+# refactor the LLM call layer to use the SDK.
 openai>=1.30.0
 
-# For Amazon Bedrock usage in MVP or production
+# Required for Amazon Bedrock provider
+# See _call_bedrock() in 01_ingest_classify_send.py for implementation guidance
 boto3>=1.34.0
 
-# For Google Vertex AI usage in MVP or production
+# Required for Google Vertex AI provider
+# See _call_vertex_ai() in 01_ingest_classify_send.py for implementation guidance
 google-cloud-aiplatform>=1.49.0
-
-# Optional alternative if you later implement direct HTTP-only model calls
-# httpx>=0.27.0
-
-# =========================================================
-# Experiment mode
-# =========================================================
-
-# No extra Python package is strictly required if experiment mode:
-# - reads from data/sf_metadata_raw.json
-# - calls AOAI API Simulator through requests/openai
-# - or calls Ollama through HTTP
-#
-# External tools used in experiment mode (installed separately, not via pip):
-# - AOAI API Simulator
-# - Ollama
-
-# =========================================================
-# MVP / Production notes
-# =========================================================
-
-# MVP / production typically rely on:
-# - simple-salesforce          -> Salesforce access / metadata retrieval
-# - openai                     -> Azure OpenAI or OpenAI-compatible LLM calls
-# - boto3                      -> Amazon Bedrock access
-# - google-cloud-aiplatform    -> Google Vertex AI access
-# - pandas + openpyxl          -> review queue and write log Excel files
-# - PyYAML                     -> config.example.yml / config.yml parsing
-# - requests                   -> direct HTTP integrations where needed
