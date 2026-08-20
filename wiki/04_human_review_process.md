@@ -111,7 +111,7 @@ The spreadsheet is the main review interface for the tool. It contains one row p
 
 - **Tab A — FLAGGED**: fields whose descriptions are missing or clearly unusable, with an AI-written replacement
 - **Tab B — UNCERTAIN**: fields whose descriptions may be problematic, with an AI suggestion where appropriate
-- **Tab C — PASSED / SKIPPED**: fields that need no action, included only for visibility
+- **Tab C — REVIEWED / SKIPPED**: fields where the LLM confirmed the description is adequate (REVIEWED) or system fields that cannot be written (SKIPPED), included only for visibility
 
 The Admin works only in **Tab A** and **Tab B**.
 
