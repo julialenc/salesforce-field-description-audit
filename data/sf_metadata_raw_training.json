@@ -1,0 +1,3647 @@
+{
+  "dataset": "training",
+  "total_fields": 288,
+  "fields": [
+    {
+      "object": "Account",
+      "field_api_name": "Id",
+      "field_type": "Id",
+      "description": "System-generated unique identifier for the Account record. Read-only. Format: 15- or 18-character alphanumeric string.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "CreatedDate",
+      "field_type": "DateTime",
+      "description": "Timestamp of when this Account record was created in Salesforce. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "LastModifiedById",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the person who last modified this Account. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "IsDeleted",
+      "field_type": "Checkbox",
+      "description": "Indicates whether this Account record has been moved to the Recycle Bin. True if deleted, false if active. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Name",
+      "field_type": "Text",
+      "description": "Legal or trading name of the account as used in contracts and official correspondence. For individual consumers, stores the full name. Required on all account records.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "BillingCity",
+      "field_type": "Text",
+      "description": "City component of the account's primary billing address. Used for territory assignment, tax jurisdiction determination, and regional sales reporting.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "BillingCountry",
+      "field_type": "Text",
+      "description": "Country component of the account's primary billing address. Used to determine applicable tax rules, shipping restrictions for hazardous gear, and regional compliance requirements.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Phone",
+      "field_type": "Phone",
+      "description": "Primary business phone number for the account. Used by the sales team for outbound calls and by customer service for inbound support routing. Should include country code for international accounts.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Website",
+      "field_type": "URL",
+      "description": "Public website URL of the account. Used by the marketing team to verify account identity and by the digital commerce integration to cross-reference B2B portal registrations.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "AnnualRevenue",
+      "field_type": "Currency",
+      "description": "Self-reported or researched annual revenue of the account in the org's default currency. Used to segment accounts into revenue bands for pricing tier assignment and enterprise programme eligibility.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "NumberOfEmployees",
+      "field_type": "Number",
+      "description": "Approximate number of full-time employees at this account. Used alongside annual revenue to classify accounts as SMB, mid-market, or enterprise for sales routing and programme eligibility.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "OwnerId",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the Account Owner \u2014 the sales representative or account manager primarily responsible for this account. Controls record visibility and activity dashboards.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Account_Segment__c",
+      "field_type": "Picklist",
+      "description": "Commercial segment assigned to this account based on annual revenue and purchase frequency. Values: Consumer Direct, Specialty Retail, Corporate Fleet, Wholesale Distributor. Drives pricing tier, minimum order quantities, and assigned account manager pool.",
+      "picklist_values": [
+        "Consumer Direct",
+        "Specialty Retail",
+        "Corporate Fleet",
+        "Wholesale Distributor"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Preferred_Gear_Category__c",
+      "field_type": "MultiselectPicklist",
+      "description": "Product categories this account primarily purchases, as recorded during onboarding or updated by the account manager. Values: Apparel, Footwear, Climbing Hardware, Camping Equipment, Navigation, Hydration, Avalanche Safety. Used to personalise product recommendations and catalogue mailings.",
+      "picklist_values": [
+        "Apparel",
+        "Footwear",
+        "Climbing Hardware",
+        "Camping Equipment",
+        "Navigation",
+        "Hydration",
+        "Avalanche Safety"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Loyalty_Programme_Member__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this account is an active member of the Summit Rewards loyalty programme. Drives eligibility for member-only pricing, early product releases, and expedition sponsorship applications.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Contract_Start_Date__c",
+      "field_type": "Date",
+      "description": "Date on which the current wholesale or corporate supply agreement with this account became effective. Populated by the account manager from the signed contract. Used to calculate contract age and trigger annual renewal workflows.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Contract_End_Date__c",
+      "field_type": "Date",
+      "description": "Expiry date of the current supply or wholesale agreement with this account. Populated from the signed contract by the account manager. Triggers a renewal opportunity creation task 90 days before this date.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Credit_Limit__c",
+      "field_type": "Currency",
+      "description": "Maximum outstanding invoice balance approved for this account by the finance team. Enforced by the order management integration to block new shipments when the balance exceeds this threshold. Updated annually during credit review.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Altitude_Certification__c",
+      "field_type": "Picklist",
+      "description": "Highest altitude certification level held by the account's primary guide or technical staff, verified during corporate account onboarding. Values: None, 3000m, 4000m, 6000m, 8000m+. Determines eligibility for high-altitude technical equipment purchase without additional safety compliance approval.",
+      "picklist_values": [
+        "None",
+        "3000m",
+        "4000m",
+        "6000m",
+        "8000m+"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Primary_Activity__c",
+      "field_type": "Picklist",
+      "description": "Main outdoor discipline associated with this account's purchasing profile. Values: Alpine Climbing, Trail Running, Ski Touring, Trekking, Via Ferrata, Mountaineering, Mixed Ice and Rock. Used to route accounts to the correct product specialist and tailor catalogue contents.",
+      "picklist_values": [
+        "Alpine Climbing",
+        "Trail Running",
+        "Ski Touring",
+        "Trekking",
+        "Via Ferrata",
+        "Mountaineering",
+        "Mixed Ice and Rock"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Last_Order_Date__c",
+      "field_type": "Date",
+      "description": "Date of the most recent confirmed purchase order placed by this account. Updated automatically by the order management integration when a new order reaches Confirmed status. Used in churn risk calculation and re-engagement campaign triggers.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Seasonal_Buying_Pattern__c",
+      "field_type": "Picklist",
+      "description": "Observed purchasing seasonality for this account based on historical order data. Values: Spring-Summer Peak, Autumn-Winter Peak, Year-Round Steady, Pre-Season Bulk. Used by the demand planning team to forecast stock requirements and schedule account manager outreach.",
+      "picklist_values": [
+        "Spring-Summer Peak",
+        "Autumn-Winter Peak",
+        "Year-Round Steady",
+        "Pre-Season Bulk"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "VAT_Registration_Number__c",
+      "field_type": "Text",
+      "description": "EU VAT registration number for this account, required for B2B tax-exempt invoicing within the European Union. Format: country code followed by numeric identifier (e.g. CHE-123.456.789). Validated against VIES before the first zero-rated invoice is issued.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Shipping_Restriction__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this account's shipping address is subject to carrier restrictions that limit delivery of oversized or hazardous items such as gas canisters, pyrotechnic avalanche charges, or large tent structures. Triggers a manual review step in the fulfilment workflow before dispatch.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Demo_Equipment_On_Loan__c",
+      "field_type": "Number",
+      "description": "Count of individual demo units currently on loan to this account from the field demonstration programme. Updated by the logistics team when items are dispatched or returned. Used to enforce the maximum concurrent loan limit per account.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Account_Manager__c",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the dedicated account manager responsible for day-to-day relationship management for this account. Separate from OwnerId, which reflects the sales owner. Used to filter activity views and trigger manager-specific notification workflows.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Parent_Distributor__c",
+      "field_type": "Lookup",
+      "description": "Reference to the Account record of the wholesale distributor responsible for supplying and invoicing this retail account. Used in the distributor hierarchy for territory-level revenue rollup and for routing support cases to the correct distributor contact.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Account",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Lifetime_Orders_Count__c",
+      "field_type": "Number",
+      "description": "Roll-up count of all confirmed purchase orders ever placed by this account, aggregated from the child Order records via a Master-Detail relationship. Used to classify accounts as New, Returning, or Key Customer in loyalty tier calculations.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Days_Since_Last_Order__c",
+      "field_type": "Number",
+      "description": "Number of calendar days elapsed since the date recorded in Last_Order_Date__c. Calculated daily by a scheduled formula. Used to trigger re-engagement workflows when the value exceeds 90 days for active accounts.",
+      "picklist_values": [],
+      "formula": "TODAY() - Last_Order_Date__c",
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Total_Lifetime_Revenue__c",
+      "field_type": "Currency",
+      "description": "Roll-up sum of the net invoice value of all confirmed orders placed by this account, aggregated from child Order records. Denominated in the org's corporate currency. Used to determine loyalty tier thresholds and key account classification.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Catalogue_Opt_Out__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this account has requested to be excluded from all printed and digital catalogue mailings. Set by the account manager based on the account's communication preferences. Suppresses the account from the seasonal catalogue dispatch list in the marketing automation platform.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Warranty_Registration_Count__c",
+      "field_type": "Number",
+      "description": "Roll-up count of active product warranty registrations linked to this account via the Warranty Registration child object. Used to validate warranty claim eligibility and to track post-sale product usage across the account's fleet.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Industry",
+      "field_type": "Picklist",
+      "description": "Industry vertical of this account. Values: Outdoor Retail, Sporting Goods Wholesale, Corporate Travel and Events, Guiding and Instruction, Government and Defence, Education.",
+      "picklist_values": [
+        "Outdoor Retail",
+        "Sporting Goods Wholesale",
+        "Corporate Travel and Events",
+        "Guiding and Instruction",
+        "Government and Defence",
+        "Education"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Fax",
+      "field_type": "Phone",
+      "description": "Fax number for this account. Retained for legacy EDI integrations that still require fax-based order confirmation with certain wholesale partners.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Payment_Terms__c",
+      "field_type": "Picklist",
+      "description": "Agreed payment terms for invoices issued to this account. Values: Net 15, Net 30, Net 60, Prepayment Required, Cash on Delivery. Set by the finance team during account approval and used by the billing integration to set invoice due dates.",
+      "picklist_values": [
+        "Net 15",
+        "Net 30",
+        "Net 60",
+        "Prepayment Required",
+        "Cash on Delivery"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Active_Product_Lines__c",
+      "field_type": "MultiselectPicklist",
+      "description": "Product lines currently stocked or ordered by this account. Values: Alpine Hardware, Technical Apparel, Footwear, Camping and Bivouac, Ski Touring, Navigation and Safety, Hydration and Nutrition. Updated annually during catalogue review.",
+      "picklist_values": [
+        "Alpine Hardware",
+        "Technical Apparel",
+        "Footwear",
+        "Camping and Bivouac",
+        "Ski Touring",
+        "Navigation and Safety",
+        "Hydration and Nutrition"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Territory_Assignment_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text notes recorded by the territory operations team to document exceptions to the standard rules-based territory assignment for this account. Should not exceed two sentences. Reviewed annually during territory planning.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Legacy_ERP_Code__c",
+      "field_type": "Text",
+      "description": "Account identifier used in the pre-2021 ERP system before migration to Salesforce. Retained for cross-referencing historical order records and resolving legacy invoice queries. Read-only after the migration freeze date of 2021-06-30.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "ISPO_Membership__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this account holds a current ISPO (International Sports and Outdoor Exposition) membership, confirming their standing as a verified trade buyer eligible for wholesale-only product lines and advance ordering windows.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "B2B_Portal_Access__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this account has been granted login credentials for the wholesale B2B ordering portal. False indicates the account places orders through the sales team only. Controls visibility of the portal credential management section on the account layout.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Returns_Policy_Accepted__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the account has accepted the current version of the returns and warranty policy (version 3.2, effective 2024-01-01). Required before the first order can be processed. Updated by the onboarding automation when the acceptance is recorded.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Account_Status__c",
+      "field_type": "Picklist",
+      "description": "Current operational status of this account in the customer lifecycle. Values: Prospect, Active, On Hold, Suspended, Churned, Reactivated. Controls order acceptance rules and automated outreach eligibility.",
+      "picklist_values": [
+        "Prospect",
+        "Active",
+        "On Hold",
+        "Suspended",
+        "Churned",
+        "Reactivated"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Churn_Risk_Score__c",
+      "field_type": "Number",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Compliance_Flag__c",
+      "field_type": "Checkbox",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Internal_Ref__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Region__c",
+      "field_type": "Text",
+      "description": "Region",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Priority_Tier__c",
+      "field_type": "Picklist",
+      "description": "Indicates account priority.",
+      "picklist_values": [
+        "Tier 1",
+        "Tier 2",
+        "Tier 3"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Annual_Order_Value__c",
+      "field_type": "Currency",
+      "description": "Stores the total value of orders for the year.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Expedition_Sponsor__c",
+      "field_type": "Checkbox",
+      "description": "Enter the name of the expedition sponsor if this account is supported by a sponsorship agreement.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Discount_Rate__c",
+      "field_type": "Number",
+      "description": "Select the applicable discount tier from the dropdown: Standard, Silver, Gold, Platinum.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Customer_Grade__c",
+      "field_type": "Picklist",
+      "description": "Grade assigned to the customer based on their value and engagement.",
+      "picklist_values": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Sponsorship_Level__c",
+      "field_type": "Picklist",
+      "description": "Level of sponsorship agreement associated with this account. Determines the marketing benefits and co-branding rights available to the account.",
+      "picklist_values": [
+        "None",
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Athlete Partner"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Partner_Agreement_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing notes on the partnership agreement for this account, including commercial terms, amendments, and exceptions approved outside the standard approval matrix. Updated by the channel manager.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Data_Residency__c",
+      "field_type": "Picklist",
+      "description": "TODO - confirm with legal before enabling.",
+      "picklist_values": [
+        "EU",
+        "US",
+        "APAC"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Certification_Body__c",
+      "field_type": "Text",
+      "description": "TBD",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Migration_Source__c",
+      "field_type": "Text",
+      "description": "Legacy reference field from the 2021 data migration. May no longer be in active use.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "NPS_Segment__c",
+      "field_type": "Picklist",
+      "description": "NPS segment assigned after the quarterly survey cycle.",
+      "picklist_values": [
+        "Detractor",
+        "Passive",
+        "Promoter"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "ICP_Flag__c",
+      "field_type": "Checkbox",
+      "description": "Flagged if account matches the ICP criteria as assessed during the QBR.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "CSAT_Score__c",
+      "field_type": "Number",
+      "description": "Most recent customer satisfaction score recorded for this account. Scale 1-10. Updated after each survey.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Avalanche_Course_Date__c",
+      "field_type": "Date",
+      "description": "Enter the date range for the avalanche safety course attended by the account's staff. Format: YYYY-MM-DD to YYYY-MM-DD.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Primary_Contact_Email__c",
+      "field_type": "Email",
+      "description": "Stores a comma-separated list of email addresses for all primary contacts at this account.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Preferred_Contact_Method__c",
+      "field_type": "Picklist",
+      "description": "Use the dropdown to select how the customer prefers to be contacted. Make sure to update this field after every customer call.",
+      "picklist_values": [
+        "Email",
+        "Phone",
+        "SMS",
+        "Post"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Newsletter_Opt_In__c",
+      "field_type": "Checkbox",
+      "description": "Check this box if the customer has agreed to receive our monthly newsletter and promotional emails. Only check if you have explicit written consent.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Flag_Field__c",
+      "field_type": "Checkbox",
+      "description": "Used by the team for tracking purposes.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Reference_Code__c",
+      "field_type": "Text",
+      "description": "Contains the reference value.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Review_Status__c",
+      "field_type": "Picklist",
+      "description": "Indicates the current review status of this account.",
+      "picklist_values": [
+        "Pending",
+        "In Review",
+        "Approved",
+        "Rejected"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Ops_Queue__c",
+      "field_type": "Picklist",
+      "description": "Ops queue flag.",
+      "picklist_values": [
+        "Alpha",
+        "Beta",
+        "Gamma",
+        "Delta"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "EBR_Cycle__c",
+      "field_type": "Picklist",
+      "description": "EBR cycle assignment for scheduling purposes. Select from the list.",
+      "picklist_values": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Gear_Loan_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing notes on gear loans for this account, including the original request, approval decision, expected return date, extensions granted, and any damage assessments charged back after return inspection.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Strategic_Value__c",
+      "field_type": "Number",
+      "description": "Strategic value score. Updated by management.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Onboarding_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text notes captured by the customer success manager during the onboarding process, covering equipment training completed, portal access confirmed, first order placed, and any account-specific delivery or invoicing preferences agreed during the kickoff call.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Account",
+      "field_api_name": "Sales_Channel__c",
+      "field_type": "Picklist",
+      "description": "Channel through which this account purchases products.",
+      "picklist_values": [
+        "Direct",
+        "Distributor",
+        "Online",
+        "Marketplace",
+        "Agent"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Id",
+      "field_type": "Id",
+      "description": "System-generated unique identifier for the Contact record. Read-only. Format: 15- or 18-character alphanumeric string.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "CreatedDate",
+      "field_type": "DateTime",
+      "description": "Timestamp of when this Contact record was created in Salesforce. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "LastModifiedById",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the person who last modified this Contact. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "IsDeleted",
+      "field_type": "Checkbox",
+      "description": "Indicates whether this Contact record has been moved to the Recycle Bin. True if deleted, false if active. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "FirstName",
+      "field_type": "Text",
+      "description": "Given name of the contact as used in formal correspondence and system salutations. Combined with LastName to form the full display name. Required for all contact records representing named individuals.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "LastName",
+      "field_type": "Text",
+      "description": "Family name of the contact. Combined with FirstName to form the full display name used across all email templates, reports, and portal greetings. Required field on all Contact records.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Email",
+      "field_type": "Email",
+      "description": "Primary email address for this contact. Used for all transactional and marketing communications, portal login authentication, and survey delivery. Must be unique within the org when the External ID flag is active.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Phone",
+      "field_type": "Phone",
+      "description": "Primary business or direct phone number for this contact. Used by the sales team for outbound calls and by customer service for case follow-up. Should include country code for contacts outside the org's home country.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "MobilePhone",
+      "field_type": "Phone",
+      "description": "Mobile phone number for this contact. Used for SMS notifications from the order fulfilment system and for two-factor authentication on the B2B portal. Stored separately from the main Phone field to allow channel-specific routing.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Title",
+      "field_type": "Text",
+      "description": "Job title of the contact as provided during registration or qualification. Used to classify contacts by buying role (e.g. Procurement Manager, Head of Guiding Operations) and to personalise communication templates.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "AccountId",
+      "field_type": "Lookup",
+      "description": "Reference to the Account record this contact is associated with. Determines which pricing tier, contract terms, and support entitlements apply to this individual. A contact without an AccountId is treated as an unaffiliated consumer.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Account",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "OwnerId",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the contact owner \u2014 typically the account manager or inside sales representative responsible for this individual. Controls record visibility and drives activity assignment in sequence workflows.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Primary_Role__c",
+      "field_type": "Picklist",
+      "description": "Buying or influencing role this contact plays in the account's purchasing process. Values: Economic Buyer, Technical Evaluator, End User, Champion, Procurement, Gatekeeper. Used to prioritise engagement and tailor communication cadence.",
+      "picklist_values": [
+        "Economic Buyer",
+        "Technical Evaluator",
+        "End User",
+        "Champion",
+        "Procurement",
+        "Gatekeeper"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Activity_Discipline__c",
+      "field_type": "MultiselectPicklist",
+      "description": "Outdoor disciplines this contact actively participates in, as recorded during onboarding or updated by the account manager. Values: Alpine Climbing, Trail Running, Ski Touring, Trekking, Via Ferrata, Mountaineering, Canyoning. Used to personalise product recommendations and event invitations.",
+      "picklist_values": [
+        "Alpine Climbing",
+        "Trail Running",
+        "Ski Touring",
+        "Trekking",
+        "Via Ferrata",
+        "Mountaineering",
+        "Canyoning"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Loyalty_Card_Number__c",
+      "field_type": "Text",
+      "description": "Unique identifier assigned to this contact's Summit Rewards loyalty card. Format: SR- followed by 8 digits (e.g. SR-00123456). Used by the POS integration to look up the contact at the point of purchase and apply loyalty points to their account.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Newsletter_Subscribed__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact has opted in to receive the monthly Summit Adventures newsletter. Drives inclusion in the newsletter distribution list in the marketing automation platform. Must be true before any newsletter content is sent.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "GDPR_Consent_Date__c",
+      "field_type": "Date",
+      "description": "Date on which this contact provided explicit GDPR marketing consent, as recorded in the consent management system. Required before any EU-regulated marketing communication is sent. Populated automatically when the consent form is submitted.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Preferred_Language__c",
+      "field_type": "Picklist",
+      "description": "Language this contact prefers for all written communications, including order confirmations, newsletters, and support correspondence. Values: English, French, German, Italian, Spanish, Dutch. Used to select the correct email template locale in the marketing platform.",
+      "picklist_values": [
+        "English",
+        "French",
+        "German",
+        "Italian",
+        "Spanish",
+        "Dutch"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Shoe_Size_EU__c",
+      "field_type": "Number",
+      "description": "EU shoe size of this contact, recorded for footwear fitting events and demo day equipment pre-preparation. Stored as a numeric EU size (e.g. 42, 43.5). Populated by the contact via the customer portal profile or by the account manager during onboarding.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Clothing_Size__c",
+      "field_type": "Picklist",
+      "description": "Apparel size of this contact for technical gear fitting events and sponsored athlete kit preparation. Values: XS, S, M, L, XL, XXL. Populated during onboarding or updated by the contact through the self-service portal.",
+      "picklist_values": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Emergency_Contact_Name__c",
+      "field_type": "Text",
+      "description": "Full name of the emergency contact nominated by this individual for corporate expedition and guided tour bookings. Stored alongside Emergency_Contact_Phone__c. Required when the contact is registered for any guided high-altitude activity.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Emergency_Contact_Phone__c",
+      "field_type": "Phone",
+      "description": "Phone number of the emergency contact nominated by this individual. Stored alongside Emergency_Contact_Name__c. Must include country code. Required when the contact is registered for any guided high-altitude or technical mountaineering activity.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Certification_Level__c",
+      "field_type": "Picklist",
+      "description": "Highest personal outdoor certification held by this contact, verified by the account manager or submitted via the customer portal. Values: None, Mountain Leader, Alpine Guide Trainee, IFMGA Guide, Avalanche Level 1, Avalanche Level 2. Determines eligibility for technical equipment purchase without additional compliance sign-off.",
+      "picklist_values": [
+        "None",
+        "Mountain Leader",
+        "Alpine Guide Trainee",
+        "IFMGA Guide",
+        "Avalanche Level 1",
+        "Avalanche Level 2"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Last_Purchase_Date__c",
+      "field_type": "Date",
+      "description": "Date of the most recent purchase associated with this contact, updated by the e-commerce integration when an order is confirmed. Used to calculate recency in the RFM scoring model and to trigger re-engagement email sequences.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Lifetime_Spend__c",
+      "field_type": "Currency",
+      "description": "Cumulative net spend by this contact across all confirmed orders, in the org's corporate currency. Updated by the order management integration when each order is invoiced. Used to determine loyalty tier eligibility and personalised discount thresholds.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Portal_User__c",
+      "field_type": "Lookup",
+      "description": "Reference to the Experience Cloud User record linked to this contact. Populated automatically when the contact activates their B2B portal account. Used to control portal access and to associate portal activity with the correct CRM contact record.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Do_Not_Call__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact has requested to be excluded from all outbound phone contact, including sales calls and customer service follow-up calls. Enforced by the telephony integration, which suppresses the contact from all outbound call lists.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Marketing_Opt_Out__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact has opted out of all marketing communications, including email, SMS, and direct mail. Overrides all campaign membership inclusions. Populated via the unsubscribe workflow or by the account manager on request.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Contact_Source__c",
+      "field_type": "Picklist",
+      "description": "Channel through which this contact was originally acquired. Values: Web Registration, Trade Show, Referral, Staff Entry, B2B Portal Import, Expedition Sign-Up, Partner Transfer. Used for acquisition channel analysis and to set default communication preferences.",
+      "picklist_values": [
+        "Web Registration",
+        "Trade Show",
+        "Referral",
+        "Staff Entry",
+        "B2B Portal Import",
+        "Expedition Sign-Up",
+        "Partner Transfer"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Onboarding_Complete__c",
+      "field_type": "Checkbox",
+      "description": "Checked when all mandatory onboarding steps for this contact have been completed: portal activation, GDPR consent recorded, preferred language set, and first order placed or demo booking confirmed. Drives suppression of onboarding reminder sequences.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Athlete_Sponsored__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact is an active sponsored athlete under a current athlete partnership agreement. Drives eligibility for the sponsored athlete product allocation workflow and suppresses standard retail pricing for this contact.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Salutation",
+      "field_type": "Picklist",
+      "description": "Honorific prefix for the contact's name. Values: Mr., Ms., Dr., Prof., Mx. Used in formal correspondence templates and printed address labels.",
+      "picklist_values": [
+        "Mr.",
+        "Ms.",
+        "Dr.",
+        "Prof.",
+        "Mx."
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Birthdate",
+      "field_type": "Date",
+      "description": "Date of birth of the contact. Used to calculate age-related eligibility for youth programme pricing and to send birthday reward vouchers via the loyalty platform.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Years_of_Experience__c",
+      "field_type": "Number",
+      "description": "Number of years of active outdoor experience reported by this contact during registration. Stored as a whole number. Used to segment contacts for appropriate product recommendations and guided tour difficulty matching.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Contact_Status__c",
+      "field_type": "Picklist",
+      "description": "Current lifecycle status of this contact record. Values: Active, Inactive, Prospect, Churned, Deceased, Merged. Controls inclusion in marketing campaigns and order processing eligibility checks.",
+      "picklist_values": [
+        "Active",
+        "Inactive",
+        "Prospect",
+        "Churned",
+        "Deceased",
+        "Merged"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Expedition_History__c",
+      "field_type": "Text",
+      "description": "Free-text summary of notable expeditions completed by this contact, as self-reported during registration or updated by the account manager. Used by the events team to match contacts with appropriate guided tour difficulty levels.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Legacy_Customer_Id__c",
+      "field_type": "Text",
+      "description": "Customer identifier from the pre-2022 retail system, retained for cross-referencing historical purchase records and resolving warranty queries from before the platform migration. Read-only after the migration cutover date of 2022-03-01.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "IFMGA_Member__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact holds active membership of the IFMGA (International Federation of Mountain Guides Associations), confirming professional guide status eligible for the guide programme wholesale pricing tier.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Account_Billing_Proxy__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact is authorised to receive and approve invoices on behalf of the parent account. Does not grant edit access to the Account record itself. Managed by the finance team during contract setup.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Consent_Withdrawn__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this contact has actively withdrawn previously given marketing consent. Set by the unsubscribe automation or by the admin when a formal withdrawal request is received. Triggers suppression across all active campaign memberships.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Communication_Channel__c",
+      "field_type": "Picklist",
+      "description": "Primary channel through which this contact prefers to receive communications. Values: Email, SMS, Post, Phone, App Notification. Used by the marketing automation platform to route outbound messages to the correct delivery channel.",
+      "picklist_values": [
+        "Email",
+        "SMS",
+        "Post",
+        "Phone",
+        "App Notification"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Ambassador_Flag__c",
+      "field_type": "Checkbox",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Gear_Size_Notes__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Internal_Tag__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Contact_Type__c",
+      "field_type": "Picklist",
+      "description": "Contact type.",
+      "picklist_values": [
+        "Individual",
+        "Corporate",
+        "Guide",
+        "Athlete"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Risk_Level__c",
+      "field_type": "Picklist",
+      "description": "Indicates risk level.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Engagement_Score__c",
+      "field_type": "Number",
+      "description": "Score.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Preferred_Contact_Time__c",
+      "field_type": "Text",
+      "description": "Select the time window when this contact prefers to be called: Morning, Afternoon, or Evening.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Loyalty_Points_Balance__c",
+      "field_type": "Number",
+      "description": "Tick this box when the contact's loyalty points have been manually adjusted by the loyalty team.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Buying_Frequency__c",
+      "field_type": "Picklist",
+      "description": "How frequently this contact makes purchases.",
+      "picklist_values": [
+        "Weekly",
+        "Monthly",
+        "Quarterly",
+        "Annually",
+        "Occasional"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Support_Tier_Override__c",
+      "field_type": "Picklist",
+      "description": "Override for the support tier applicable to this individual contact, where it differs from the account-level tier.",
+      "picklist_values": [
+        "Basic",
+        "Standard",
+        "Premium",
+        "Enterprise"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Expedition_Waiver_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing expedition liability waiver records for this contact, including waiver version, signature method, witnessing staff, any amendments agreed prior to departure, and follow-up actions from the legal review process.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Fitting_Session_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing equipment fitting session notes for this contact, including items tried, fit assessments, biomechanical observations, final recommendations, purchase outcome, and any re-fitting appointments scheduled.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Regulatory_Segment__c",
+      "field_type": "Picklist",
+      "description": "TBD \u2014 pending compliance review.",
+      "picklist_values": [
+        "Consumer",
+        "Professional",
+        "Institutional"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Health_Disclosure__c",
+      "field_type": "Checkbox",
+      "description": "TODO \u2014 confirm with legal and HR before activating.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Old_Portal_Id__c",
+      "field_type": "Text",
+      "description": "Reference ID from the previous customer portal. May no longer be needed following the 2023 platform migration.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "RFM_Segment__c",
+      "field_type": "Picklist",
+      "description": "RFM segment assigned to this contact based on the most recent scoring cycle.",
+      "picklist_values": [
+        "Champions",
+        "Loyal",
+        "At Risk",
+        "Lost",
+        "New"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "CLV_Band__c",
+      "field_type": "Picklist",
+      "description": "CLV band assigned during the quarterly customer valuation run.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "VIP"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "DNC_Reason__c",
+      "field_type": "Picklist",
+      "description": "Reason this contact was added to the DNC list. Use the dropdown to select the applicable reason.",
+      "picklist_values": [
+        "Opt-Out",
+        "Legal Request",
+        "Deceased",
+        "Uncontactable"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Chest_Measurement__c",
+      "field_type": "Number",
+      "description": "Chest and waist measurement range of this contact for custom kit orders, stored as a hyphenated range (e.g. 92-96 cm).",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Event_Attendance__c",
+      "field_type": "Checkbox",
+      "description": "Records the list of events this contact has attended, including trade shows, demo days, and guided taster sessions.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Size_Confirmed__c",
+      "field_type": "Checkbox",
+      "description": "Tick this box after you have confirmed the contact's clothing and footwear sizes with them directly during the fitting call.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Referral_Source__c",
+      "field_type": "Text",
+      "description": "Enter the name of the person or organisation who referred this contact to us. Leave blank if not referred.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Flag__c",
+      "field_type": "Checkbox",
+      "description": "Used internally for tracking.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Ref_Code__c",
+      "field_type": "Text",
+      "description": "Stores the contact's reference information.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Contact_Grade__c",
+      "field_type": "Picklist",
+      "description": "Indicates the contact's current grade.",
+      "picklist_values": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Data_Residency_Region__c",
+      "field_type": "Picklist",
+      "description": "",
+      "picklist_values": [
+        "EU",
+        "CH",
+        "US",
+        "APAC"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Certification_Expiry__c",
+      "field_type": "Date",
+      "description": "Enter the expiry date and certification body name in the format: YYYY-MM-DD / Body Name.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Legacy_Segment_Code__c",
+      "field_type": "Text",
+      "description": "Deprecated. This field was used for segment classification before the 2021 migration and should no longer be populated.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Nationality__c",
+      "field_type": "Text",
+      "description": "Nationality of the contact as stated during registration. Used for export compliance checks when processing orders that include restricted technical equipment such as high-altitude avalanche airbag systems or satellite communication devices.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Guided_Tours_Completed__c",
+      "field_type": "Number",
+      "description": "Count of guided tours and expeditions completed by this contact through the company's guided adventures programme. Updated by the events team after each trip debrief. Used to determine eligibility for the loyalty expedition rewards tier.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Contact",
+      "field_api_name": "Preferred_Demo_Location__c",
+      "field_type": "Picklist",
+      "description": "Retail location or outdoor venue this contact prefers for equipment demo and fitting events. Values: Geneva Store, Zurich Store, Chamonix Partner, Innsbruck Partner, Online Virtual. Used by the events team to allocate demo day invitations to the nearest location.",
+      "picklist_values": [
+        "Geneva Store",
+        "Zurich Store",
+        "Chamonix Partner",
+        "Innsbruck Partner",
+        "Online Virtual"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Id",
+      "field_type": "Id",
+      "description": "System-generated unique identifier for the Opportunity record. Read-only. Format: 15- or 18-character alphanumeric string.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "CreatedDate",
+      "field_type": "DateTime",
+      "description": "Timestamp of when this Opportunity record was created in Salesforce. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "LastModifiedById",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the person who last modified this Opportunity. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "IsDeleted",
+      "field_type": "Checkbox",
+      "description": "Indicates whether this Opportunity record has been moved to the Recycle Bin. True if deleted, false if active. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Name",
+      "field_type": "Text",
+      "description": "Descriptive name for this opportunity, typically combining the account name, product line, and fiscal year (e.g. Alpine Solutions \u2014 Climbing Hardware \u2014 FY26). Required. Used as the primary identifier in list views, reports, and email notifications.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "AccountId",
+      "field_type": "Lookup",
+      "description": "Reference to the Account record this opportunity is associated with. Determines the pricing tier, contract terms, and support entitlements that apply. Required on all opportunity records.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Account",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "OwnerId",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the sales representative who owns this opportunity. Controls record visibility, forecast inclusion, and commission calculation. Updated automatically when territory reassignment is processed.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Amount",
+      "field_type": "Currency",
+      "description": "Total net value of this opportunity in the org's default currency, excluding VAT. Represents the expected invoice value if the deal closes. Used in forecast roll-ups, quota tracking, and pipeline reporting.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "CloseDate",
+      "field_type": "Date",
+      "description": "Expected or actual date on which this opportunity will close. Required. For open opportunities, represents the sales rep's committed close date reviewed in forecast calls. For closed opportunities, reflects the date the final order was confirmed.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "StageName",
+      "field_type": "Picklist",
+      "description": "Current stage of this opportunity in the sales process. Values: Prospecting, Qualification, Needs Analysis, Proposal, Negotiation, Closed Won, Closed Lost. Drives forecast category assignment, required field validation, and stage-specific task creation.",
+      "picklist_values": [
+        "Prospecting",
+        "Qualification",
+        "Needs Analysis",
+        "Proposal",
+        "Negotiation",
+        "Closed Won",
+        "Closed Lost"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Probability",
+      "field_type": "Number",
+      "description": "Estimated probability of closing this opportunity, expressed as a percentage (0\u2013100). Defaulted by stage but editable by the sales rep. Used to calculate weighted pipeline value in forecast reports.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "ForecastCategoryName",
+      "field_type": "Picklist",
+      "description": "Forecast bucket for this opportunity, derived from Stage but overridable by the rep. Values: Pipeline, Best Case, Commit, Closed Won, Omitted. Used in the weekly forecast roll-up reviewed by sales leadership.",
+      "picklist_values": [
+        "Pipeline",
+        "Best Case",
+        "Commit",
+        "Closed Won",
+        "Omitted"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Deal_Type__c",
+      "field_type": "Picklist",
+      "description": "Classification of this opportunity by commercial motion. Values: New Logo, Expansion, Renewal, Reactivation. Set at opportunity creation. Drives commission calculation rules and separates new business metrics from retention metrics in revenue reporting.",
+      "picklist_values": [
+        "New Logo",
+        "Expansion",
+        "Renewal",
+        "Reactivation"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Primary_Product_Line__c",
+      "field_type": "Picklist",
+      "description": "Main product category driving the revenue in this opportunity. Values: Alpine Hardware, Technical Apparel, Footwear, Camping and Bivouac, Ski Touring Equipment, Navigation and Safety, Hydration. Used to route to the correct product specialist.",
+      "picklist_values": [
+        "Alpine Hardware",
+        "Technical Apparel",
+        "Footwear",
+        "Camping and Bivouac",
+        "Ski Touring Equipment",
+        "Navigation and Safety",
+        "Hydration and Nutrition"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Loss_Reason__c",
+      "field_type": "Picklist",
+      "description": "Primary reason this opportunity was lost. Values: Price, Competitor, No Decision, Timing, Product Gap, Budget Frozen, Key Contact Left. Required when StageName is set to Closed Lost. Used in win/loss analysis and product roadmap prioritisation.",
+      "picklist_values": [
+        "Price",
+        "Competitor",
+        "No Decision",
+        "Timing",
+        "Product Gap",
+        "Budget Frozen",
+        "Key Contact Left"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Technical_Win__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the prospect technical team has confirmed the solution meets their requirements. Typically set after a product demonstration or equipment trial. Required before the opportunity advances to Negotiation stage.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Decision_Maker_Identified__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the economic decision maker has been identified and engaged in the buying process. Required qualification criterion for opportunities above CHF 50,000. Logged by the account executive when the decision maker attends a discovery or demo call.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Pilot_Start_Date__c",
+      "field_type": "Date",
+      "description": "Date on which the equipment pilot or gear trial programme was started with this prospect. Populated by the sales engineer when trial items are dispatched. Used to calculate trial duration and trigger follow-up task creation.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Contract_Term_Months__c",
+      "field_type": "Number",
+      "description": "Duration of the supply or wholesale agreement in months as agreed in the final negotiation. Common values: 12, 24, 36. Used to calculate total contract value, set the renewal opportunity creation date, and determine volume discount eligibility.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Discount_Approved__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the requested discount has been approved through the deal desk approval workflow. Unlocks the ability to generate a final quote at the discounted rate. Populated automatically when the approval record reaches Approved status.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Discount_Percent__c",
+      "field_type": "Number",
+      "description": "Discount percentage applied to the list price of this opportunity, expressed as a decimal between 0 and 100. Set by the sales rep and subject to deal desk approval above the threshold defined in the pricing policy. Used to calculate the net Amount field.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Competitor__c",
+      "field_type": "Picklist",
+      "description": "Primary competitor identified during the sales cycle. Values: Competitor A, Competitor B, Competitor C, Competitor D, None. Populated by the sales rep during discovery. Used in win/loss analysis and competitive intelligence reporting.",
+      "picklist_values": [
+        "Competitor A",
+        "Competitor B",
+        "Competitor C",
+        "Competitor D",
+        "None"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Partner_Sourced__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this opportunity was sourced by a registered channel partner. Triggers the partner commission calculation workflow and requires Partner_Name__c to be populated before the opportunity can advance past the Qualification stage.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Partner_Name__c",
+      "field_type": "Text",
+      "description": "Name of the channel partner who sourced or co-sold this opportunity. Required when Partner_Sourced__c is true. Used to calculate partner referral fees and to attribute revenue in the channel partner performance report.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Implementation_Complexity__c",
+      "field_type": "Picklist",
+      "description": "Estimated complexity of fulfilling and onboarding this opportunity, assessed by the sales engineer during scoping. Values: Low, Medium, High, Very High. Drives post-sale resource allocation and implementation timeline estimates.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "Very High"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Legal_Review_Required__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the prospect has requested changes to the standard supply agreement terms that require review by the legal team. Triggers a legal review task and pauses quote finalisation until the legal team records their decision.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Primary_Contact__c",
+      "field_type": "Lookup",
+      "description": "Reference to the Contact record of the main point of contact for this opportunity on the buyer side. Used to address proposal documents, route contract signature requests, and log call activity against the correct individual.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Contact",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Gear_Categories_In_Scope__c",
+      "field_type": "MultiselectPicklist",
+      "description": "Product categories included in this opportunity's scope. Values: Alpine Hardware, Technical Apparel, Footwear, Camping Equipment, Ski Touring, Navigation and Safety, Hydration. Used to route fulfilment tasks to the correct warehouse picking teams.",
+      "picklist_values": [
+        "Alpine Hardware",
+        "Technical Apparel",
+        "Footwear",
+        "Camping Equipment",
+        "Ski Touring",
+        "Navigation and Safety",
+        "Hydration"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Days_To_Close__c",
+      "field_type": "Number",
+      "description": "Number of calendar days between the opportunity creation date and the CloseDate. Calculated by formula. Used to identify stale opportunities in the pipeline and to benchmark sales cycle length by deal type and segment.",
+      "picklist_values": [],
+      "formula": "CloseDate - CreatedDate",
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Deal_Size_Category__c",
+      "field_type": "Text",
+      "description": "Categorical classification of the opportunity by net Amount. Calculated by formula: Small (<CHF 10k), Mid-Market (CHF 10k\u2013100k), Enterprise (>CHF 100k). Used to apply the correct approval thresholds and route to the appropriate deal desk queue.",
+      "picklist_values": [],
+      "formula": "IF(Amount < 10000, 'Small', IF(Amount < 100000, 'Mid-Market', 'Enterprise'))",
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Win_Probability_Band__c",
+      "field_type": "Text",
+      "description": "Qualitative probability band derived from the Probability field. Calculated by formula: Low (0\u201330%), Medium (31\u201360%), High (61\u201399%), Won (100%). Used in pipeline visualisation dashboards and in manager review filters.",
+      "picklist_values": [],
+      "formula": "IF(Probability = 100, 'Won', IF(Probability > 60, 'High', IF(Probability > 30, 'Medium', 'Low')))",
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Expedition_Kit_Deal__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this opportunity involves a fully configured expedition kit package for a guided tour operator or corporate mountaineering programme. Triggers the expedition kit workflow and assigns an equipment specialist.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Seasonal_Delivery_Window__c",
+      "field_type": "Picklist",
+      "description": "Target delivery season agreed with the buyer for the goods in this opportunity. Values: Pre-Winter (Sep\u2013Oct), Winter (Nov\u2013Jan), Pre-Summer (Mar\u2013Apr), Summer (May\u2013Jul), Year-Round. Used by logistics to schedule warehouse allocation and carrier booking.",
+      "picklist_values": [
+        "Pre-Winter (Sep-Oct)",
+        "Winter (Nov-Jan)",
+        "Pre-Summer (Mar-Apr)",
+        "Summer (May-Jul)",
+        "Year-Round"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "LeadSource",
+      "field_type": "Picklist",
+      "description": "Channel through which this opportunity was originally generated. Values: Web Enquiry, Trade Show, Partner Referral, Inbound Call, Account Manager Prospecting, Existing Customer Upsell.",
+      "picklist_values": [
+        "Web Enquiry",
+        "Trade Show",
+        "Partner Referral",
+        "Inbound Call",
+        "Account Manager Prospecting",
+        "Existing Customer Upsell"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "NextStep",
+      "field_type": "Text",
+      "description": "Free-text field for the sales rep to record the agreed next action for this opportunity, including the date and owner of that action. Updated after every customer interaction.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Expected_Margin__c",
+      "field_type": "Currency",
+      "description": "Expected gross margin on this opportunity in the org's default currency, calculated by the sales rep based on the agreed pricing and estimated cost of goods. Used in profitability reporting alongside the Amount field.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Approval_Status__c",
+      "field_type": "Picklist",
+      "description": "Current deal desk approval status for this opportunity. Values: Not Submitted, Pending Review, Approved, Rejected, Recalled. Controlled by the approval workflow; not editable directly by the sales rep once submitted.",
+      "picklist_values": [
+        "Not Submitted",
+        "Pending Review",
+        "Approved",
+        "Rejected",
+        "Recalled"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Legacy_Opp_Id__c",
+      "field_type": "Text",
+      "description": "Opportunity identifier from the pre-2022 CRM system, retained for cross-referencing historical deal records and resolving commission disputes from before the platform migration. Read-only after the migration cutover date of 2022-06-01.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Negotiation_Summary__c",
+      "field_type": "Text",
+      "description": "Free-text summary of key negotiation points for this opportunity, including discount rationale, non-standard terms agreed, and any side commitments made by the sales rep. Reviewed by deal desk before final approval.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "UIAA_Certified_Products__c",
+      "field_type": "Checkbox",
+      "description": "Checked when all climbing hardware included in this opportunity is certified to UIAA (Union Internationale des Associations d'Alpinisme) safety standards. Required for opportunities supplying certified guide services or public sector climbing facilities.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Executive_Sponsor__c",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the executive sponsor assigned to this opportunity. Required for all deals above CHF 100,000. Does not override the OwnerId field. Used to drive executive engagement tasks and to populate the EBR invitation list.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Handoff_Complete__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the post-sale handoff from the sales team to the customer success team has been completed and logged in the handoff tracker. Set by the automated handoff workflow when all mandatory handoff tasks reach Completed status.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Pipeline_Flag__c",
+      "field_type": "Picklist",
+      "description": "Internal pipeline management flag used by the sales operations team to mark opportunities requiring attention in the weekly pipeline review. Values: Clean, Watch, At Risk, Escalated. Updated by the sales ops analyst after each review session.",
+      "picklist_values": [
+        "Clean",
+        "Watch",
+        "At Risk",
+        "Escalated"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "ARR_Impact__c",
+      "field_type": "Currency",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Upsell_Flag__c",
+      "field_type": "Checkbox",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Custom_Pricing_Ref__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Deal_Source__c",
+      "field_type": "Picklist",
+      "description": "Deal source.",
+      "picklist_values": [
+        "Inbound",
+        "Outbound",
+        "Partner",
+        "Event"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Close_Quarter__c",
+      "field_type": "Text",
+      "description": "Indicates close quarter.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Segment_Code__c",
+      "field_type": "Picklist",
+      "description": "Segment.",
+      "picklist_values": [
+        "SMB",
+        "Mid-Market",
+        "Enterprise",
+        "Strategic"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Contract_Signed_Date__c",
+      "field_type": "Date",
+      "description": "Enter the contract reference number and the date the contract was countersigned by the customer's legal representative.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Revenue_Type__c",
+      "field_type": "Picklist",
+      "description": "Enter the revenue type as a free-text description of the commercial arrangement for this deal.",
+      "picklist_values": [
+        "Product Sale",
+        "Service Fee",
+        "Rental",
+        "Consignment"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Sales_Motion__c",
+      "field_type": "Picklist",
+      "description": "Sales motion applied to this opportunity.",
+      "picklist_values": [
+        "Land",
+        "Expand",
+        "Retain",
+        "Partner-Led"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Risk_Category__c",
+      "field_type": "Picklist",
+      "description": "Indicates the level of risk associated with this opportunity as assessed by the deal desk.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Integration_Scope__c",
+      "field_type": "Text",
+      "description": "TBD \u2014 to be defined with the solutions team before go-live.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Pricing_Model__c",
+      "field_type": "Picklist",
+      "description": "TODO \u2014 confirm pricing model taxonomy with finance before activating.",
+      "picklist_values": [
+        "Per Unit",
+        "Volume Band",
+        "Subscription",
+        "Custom"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Old_CRM_Stage__c",
+      "field_type": "Text",
+      "description": "Stage value from the legacy CRM. May no longer reflect current usage since the 2022 migration.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Stakeholder_Map_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing the stakeholder map for this opportunity, including buyer roles identified, level of support, internal dynamics observed, and the engagement strategy agreed between the AE and their manager.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Negotiation_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing negotiation notes for this opportunity, including discount requests submitted, justification provided, approval decisions at each level, counter-proposals from the prospect, and final agreed commercial terms.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "MEDDIC_Score__c",
+      "field_type": "Number",
+      "description": "MEDDIC qualification score assigned to this opportunity by the account executive during the discovery phase.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "ACV__c",
+      "field_type": "Currency",
+      "description": "ACV for this opportunity, calculated from the Amount and Contract_Term_Months__c fields.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "QBR_Flag__c",
+      "field_type": "Checkbox",
+      "description": "Flag this opportunity for inclusion in the QBR deck. Check the box before submitting your forecast.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Expected_Units__c",
+      "field_type": "Currency",
+      "description": "Number of individual product units expected to be included in this order, as estimated by the sales rep during scoping.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Pilot_Feedback__c",
+      "field_type": "Checkbox",
+      "description": "Stores the written feedback provided by the prospect at the end of the equipment pilot, including scores for each item tested and overall recommendation.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Deal_Review_Submitted__c",
+      "field_type": "Checkbox",
+      "description": "Check this box once you have submitted the deal review form to your manager for sign-off prior to the forecast call.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Stage_Override__c",
+      "field_type": "Picklist",
+      "description": "Use this field to manually override the stage if the automation has not updated it correctly. Select the correct stage from the list below.",
+      "picklist_values": [
+        "Prospecting",
+        "Qualification",
+        "Needs Analysis",
+        "Proposal",
+        "Negotiation",
+        "Closed Won",
+        "Closed Lost"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Internal_Flag__c",
+      "field_type": "Checkbox",
+      "description": "Used by the team for internal tracking.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Ops_Reference__c",
+      "field_type": "Text",
+      "description": "Contains the ops reference value for this deal.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Deal_Status__c",
+      "field_type": "Picklist",
+      "description": "Indicates the current status of this deal.",
+      "picklist_values": [
+        "Active",
+        "On Hold",
+        "Stalled",
+        "Closed"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "TCV__c",
+      "field_type": "Currency",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Renewal_Term_Months__c",
+      "field_type": "Number",
+      "description": "Check this box to confirm the renewal term has been agreed with the customer.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Legacy_Forecast_Category__c",
+      "field_type": "Text",
+      "description": "Deprecated. Forecast category field from the pre-2021 process. No longer populated or used in reporting.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Opportunity",
+      "field_api_name": "Technical_Evaluation_Date__c",
+      "field_type": "Date",
+      "description": "Indicates whether a technical evaluation has been completed for this opportunity and records the evaluator's recommendation.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Id",
+      "field_type": "Id",
+      "description": "System-generated unique identifier for the Case record. Read-only. Format: 15- or 18-character alphanumeric string.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "CreatedDate",
+      "field_type": "DateTime",
+      "description": "Timestamp of when this Case record was created in Salesforce. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "LastModifiedById",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the person who last modified this Case. Set automatically by the platform. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "IsDeleted",
+      "field_type": "Checkbox",
+      "description": "Indicates whether this Case record has been moved to the Recycle Bin. True if deleted, false if active. Read-only.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "SKIPPED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Subject",
+      "field_type": "Text",
+      "description": "One-line summary of the issue reported in this case, as entered by the customer or populated from the incoming email subject line. Required. Used as the primary identifier in case list views, SLA dashboards, and customer-facing correspondence.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Status",
+      "field_type": "Picklist",
+      "description": "Current status of this case in the support workflow. Values: New, In Progress, Awaiting Customer, Escalated, Resolved, Closed. Controls SLA timer behaviour and determines which queues the case is visible in.",
+      "picklist_values": [
+        "New",
+        "In Progress",
+        "Awaiting Customer",
+        "Escalated",
+        "Resolved",
+        "Closed"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Priority",
+      "field_type": "Picklist",
+      "description": "Urgency level of this case as assessed at intake. Values: Low, Medium, High, Critical. Determines the SLA target response and resolution times and controls escalation routing rules.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Origin",
+      "field_type": "Picklist",
+      "description": "Channel through which this case was submitted by the customer. Values: Email, Phone, Web Form, Chat, B2B Portal, In-Store. Populated automatically based on the intake method and used to measure channel volume trends.",
+      "picklist_values": [
+        "Email",
+        "Phone",
+        "Web Form",
+        "Chat",
+        "B2B Portal",
+        "In-Store"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "AccountId",
+      "field_type": "Lookup",
+      "description": "Reference to the Account record associated with this case. Determines the support tier, SLA entitlement, and account manager notified on escalation. Required for B2B cases; optional for direct consumer cases.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Account",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "ContactId",
+      "field_type": "Lookup",
+      "description": "Reference to the Contact record of the individual who submitted this case. Used to personalise correspondence, look up product registration history, and route cases based on the contact's loyalty tier or certification level.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "Contact",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "OwnerId",
+      "field_type": "Lookup",
+      "description": "Reference to the User or Queue record currently responsible for this case. Updated when the case is assigned or transferred. Controls SLA accountability and determines which agent dashboard the case appears on.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Description",
+      "field_type": "Text",
+      "description": "Full description of the issue as reported by the customer, captured at intake. Retained verbatim to preserve the customer's original wording. Reviewed by the support agent before the first response is sent.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Product_Area__c",
+      "field_type": "Picklist",
+      "description": "Product category related to the reported issue. Values: Alpine Hardware, Technical Apparel, Footwear, Camping Equipment, Ski Touring, Navigation and Safety, Hydration, Order and Delivery, Warranty, Returns. Used to route to the correct specialist team.",
+      "picklist_values": [
+        "Alpine Hardware",
+        "Technical Apparel",
+        "Footwear",
+        "Camping Equipment",
+        "Ski Touring",
+        "Navigation and Safety",
+        "Hydration",
+        "Order and Delivery",
+        "Warranty",
+        "Returns"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Root_Cause_Category__c",
+      "field_type": "Picklist",
+      "description": "Root cause assigned after investigation. Values: Product Defect, User Error, Shipping Damage, Incorrect Item Sent, Size or Fit Issue, Missing Component, Documentation Error. Required before the case can be set to Resolved.",
+      "picklist_values": [
+        "Product Defect",
+        "User Error",
+        "Shipping Damage",
+        "Incorrect Item Sent",
+        "Size or Fit Issue",
+        "Missing Component",
+        "Documentation Error"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Customer_Impact_Level__c",
+      "field_type": "Picklist",
+      "description": "Severity of the business or personal impact reported by the customer. Values: Critical, High, Medium, Low. Set at intake and used to override default SLA timers when the declared impact exceeds the case priority level.",
+      "picklist_values": [
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Escalated_To_Engineering__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case has been formally escalated to the product engineering team for investigation. Triggers an engineering task creation and links the case to the internal bug tracking system for progress tracking.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Workaround_Provided__c",
+      "field_type": "Checkbox",
+      "description": "Checked when a temporary workaround has been communicated to the customer while a permanent resolution is being developed. Suppresses SLA breach escalation while the workaround is active and the customer has acknowledged receipt.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Customer_Confirmed_Resolved__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the customer has explicitly confirmed that the reported issue is resolved to their satisfaction. Required before the case status can be set to Closed. Populated by the agent after receiving written or verbal confirmation.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Time_To_First_Response__c",
+      "field_type": "Number",
+      "description": "Number of business hours elapsed between case creation and the first substantive response sent to the customer. Calculated automatically by the SLA management workflow on first outbound email. Used in SLA compliance reporting.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Reopen_Count__c",
+      "field_type": "Number",
+      "description": "Number of times this case has been reopened after being set to Closed or Resolved status. Incremented automatically by the reopen workflow. Cases with a count above 2 are automatically flagged for a quality review by the support manager.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Linked_Bug_Id__c",
+      "field_type": "Text",
+      "description": "Identifier of the defect record in the internal engineering bug tracker linked to this case. Format: BUG-XXXXX. Populated when the case is escalated to engineering. Used to track resolution progress and notify affected customers when the fix is released.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "SLA_Breach_Reason__c",
+      "field_type": "Text",
+      "description": "Free-text explanation entered by the support manager when this case has breached its SLA target. Required when SLA_Breached__c is true. Used in the weekly SLA review and reported to the VP of Support on a monthly basis.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Regression_Confirmed__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the engineering team has confirmed that the reported issue is a regression from a previous product release. Flags the case for inclusion in the release quality report and triggers notification to the product owner.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Resolution_KB_Article__c",
+      "field_type": "URL",
+      "description": "URL of the Knowledge Base article used to resolve this case. Populated by the agent before closing. Used to identify which articles are most effective at resolving cases and to surface them in the agent-facing recommended articles panel.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Warranty_Claim__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case involves a formal warranty claim under the product's standard or extended warranty terms. Triggers the warranty claim workflow, which routes the case to the returns and exchanges team for physical inspection.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Product_Serial_Number__c",
+      "field_type": "Text",
+      "description": "Serial number of the specific product unit associated with this case, as provided by the customer or retrieved from the warranty registration system. Used to look up manufacturing batch records and identify potential product safety issues.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Replacement_Dispatched__c",
+      "field_type": "Checkbox",
+      "description": "Checked when a replacement product has been dispatched to the customer as the agreed resolution for this case. Populated by the fulfilment team when the replacement shipment is confirmed. Triggers a tracking notification to the customer.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Case_Source_Channel__c",
+      "field_type": "Picklist",
+      "description": "Intake channel supplementing the standard Origin field. Values: Direct Email, Support Portal Ticket, Live Chat, Social Media, In-Store Staff Entry, Phone IVR, Partner Submission. Used for detailed channel attribution in support reporting.",
+      "picklist_values": [
+        "Direct Email",
+        "Support Portal Ticket",
+        "Live Chat",
+        "Social Media",
+        "In-Store Staff Entry",
+        "Phone IVR",
+        "Partner Submission"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Escalation_Owner__c",
+      "field_type": "Lookup",
+      "description": "Reference to the User record of the senior support agent or manager who owns this case during an active escalation. Separate from OwnerId, which reflects the primary assignee. Used to drive escalation-specific SLA timers and notification rules.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": "User",
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "SLA_Breached__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case has exceeded its SLA target for either first response or resolution time. Set automatically by the SLA management workflow. Triggers a manager notification and requires SLA_Breach_Reason__c to be populated.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Expedition_Related__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case relates to equipment used or purchased for a guided expedition or organised mountaineering event. Triggers priority routing to the expedition support specialist team and enables access to expedition trip records.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Type",
+      "field_type": "Picklist",
+      "description": "Classification of this case by request type. Values: Technical Issue, Warranty Claim, Return Request, Order Query, Product Information, Complaint. Used to route to the correct support queue.",
+      "picklist_values": [
+        "Technical Issue",
+        "Warranty Claim",
+        "Return Request",
+        "Order Query",
+        "Product Information",
+        "Complaint"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "ClosedDate",
+      "field_type": "DateTime",
+      "description": "Date and time when this case was set to Closed status. Set automatically by the platform. Used to calculate total resolution time and to populate the case closure report.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Resolution_Time_Hours__c",
+      "field_type": "Number",
+      "description": "Total number of business hours from case creation to the first Resolved status, calculated by the SLA workflow. Stored as a decimal number. Used to measure resolution speed against SLA targets in the support performance dashboard.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Closure_Category__c",
+      "field_type": "Picklist",
+      "description": "Category describing how this case was ultimately resolved. Values: Fixed by Agent, Customer Self-Resolved, Workaround Accepted, Replacement Issued, Refund Processed, No Action Required, Duplicate Closed. Required before case can be set to Closed.",
+      "picklist_values": [
+        "Fixed by Agent",
+        "Customer Self-Resolved",
+        "Workaround Accepted",
+        "Replacement Issued",
+        "Refund Processed",
+        "No Action Required",
+        "Duplicate Closed"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Legacy_Ticket_Id__c",
+      "field_type": "Text",
+      "description": "Ticket identifier from the pre-2023 helpdesk system, retained for cross-referencing historical support records and resolving warranty disputes predating the Salesforce migration. Read-only after the migration cutover date of 2023-02-01.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Technical_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field for the support engineer to record technical findings during case investigation, including diagnostic steps taken, tools used, and intermediate conclusions reached before final root cause is confirmed.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "CE_Mark_Issue__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case involves a product compliance concern related to CE (Conformit\u00e9 Europ\u00e9enne) marking requirements. Triggers mandatory notification to the quality and regulatory team within 24 hours of the case being raised.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Auto_Close_Eligible__c",
+      "field_type": "Checkbox",
+      "description": "Checked when this case meets the criteria for automatic closure after 14 days of inactivity in Awaiting Customer status. Does not close the case immediately \u2014 the auto-close workflow evaluates this flag nightly before triggering closure.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Post_Resolution_Survey_Sent__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the post-resolution satisfaction survey has been dispatched to the customer contact via the survey platform integration. Set automatically when the case status changes to Closed and Customer_Confirmed_Resolved__c is true.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Handling_Priority__c",
+      "field_type": "Picklist",
+      "description": "Internal handling priority assigned by the support team lead to manage workload during high-volume periods. Values: Standard Queue, Fast Track, Hold, VIP Direct. Overrides the default queue assignment without changing the customer-facing Priority field.",
+      "picklist_values": [
+        "Standard Queue",
+        "Fast Track",
+        "Hold",
+        "VIP Direct"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Defect_Reference__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Internal_Routing_Code__c",
+      "field_type": "Picklist",
+      "description": "",
+      "picklist_values": [
+        "L1",
+        "L2",
+        "L3",
+        "Specialist"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Ops_Flag__c",
+      "field_type": "Text",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Case_Source__c",
+      "field_type": "Picklist",
+      "description": "Case source.",
+      "picklist_values": [
+        "Email",
+        "Phone",
+        "Chat",
+        "Portal"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Escalation_Level__c",
+      "field_type": "Picklist",
+      "description": "Indicates escalation level.",
+      "picklist_values": [
+        "L1",
+        "L2",
+        "L3",
+        "Executive"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Tier_Code__c",
+      "field_type": "Picklist",
+      "description": "Tier.",
+      "picklist_values": [
+        "Gold",
+        "Silver",
+        "Bronze",
+        "Standard"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Resolution_Date__c",
+      "field_type": "Date",
+      "description": "Enter the resolution date range and a brief summary of the actions taken to resolve this case.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "SLA_Target_Hours__c",
+      "field_type": "Number",
+      "description": "Select the applicable SLA tier from the dropdown: Basic 48h, Standard 24h, Premium 8h, Enterprise 4h.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Dispatch_Queue__c",
+      "field_type": "Picklist",
+      "description": "Queue to which this case is dispatched for handling.",
+      "picklist_values": [
+        "Hardware",
+        "Apparel",
+        "Returns",
+        "Warranty",
+        "General"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Case_Priority_Override__c",
+      "field_type": "Picklist",
+      "description": "Override for the case priority where the system-assigned priority does not reflect the true business impact.",
+      "picklist_values": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Tier2_Routing_Flag__c",
+      "field_type": "Picklist",
+      "description": "TODO \u2014 routing logic to be defined with the support ops team.",
+      "picklist_values": [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Compliance_Category__c",
+      "field_type": "Picklist",
+      "description": "TBD \u2014 pending review by the legal and compliance team.",
+      "picklist_values": [
+        "Regulatory",
+        "Safety",
+        "Data",
+        "Commercial"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Old_Queue_Reference__c",
+      "field_type": "Text",
+      "description": "Queue reference from the legacy helpdesk. May no longer be relevant following the 2023 platform migration.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Investigation_Log__c",
+      "field_type": "Text",
+      "description": "Free-text field for the support engineer to record the full investigation log for this case, including diagnostic steps taken, tools and queries used, intermediate findings, hypotheses tested, root cause conclusion, and remediation steps applied.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Escalation_Timeline_Notes__c",
+      "field_type": "Text",
+      "description": "Free-text field storing the escalation history for this case, including date and time of each event, person who initiated it, reason provided, response time of the receiving team, and commitments made regarding resolution.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R6"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "CSAT_Score__c",
+      "field_type": "Number",
+      "description": "CSAT score submitted by the customer following case resolution, on a scale of 1 to 5.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "TTR_Target_Met__c",
+      "field_type": "Checkbox",
+      "description": "Checked when the TTR for this case was within the threshold defined for the applicable support tier.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "NPS_Followup_Sent__c",
+      "field_type": "Checkbox",
+      "description": "Tick this box once the NPS follow-up survey has been sent to the customer via the survey platform.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Affected_Units__c",
+      "field_type": "Text",
+      "description": "Number of product units affected by the issue reported in this case, as estimated by the customer at intake.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "SLA_Deadline__c",
+      "field_type": "Date",
+      "description": "Stores the list of SLA deadlines applicable to this case for first response, resolution, and any interim update commitments agreed with the customer.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Agent_Notes__c",
+      "field_type": "Text",
+      "description": "Fill in this field before escalating the case. Include all steps you have already tried so the next agent does not repeat them.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Re_Assign_Queue__c",
+      "field_type": "Picklist",
+      "description": "Use this dropdown to select the queue you want to reassign this case to if your team cannot resolve it.",
+      "picklist_values": [
+        "Hardware",
+        "Apparel",
+        "Returns",
+        "Warranty",
+        "Tier 2",
+        "Escalations"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R9"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Case_Flag__c",
+      "field_type": "Checkbox",
+      "description": "Used by the support team for case tracking.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Info_Store__c",
+      "field_type": "Text",
+      "description": "Contains relevant case information.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Case_Classifier__c",
+      "field_type": "Picklist",
+      "description": "Indicates the current classification of this case.",
+      "picklist_values": [
+        "Type A",
+        "Type B",
+        "Type C",
+        "Type D"
+      ],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "First_Response_Date__c",
+      "field_type": "DateTime",
+      "description": "",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R1"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Breach_Count__c",
+      "field_type": "Number",
+      "description": "Select from the dropdown how many times the SLA has been breached: Once, Twice, Three or more times.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R3"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Legacy_Queue_Code__c",
+      "field_type": "Text",
+      "description": "Deprecated. Queue routing code from the pre-Salesforce helpdesk. No longer used for routing.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R5"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "CC_Recipients__c",
+      "field_type": "Email",
+      "description": "Stores all email addresses that should be copied on correspondence for this case, separated by semicolons.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R8"
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Return_Authorisation_Number__c",
+      "field_type": "Text",
+      "description": "Unique return authorisation code issued to the customer when a product return or exchange is approved. Format: RA-XXXXXXXX. Populated by the returns team and communicated to the customer via the case resolution email.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    },
+    {
+      "object": "Case",
+      "field_api_name": "Altitude_Of_Incident__c",
+      "field_type": "Number",
+      "description": "Altitude in metres at which the reported product failure or incident occurred, as stated by the customer. Stored as a whole number. Used by the product quality team to assess whether high-altitude conditions contributed to the failure.",
+      "picklist_values": [],
+      "formula": null,
+      "related_object": null,
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
+    }
+  ]
+}
