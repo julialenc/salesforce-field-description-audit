@@ -15,8 +15,8 @@ Built for **Salesforce Developers and Architects**, it gives teams a reusable so
 ## Features
 
 - **Extract field metadata** via the **Tooling API**, with experiment mode supported through synthetic input files.
-- **Classify description quality** with 10 rule-based checks that assign `FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
-- **Generate LLM-assisted rewrites** using shared prompt context plus task-specific prompts for `FLAGGED` and `UNCERTAIN` fields.
+- **Classify description quality** with 9 rule-based checks that assign `FLAGGED`, `UNCERTAIN`, `REVIEWED`, or `SKIPPED`.
+- **Generate LLM-assisted rewrites** using shared prompt context plus task-specific prompts for `FLAGGED`, `UNCERTAIN`, and `REVIEWED` fields.
 - **Require human review**: every proposed change must be **approved, edited, or rejected** before deployment.
 - **Write back safely** through a separate deployment script that validates decisions before calling the **Metadata API**.
 - **Support experiment, MVP, and production** through the same pipeline, with configurable seams for data source, LLM provider, write-back mode, and runtime interface.
@@ -50,8 +50,9 @@ The result is not a temporary workaround for one interaction, but a durable meta
 `system_prompt.md` + `golden_examples.json`
         ↓
 FLAGGED   → Prompt A → LLM                          # fields with missing description or clear description failure (R1-R5)
-UNCERTAIN → Prompt B → LLM                          # fields with possible description failure (R6-R10)
-PASSED / SKIPPED → no LLM                           # fields meeting all criteria or system fields
+UNCERTAIN → Prompt B → LLM                          # fields with possible description failure (R6-R9)
+REVIEWED  → Prompt C → LLM                          # passed all rules — LLM evaluates quality
+SKIPPED   → no LLM                                  # system fields — not writable via Metadata API
         ↓
 `data/llm_response.json`                            # LLM suggestion for descriptions
         ↓
