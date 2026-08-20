@@ -1,0 +1,110 @@
+[
+  {
+    "object": "Account",
+    "field_api_name": "Account_Segment__c",
+    "field_type": "Picklist",
+    "picklist_values": ["Consumer Direct", "Specialty Retail", "Corporate Fleet", "Wholesale Distributor"],
+    "formula": null,
+    "related_object": null,
+    "description": "Commercial segment assigned to this account based on annual revenue and purchase frequency. Values: Consumer Direct, Specialty Retail, Corporate Fleet, Wholesale Distributor. Drives pricing tier, minimum order quantities, and assigned account manager pool."
+  },
+  {
+    "object": "Account",
+    "field_api_name": "Credit_Limit__c",
+    "field_type": "Currency",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Maximum outstanding invoice balance approved for this account by the finance team. Enforced by the order management integration to block new shipments when the balance exceeds this threshold. Updated annually during credit review."
+  },
+  {
+    "object": "Account",
+    "field_api_name": "Shipping_Restriction__c",
+    "field_type": "Checkbox",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Checked when this account's shipping address is subject to carrier restrictions that limit delivery of oversized or hazardous items such as gas canisters, pyrotechnic avalanche charges, or large tent structures. Triggers a manual review step in the fulfilment workflow before dispatch."
+  },
+  {
+    "object": "Account",
+    "field_api_name": "Days_Since_Last_Order__c",
+    "field_type": "Number",
+    "picklist_values": [],
+    "formula": "TODAY() - Last_Order_Date__c",
+    "related_object": null,
+    "description": "Number of calendar days elapsed since the date recorded in Last_Order_Date__c. Calculated daily by a scheduled formula. Used to trigger re-engagement workflows when the value exceeds 90 days for active accounts."
+  },
+  {
+    "object": "Contact",
+    "field_api_name": "GDPR_Consent_Date__c",
+    "field_type": "Date",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Date on which this contact provided explicit GDPR marketing consent, as recorded in the consent management system. Required before any EU-regulated marketing communication is sent. Populated automatically when the consent form is submitted."
+  },
+  {
+    "object": "Contact",
+    "field_api_name": "Certification_Level__c",
+    "field_type": "Picklist",
+    "picklist_values": ["None", "Mountain Leader", "Alpine Guide Trainee", "IFMGA Guide", "Avalanche Level 1", "Avalanche Level 2"],
+    "formula": null,
+    "related_object": null,
+    "description": "Highest personal outdoor certification held by this contact, verified by the account manager or submitted via the customer portal. Values: None, Mountain Leader, Alpine Guide Trainee, IFMGA Guide, Avalanche Level 1, Avalanche Level 2. Determines eligibility for technical equipment purchase without additional compliance sign-off."
+  },
+  {
+    "object": "Contact",
+    "field_api_name": "Loyalty_Card_Number__c",
+    "field_type": "Text",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Unique identifier assigned to this contact's Summit Rewards loyalty card. Format: SR- followed by 8 digits (e.g. SR-00123456). Used by the POS integration to look up the contact at the point of purchase and apply loyalty points to their account."
+  },
+  {
+    "object": "Opportunity",
+    "field_api_name": "Technical_Win__c",
+    "field_type": "Checkbox",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Checked when the prospect technical team has confirmed the solution meets their requirements. Typically set after a product demonstration or equipment trial. Required before the opportunity advances to Negotiation stage."
+  },
+  {
+    "object": "Opportunity",
+    "field_api_name": "Loss_Reason__c",
+    "field_type": "Picklist",
+    "picklist_values": ["Price", "Competitor", "No Decision", "Timing", "Product Gap", "Budget Frozen", "Key Contact Left"],
+    "formula": null,
+    "related_object": null,
+    "description": "Primary reason this opportunity was lost. Values: Price, Competitor, No Decision, Timing, Product Gap, Budget Frozen, Key Contact Left. Required when StageName is set to Closed Lost. Used in win/loss analysis and product roadmap prioritisation."
+  },
+  {
+    "object": "Opportunity",
+    "field_api_name": "Primary_Contact__c",
+    "field_type": "Lookup",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": "Contact",
+    "description": "Reference to the Contact record of the main point of contact for this opportunity on the buyer side. Used to address proposal documents, route contract signature requests, and log call activity against the correct individual."
+  },
+  {
+    "object": "Case",
+    "field_api_name": "Product_Serial_Number__c",
+    "field_type": "Text",
+    "picklist_values": [],
+    "formula": null,
+    "related_object": null,
+    "description": "Serial number of the specific product unit associated with this case, as provided by the customer or retrieved from the warranty registration system. Used to look up manufacturing batch records and identify potential product safety issues."
+  },
+  {
+    "object": "Case",
+    "field_api_name": "Root_Cause_Category__c",
+    "field_type": "Picklist",
+    "picklist_values": ["Product Defect", "User Error", "Shipping Damage", "Incorrect Item Sent", "Size or Fit Issue", "Missing Component", "Documentation Error"],
+    "formula": null,
+    "related_object": null,
+    "description": "Root cause assigned after investigation. Values: Product Defect, User Error, Shipping Damage, Incorrect Item Sent, Size or Fit Issue, Missing Component, Documentation Error. Required before the case can be set to Resolved."
+  }
+]
