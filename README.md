@@ -74,7 +74,7 @@ For step-by-step workflow, see `wiki/02_how_it_works.md`. For the full architect
 
 ---
 
-> **Current status:** design, classifier, prompts and synthetic datasets are complete. The first end-to-end run, testing on a real Salesforce org and the first release are in progress — see `PLAN.md` and `PROGRESS.md`.
+> **Current status:** design, classifier, prompts and synthetic datasets are complete. The first end-to-end run, testing on a real Salesforce org and the first release are in progress.
 
 ## Installation
 

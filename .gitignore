@@ -1,3 +1,8 @@
 config.yml
 venv/
 data/description_cache.json
+
+# Local working notes for Claude Code sessions - not published
+CLAUDE.md
+PLAN.md
+PROGRESS.md

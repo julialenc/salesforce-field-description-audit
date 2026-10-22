@@ -100,13 +100,10 @@ Intended users:
 │   ├── 04_human_review_process.md
 │   └── 05_architecture_and_reproducibility.md
 ├── .gitignore
-├── CLAUDE.md                          # Working notes read by Claude Code at the start of each session
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── NOTICE
 ├── ONBOARDING.md                      # Guide for a new maintainer
-├── PLAN.md                            # Day-by-day plan to a handoff-ready release
-├── PROGRESS.md                        # Current status, session log, Azure cost ledger
 ├── README.md
 ├── config.example.yml                 # Copy, rename to config.yml, fill in credentials, object list, and experiment file path before running
 └── requirements.txt

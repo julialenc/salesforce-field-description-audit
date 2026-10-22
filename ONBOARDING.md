@@ -1,6 +1,6 @@
 # ONBOARDING.md
 
-For a person picking up this project — a future maintainer, or Julia after a long break. Claude Code sessions use `CLAUDE.md`, `PROGRESS.md` and `PLAN.md` instead.
+For a person picking up this project — a future maintainer, or Julia after a long break.
 
 ---
 
@@ -12,16 +12,14 @@ Why it matters: Agentforce, Claude and other AI agents read field descriptions t
 
 ## Where it stands
 
-See `PROGRESS.md` for the current day and status. In short, as of October 2026:
+As of October 2026:
 - Design, classifier, prompts, synthetic datasets and docs are complete
-- The plan in `PLAN.md` takes it from "never run" to "tested end to end on a real Salesforce org, ready for someone else to adopt"
+- In progress: the first end-to-end run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
 
 ## Read in this order
 
 1. `README.md` — what it does, architecture, quickstart (10 minutes)
 2. `wiki/02_how_it_works.md` — classifier rules, LLM routing, review and write-back
-3. `PROGRESS.md` — where things stand
-4. `PLAN.md` — what's done and what's left
 
 The other wikis are reference: `01` problem and audience, `03` experiment method and results, `04` the Admin's review process, `05` architecture and what is safe to change.
 
