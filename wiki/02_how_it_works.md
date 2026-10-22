@@ -9,10 +9,10 @@ Salesforce Org
       ↓
 [1] Extract field metadata — Tooling API
       ↓
-[2] Classify the description of every field — 10 rule-based checks (described at the end of this file)
+[2] Classify the description of every field — 9 rule-based checks (described at the end of this file)
       ↓                          ↓                        ↓                        ↓
-  FLAGGED                   UNCERTAIN                  PASSED                  SKIPPED
-(clear failure)         (possible failure)           (no issues)          (system fields —
+  FLAGGED                   UNCERTAIN                 REVIEWED                 SKIPPED
+(clear failure)         (possible failure)           (no rule fired)      (system fields —
                                                                           read-only, cannot
                                                                           be overwritten)
       ↓                          ↓                        ↓                        ↓
@@ -35,33 +35,28 @@ Salesforce Org
                          └───────────────────────────────┘
                                              ↓
 
-                 ┌───────────────────────────┼────────────────────────┐
-                 ↓                           ↓                        ↓
-             FLAGGED                     UNCERTAIN               PASSED + SKIPPED
-                 ↓                           ↓                        ↓
-           Prompt A                      Prompt B                  No LLM
-    "If the description          "Is this description         PASSED fields used
-    is missing, write a           good enough?                 as few-shot examples
-    new one from metadata.        If not, suggest              in Prompt A and B.
-    If it exists, replace         an improvement."             SKIPPED logged only.
-    it with a better one."
-                 ↓                           ↓                        ↓
-      Shared prompt context        Shared prompt context
-       + Prompt A + fields          + Prompt B + fields
-                 ↓                           ↓
-          Sent to AI                  Sent to AI
-                 ↓                           ↓
-          AI writes a              AI evaluates and
-          new description          suggests a revision
-                 ↓                           ↓
-                 └──────────┬───────────────┘
-                            ↓
-[3] Merge all results — FLAGGED + UNCERTAIN + PASSED + SKIPPED
+            ┌───────────────────┬───────────────────────┬───────────────────┐
+            ↓                   ↓                       ↓                   ↓
+         FLAGGED            UNCERTAIN               REVIEWED             SKIPPED
+            ↓                   ↓                       ↓                   ↓
+        Prompt A            Prompt B                Prompt C              No LLM
+   "Missing or          "Fix the detected      "Passed all rules.     Logged only.
+    unusable: write      issue: shorten (R6)    Keep it unless it
+    a new one from       or rewrite (R7–R9)."   is clearly
+    metadata."                                  inadequate."
+            ↓                   ↓                       ↓
+            └───────────────────┼───────────────────────┘
+                                ↓
+           Shared prompt context + task prompt + batch of fields
+                                ↓
+              Sent to the LLM — returns rewrite, shorten or keep
+                                ↓
+[3] Merge all results — FLAGGED + UNCERTAIN + REVIEWED + SKIPPED
                             ↓
 [4] `review_queue_{timestamp}.xlsx` — three tabs, one row per field
          Tab A — Fields that were FLAGGED (AI wrote a new description)
-         Tab B — Fields that were UNCERTAIN (AI suggested a revision)
-         Tab C — Fields that PASSED or were SKIPPED (no action needed, for reference only)
+         Tab B — UNCERTAIN fields, plus REVIEWED fields the AI proposes to rewrite
+         Tab C — Reference: REVIEWED fields the AI kept, and SKIPPED fields (no action needed)
                             ↓
                     ── HUMAN STEP ──
 [5] Admin opens the spreadsheet and reviews Tab A and Tab B
@@ -104,7 +99,7 @@ In **experiment mode**, the Tooling API call is replaced by reading from a local
 
 Which file is active is controlled by `data_source.experiment_file` in `config.yml`. See wiki `03_experiment_and_validation.md` for the full experiment methodology.
 
-> \*\*This step is entirely read-only. Nothing is written to Salesforce.\*\*
+> **This step is entirely read-only. Nothing is written to Salesforce.**
 
 ---
 
@@ -112,7 +107,7 @@ Which file is active is controlled by `data_source.experiment_file` in `config.y
 
 `01_ingest_classify_send.py`
 
-Every field collected in Step 1 is evaluated by a Python classifier against **10 rule-based checks**, which are described in full at the end of this chapter.
+Every field collected in Step 1 is evaluated by a Python classifier against **9 rule-based checks**, which are described in full at the end of this chapter.
 
 Based on the results, every field is assigned one of four statuses:
 
@@ -120,7 +115,7 @@ Based on the results, every field is assigned one of four statuses:
 |-|-|
 |**FLAGGED**|The description has a clear, detectable problem. The classifier is certain. The LLM will be asked to propose a replacement description.|
 |**UNCERTAIN**|The description may have a problem, but context or judgment is needed to confirm. The LLM will be asked to evaluate the description and propose a replacement only if the problem is confirmed.|
-|**PASSED**|The description looks acceptable. No LLM involvement. No changes proposed.|
+|**REVIEWED**|No rule fired. Rules cannot judge whether the description is genuinely clear, so the LLM reviews it conservatively and keeps it unless it is clearly inadequate.|
 |**SKIPPED**|The field is a Salesforce system field that cannot be updated via API. Logged for visibility only. Never sent to LLM. Never written to.|
 
 A field receives exactly one status. If multiple checks could apply to the same field, the earliest check to fire wins — the classifier stops immediately and does not continue evaluating that field.
@@ -143,7 +138,7 @@ These rules represent clear, high-confidence failures. They are checked first, i
 
 If a field triggers any of Rules 1–5, it is marked **FLAGGED**. The Rule Column records the first rule that fired. Step 2 is not evaluated.
 
-#### Rules 6 through 10 (UNCERTAIN)
+#### Rules 6 through 9 (UNCERTAIN)
 
 These rules are only evaluated if the field has passed all of Step 1. They represent softer, more context-dependent signals. The first rule that fires assigns the field a status of **UNCERTAIN** and stops all further evaluation for that field.
 
@@ -153,9 +148,8 @@ These rules are only evaluated if the field has passed all of Step 1. They repre
 |R7|Jargon Without Context|Description uses unexplained internal acronyms or terms|
 |R8|Contradictory|Description conflicts with something else observable in the field configuration|
 |R9|Audience Mismatch|Description is written for end users rather than systems or developers|
-|R10|Ambiguous|Description exists and passes all prior checks but is too vague to be actionable|
 
-If a field triggers any of Rules 6–10, it is marked **UNCERTAIN**. If none trigger, the field is marked **PASSED**.
+If a field triggers any of Rules 6–9, it is marked **UNCERTAIN**. If none trigger, it is marked **REVIEWED** and sent to the LLM with Prompt C. There is no separate ambiguity rule — see *Why There Is No Ambiguity Rule* at the end of this chapter.
 
 #### Why the classifier stops at the first match
 
@@ -182,8 +176,7 @@ For each field:
   Does R7 fire?  → UNCERTAIN / R7. Stop.
   Does R8 fire?  → UNCERTAIN / R8. Stop.
   Does R9 fire?  → UNCERTAIN / R9. Stop.
-  Does R10 fire? → UNCERTAIN / R10. Stop.
-  None fired     → PASSED. Stop.
+  None fired     → REVIEWED. Stop.
 ```
 
 > The LLM does not rewrite anything at this stage. Classification is fully rule-based and deterministic. The LLM is only involved in the next step.
@@ -192,9 +185,9 @@ For each field:
 
 The result of classification is saved locally as `data/sf_classified.json`.
 This file contains every field processed in Step 1, each annotated with its assigned status:
-`FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
+`FLAGGED`, `UNCERTAIN`, `REVIEWED`, or `SKIPPED`.
 
-All statuses are stored in a single file. The split into Prompt A (FLAGGED) and Prompt B (UNCERTAIN) happens at runtime in the next step — not at storage. PASSED fields are also read from this file when building few-shot examples for the LLM.
+All statuses are stored in a single file. The split into Prompt A (FLAGGED), Prompt B (UNCERTAIN) and Prompt C (REVIEWED) happens at runtime in the next step — not at storage.
 
 This file is the single source of truth between the classification step and the LLM step.
 
@@ -204,14 +197,14 @@ This file is the single source of truth between the classification step and the 
 
 `01_ingest_classify_send.py`
 
-The input for this step is `data/sf_classified.json` — the file produced by the Classifier in Step 2. Every field in that file carries a status: `FLAGGED`, `UNCERTAIN`, `PASSED`, or `SKIPPED`.
+The input for this step is `data/sf_classified.json` — the file produced by the Classifier in Step 2. Every field in that file carries a status: `FLAGGED`, `UNCERTAIN`, `REVIEWED`, or `SKIPPED`.
 
 Before any fields are sent to the LLM, Script 1 assembles a reusable instruction layer for the session:
 
 * `system_prompt.md` — the universal definition of a good field description, including the expected tone, length, format, and quality criteria
 * `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding
 
-This shared context is injected once per session. For each batch, the script then adds the relevant task instruction — `prompt_a_flagged_fields.md` or `prompt_b_uncertain_fields.md` — together with the field data for that batch.
+This shared context is injected once per session. For each batch, the script then adds the relevant task instruction — `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` or `prompt_c_reviewed_fields.md` — together with the field data for that batch.
 
 Routing logic:
 
@@ -219,10 +212,10 @@ Routing logic:
 |-|-|
 |**FLAGGED**|Sent to the LLM with `prompt_a_flagged_fields.md` — if the description is missing, the LLM writes a new one from metadata; if the description exists but is unusable, the LLM replaces it|
 |**UNCERTAIN**|Sent to the LLM with `prompt_b_uncertain_fields.md` — the LLM evaluates the existing description and suggests an improvement only if one is needed|
-|**PASSED**|Not sent to the LLM — carried forward without change|
+|**REVIEWED**|Sent to the LLM with `prompt_c_reviewed_fields.md` — the LLM keeps the description unless it is clearly inadequate, in which case it proposes a rewrite|
 |**SKIPPED**|Not sent to the LLM — logged for visibility only and carried forward without change|
 
-Fields are sent in batches of 50 per API call. Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
+Fields are sent in batches (default 50 per API call, set by `options.llm_batch_size`; free-tier providers may need smaller batches). Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
 
 ---
 
@@ -239,8 +232,8 @@ The file contains three tabs:
 |Tab|Contents|Reviewer action required|
 |-|-|-|
 |**Tab A — FLAGGED**|Original description + AI-written replacement|Approve, edit, or reject each row|
-|**Tab B — UNCERTAIN**|Original description + AI-suggested revision|Approve, edit, or reject each row|
-|**Tab C — PASSED / SKIPPED**|Original description only, no AI suggestion|No action required — included for full visibility|
+|**Tab B — UNCERTAIN**|UNCERTAIN fields with the AI-suggested revision, plus REVIEWED fields the AI proposes to rewrite|Approve, edit, or reject each row|
+|**Tab C — Reference**|REVIEWED fields the AI kept, and SKIPPED fields|No action required — included for full visibility|
 
 The timestamp in the filename ensures that multiple runs do not overwrite each other, and every review file can be traced back to the exact run that produced it.
 
@@ -299,9 +292,9 @@ Every field processed in this step is recorded in:
 
 ---
 
-## The 10 Rule-Based Checks
+## The 9 Rule-Based Checks
 
-The rules are listed in evaluation order. Rules 1–5 are evaluated in Step 1 and produce **FLAGGED**. Rules 6–10 are evaluated in Step 2 (only if Step 1 produced no match) and produce **UNCERTAIN**.
+The rules are listed in evaluation order. Rules 1–5 are evaluated in Step 1 and produce **FLAGGED**. Rules 6–9 are evaluated in Step 2 (only if Step 1 produced no match) and produce **UNCERTAIN**.
 
 ---
 
@@ -397,19 +390,10 @@ Examples: *"Click here to select the account type. Choose the option that best d
 
 ---
 
-### Rule 10 — Ambiguous
+## Why There Is No Ambiguity Rule
 
-**Step 2 → UNCERTAIN**
+An earlier design had a tenth rule, *Ambiguous*: a description that passes every check but is too vague to act on, such as *"Used to categorize the record"* or *"Stores relevant data for internal use"*.
 
-The description exists, passes all prior checks, and sounds plausible — but contains no specific information that would help a system or developer understand what the field actually stores.
+It was removed. Detecting vagueness needs judgment about meaning. A keyword list (flagging "used for", "relevant", "various") was too blunt: it flagged good descriptions that happen to use those words and missed vague ones that don't. A rule that fires unreliably makes the classifier harder to trust.
 
-Examples:
-
-* *"Contains additional information about the source"*
-* *"Used to categorize the record"*
-* *"Stores relevant data for internal use"*
-
-The ambiguity test: remove the field name and object name from the description. If what remains could describe any field in any system, it fails. A good description is specific enough to be meaningful without the field name for context.
-
-This is the softest and hardest-to-catch failure. It requires understanding meaning, not just pattern-matching. That is why it is the last rule evaluated and why UNCERTAIN fields are sent to the LLM for judgment rather than flagged with certainty.
-
+Instead, every field that passes Rules 1–9 is marked **REVIEWED** and sent to the LLM with Prompt C, which applies the ambiguity test directly: remove the field name and object name from the description — if what remains could describe any field in any system, it needs rewriting. Prompt C keeps descriptions by default and rewrites only those that clearly fail this test, so the Admin is not flooded with unnecessary suggestions.

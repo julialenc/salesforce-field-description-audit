@@ -74,7 +74,7 @@ For step-by-step workflow, see `wiki/02_how_it_works.md`. For the full architect
 
 ---
 
-> **Current status:** the first-run setup flow is being finalized now. The configuration structure and installation steps are defined, but the full end-to-end first run has not yet been executed on the current codebase. This section will be updated after Script 1 has been tested successfully.
+> **Current status:** design, classifier, prompts and synthetic datasets are complete. The first end-to-end run, testing on a real Salesforce org and the first release are in progress — see `PLAN.md` and `PROGRESS.md`.
 
 ## Installation
 
@@ -83,9 +83,9 @@ For step-by-step workflow, see `wiki/02_how_it_works.md`. For the full architect
 - **Python 3.10+**
 - **Git**
 - Dependencies from `requirements.txt`
-- For **experiment mode**: one local LLM option
-  - **AOAI API Simulator**, or
-  - **Ollama**
+- An LLM API key, either:
+  - **Groq** — free tier with open-weight models; no credit card, nothing to install, or
+  - **Azure OpenAI** — paid
 
 ### Install
 
@@ -132,7 +132,7 @@ Then update `config.yml` so that:
 
 - `mode: experiment`
 - `data_source.experiment_file` points to `data/sf_metadata_raw_training.json`
-- `llm.provider` is set to your local or simulated provider
+- the `llm` block points to Groq (free) or Azure OpenAI — see the examples in `config.example.yml`
 
 ### 2. Run Script 1
 
@@ -196,7 +196,7 @@ For the full workflow, see:
 | Review interface | **Excel (`.xlsx`)** | Human review artifact for Approve / Edit / Reject decisions |
 | Configuration | **YAML** (`config.example.yml` → `config.yml`) | Controls mode, data source, provider settings, and object scope |
 | Experiment input | **`data/sf_metadata_raw_training.json`** (288 fields) and **`data/sf_metadata_raw_test.json`** (144 fields) | Synthetic metadata datasets for safe experiment-mode runs — training set for development, test set for final validation |
-| LLM providers | **AOAI API Simulator, Ollama, Azure OpenAI, OpenAI-compatible APIs, Amazon Bedrock, Google Vertex AI** | Generates proposed field-description rewrites depending on runtime mode |
+| LLM providers | **Groq** (free, open-weight models), **Azure OpenAI**, any **OpenAI-compatible API**. Amazon Bedrock and Google Vertex AI are stubs, not yet implemented | Generates proposed field-description rewrites |
 | Prompt assets | **Markdown + JSON** (`system_prompt.md`, `golden_examples.json`, prompt templates) | Defines quality rules, examples, and task-specific instructions |
 | Artifacts | **JSON + Excel** | Stores classification output, raw LLM output, review queue, and write log |
 
@@ -243,7 +243,7 @@ Tech Consultants, Data Cloud specialists, and Agentforce advisors may also use t
 
 Contributions are welcome.
 
-Contribution guidelines are being finalized and will be added in `CONTRIBUTING.md`.
+See `CONTRIBUTING.md`.
 
 ---
 

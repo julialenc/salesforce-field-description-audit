@@ -72,33 +72,28 @@ data_source:
 
 llm:
   # Supported providers:
-  # - aoai_simulator   -> local Azure OpenAI API simulator
-  # - ollama           -> local open-source model runtime
-  # - azure_openai     -> Azure OpenAI
-  # - openai           -> OpenAI-compatible API
-  # - bedrock          -> Amazon Bedrock
-  # - vertex_ai        -> Google Vertex AI
-  provider: aoai_simulator
+  # - openai        -> any OpenAI-compatible API. Default: Groq free tier —
+  #                    open-weight models, free key, no credit card, nothing
+  #                    to install. Get a key at https://console.groq.com
+  # - azure_openai  -> Azure OpenAI (paid)
+  # - bedrock, vertex_ai -> not implemented yet
+  #
+  # Free tiers are for synthetic data only. Send real org metadata only to a
+  # company-approved provider such as Azure OpenAI.
+  provider: openai
 
-  # Examples:
-  # aoai_simulator -> http://localhost:8080
-  # ollama         -> http://localhost:11434
-  # azure_openai   -> https://YOUR-RESOURCE.openai.azure.com/
-  # openai         -> https://api.openai.com/v1
-  # bedrock / vertex_ai may not require the same endpoint style,
-  # but the field is kept here for a consistent config shape.
-  endpoint: http://localhost:8080
+  # The script appends /v1/chat/completions to this address.
+  # openai (Groq)   -> https://api.groq.com/openai
+  # openai (OpenAI) -> https://api.openai.com
+  # azure_openai    -> https://YOUR-RESOURCE.openai.azure.com/
+  endpoint: https://api.groq.com/openai
 
-  # Model name depends on provider
-  # Examples:
-  # - gpt-4o
-  # - llama3
-  # - claude-3-5-sonnet
-  # - gemini-1.5-pro
-  model: gpt-4o
+  # Groq: an open-weight model from Groq's model list, e.g.
+  #       llama-3.3-70b-versatile (names change — check the list)
+  # Azure: your deployment name, e.g. gpt-4o-mini
+  model: llama-3.3-70b-versatile
 
-  # Keep local in config.yml only
-  # Not used by all providers in the same way
+  # Keep local in config.yml only — never commit
   api_key: YOUR_API_KEY_HERE
 
   # Optional generation controls
@@ -128,7 +123,8 @@ options:
   # If true, standard fields may also be included where writable.
   include_standard_fields: false
 
-  # Number of fields sent per LLM request
+  # Number of fields sent per LLM request.
+  # Lower it (e.g. 15) if a free tier returns rate-limit errors (HTTP 429).
   llm_batch_size: 50
 
   # Keep intermediate JSON/XLSX artifacts for inspection and debugging

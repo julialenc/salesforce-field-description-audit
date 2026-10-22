@@ -80,15 +80,16 @@ Intended users:
 ├── data/
 │   ├── sf_metadata_raw_training.json  # Synthetic training set — 288 fields across 4 objects, used during classifier development and prompt iteration
 │   ├── sf_metadata_raw_test.json      # Synthetic test set — 144 fields across 4 objects, held out for final validation only
-│   ├── sf_classified.json             # Classifier output — each field labelled FLAGGED, UNCERTAIN, PASSED, or SKIPPED. Committed as experiment reference only
+│   ├── sf_classified.json             # Classifier output — each field labelled FLAGGED, UNCERTAIN, REVIEWED, or SKIPPED. Committed as experiment reference only
 │   ├── llm_response.json              # Raw LLM suggestions before human review. Committed as experiment reference only
-│   ├── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs (FLAGGED, UNCERTAIN, PASSED/SKIPPED). Committed as experiment reference only
+│   ├── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs (FLAGGED, UNCERTAIN, Reference). Committed as experiment reference only
 │   └── write_log_{timestamp}.xlsx     # Deployment audit log — one row per field write attempt, with decision and outcome. Committed as experiment reference only
 ├── prompts/
 │   ├── system_prompt.md               # Quality criteria and instructions — injected once per session for all LLM calls
 │   ├── golden_examples.json           # Hand-picked high-quality field descriptions used for few-shot grounding
 │   ├── prompt_a_flagged_fields.md     # Task instruction for FLAGGED fields — clear quality failures (Rules 1–5)
-│   └── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–10)
+│   ├── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–9)
+│   └── prompt_c_reviewed_fields.md    # Task instruction for REVIEWED fields — passed all rules; LLM keeps unless clearly inadequate
 ├── scripts/
 │   ├── 01_ingest_classify_send.py     # Extract from Salesforce (or synthetic file), classify, call LLM, produce review file
 │   └── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
@@ -99,6 +100,13 @@ Intended users:
 │   ├── 04_human_review_process.md
 │   └── 05_architecture_and_reproducibility.md
 ├── .gitignore
+├── CLAUDE.md                          # Working notes read by Claude Code at the start of each session
+├── CONTRIBUTING.md
+├── LICENSE
+├── NOTICE
+├── ONBOARDING.md                      # Guide for a new maintainer
+├── PLAN.md                            # Day-by-day plan to a handoff-ready release
+├── PROGRESS.md                        # Current status, session log, Azure cost ledger
 ├── README.md
 ├── config.example.yml                 # Copy, rename to config.yml, fill in credentials, object list, and experiment file path before running
 └── requirements.txt

@@ -25,7 +25,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 |---|---|---|---|
 | Purpose | Validate the pipeline safely | Prove the pipeline in a real org | Operate the same pipeline with a stronger operational shell |
 | Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live Salesforce metadata via **Tooling API** | Live Salesforce metadata via **Tooling API** |
-| LLM provider | Local or simulated provider, such as AOAI API Simulator or Ollama | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
+| LLM provider | Free hosted open-weight model (Groq free tier) or Azure OpenAI | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
 | Write-back | Dry-run only — no live write to Salesforce | Live write-back via **Metadata API** | Live write-back via **Metadata API** |
 | Runtime interface | Manual scripts, local configuration | Manual scripts, local configuration in `config.yml` | More user-friendly operating layer, such as CLI parameters, a service wrapper, or a simple web UI |
 | Human review | Required | Required | Required |
@@ -41,7 +41,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 
 Across all three stages, the stable core remains the same:
 - the rule-based classifier
-- the `FLAGGED` / `UNCERTAIN` / `PASSED` / `SKIPPED` model
+- the `FLAGGED` / `UNCERTAIN` / `REVIEWED` / `SKIPPED` model
 - the prompt assembly and routing structure
 - the review-first decision model
 - the validation gate before write-back
@@ -76,13 +76,13 @@ Salesforce metadata source
     Extract field metadata for configured objects
              ↓
 [2] Classification
-    Apply 10 rule-based checks to each field description
+    Apply 9 rule-based checks to each field description
              ↓
      ┌───────────────┬───────────────┬───────────────┬
      ↓               ↓               ↓               ↓
-  FLAGGED         UNCERTAIN        PASSED          SKIPPED
-(clear failure) (possible failure) (no issues)   (read-only /
-R1-R5 trigger   R6-R10 trigger                    not writable)
+  FLAGGED         UNCERTAIN        REVIEWED        SKIPPED
+(clear failure) (possible failure) (no rule      (read-only /
+R1-R5 trigger   R6-R9 trigger       fired)         not writable)
      ↓               ↓               ↓               ↓
      └───────────────┴───────────────┴───────────────┘
                              ↓
@@ -105,32 +105,32 @@ R1-R5 trigger   R6-R10 trigger                    not writable)
                              ↓
 
 [3] Routing and LLM Processing
-     ┌───────────────────────────┬───────────────────────────┬
-     ↓                           ↓                           ↓
-  FLAGGED                    UNCERTAIN                 PASSED + SKIPPED
-     ↓                           ↓                           ↓
- Prompt A                    Prompt B                    No LLM call
-"if missing, write          "is this description        PASSED carried forward;
- a new one from              good enough? if not,       SKIPPED logged only
- metadata; if unusable,      suggest an improvement"
- replace it"
-     ↓                           ↓
-Shared prompt context      Shared prompt context
- + Prompt A + fields        + Prompt B + fields
-     ↓                           ↓
-  LLM call                    LLM call
-     └───────────────┬───────────┘
-                     ↓
+     ┌────────────────────┬────────────────────┬────────────────────┐
+     ↓                    ↓                    ↓                    ↓
+  FLAGGED             UNCERTAIN            REVIEWED             SKIPPED
+     ↓                    ↓                    ↓                    ↓
+ Prompt A             Prompt B             Prompt C             No LLM call
+"write a new         "fix the detected    "keep unless         logged only
+ description          issue: shorten       clearly
+ from metadata"       (R6) or rewrite      inadequate"
+                      (R7-R9)"
+     ↓                    ↓                    ↓
+     └────────────────────┼────────────────────┘
+                          ↓
+      Shared prompt context + task prompt + batch of fields
+                          ↓
+                       LLM call
+                          ↓
             `data/llm_response.json`
                      ↓
 
 [4] Merge into review artifact
-    Combine FLAGGED + UNCERTAIN + PASSED + SKIPPED
+    Combine FLAGGED + UNCERTAIN + REVIEWED + SKIPPED
                      ↓
     `data/review_queue_{timestamp}.xlsx`
         Tab A — FLAGGED
-        Tab B — UNCERTAIN
-        Tab C — PASSED / SKIPPED
+        Tab B — UNCERTAIN + REVIEWED fields the LLM proposes to rewrite
+        Tab C — Reference: REVIEWED fields kept + SKIPPED
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -206,10 +206,10 @@ Which experiment file is active is controlled by `data_source.experiment_file` i
 
 The **classification layer** is the deterministic control layer of the system.
 
-It applies 10 rule-based checks in a fixed two-step sequence and assigns each field one status:
+It applies 9 rule-based checks in a fixed two-step sequence and assigns each field one status:
 - `FLAGGED` — Rules 1–5 (Step 1): clear, high-confidence failures
-- `UNCERTAIN` — Rules 6–10 (Step 2): softer signals requiring LLM judgment
-- `PASSED` — no rule fired
+- `UNCERTAIN` — Rules 6–9 (Step 2): softer signals requiring LLM judgment
+- `REVIEWED` — no rule fired; the LLM judges quality with Prompt C
 - `SKIPPED` — system field, not writable
 
 Its output is stored in `data/sf_classified.json`.
@@ -220,20 +220,20 @@ The **prompt and LLM layer** generates suggestions only where the classifier say
 
 It combines:
 - shared session context: `system_prompt.md` and `golden_examples.json`
-- task-specific prompts: `prompt_a_flagged_fields.md` and `prompt_b_uncertain_fields.md`
+- task-specific prompts: `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` and `prompt_c_reviewed_fields.md`
 
 This keeps the LLM in a narrow role: grounded suggestion generation under explicit routing rules.
 
 ### Review Artifact and Human Decision Layers
 
-After LLM processing, Script 1 merges `FLAGGED`, `UNCERTAIN`, `PASSED`, and `SKIPPED` into:
+After LLM processing, Script 1 merges `FLAGGED`, `UNCERTAIN`, `REVIEWED`, and `SKIPPED` into:
 
 `data/review_queue_{timestamp}.xlsx`
 
 This file is the formal handoff between machine processing and human review:
 - **Tab A** — `FLAGGED`
-- **Tab B** — `UNCERTAIN`
-- **Tab C** — `PASSED / SKIPPED`
+- **Tab B** — `UNCERTAIN`, plus `REVIEWED` fields the LLM proposes to rewrite
+- **Tab C** — `REVIEWED` fields the LLM kept, and `SKIPPED` fields
 
 The Admin then assigns one of three decisions to each actionable row:
 - **Approve**
@@ -269,7 +269,7 @@ This is what allows the project to evolve across experiment, MVP, and production
 The following elements are intended to remain stable across all operating stages:
 
 - **classifier logic**
-- **status model** — `FLAGGED`, `UNCERTAIN`, `PASSED`, `SKIPPED`
+- **status model** — `FLAGGED`, `UNCERTAIN`, `REVIEWED`, `SKIPPED`
 - **prompt assembly structure**
 - **batching logic**
 - **review queue structure**

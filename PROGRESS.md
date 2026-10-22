@@ -1,37 +1,74 @@
 # PROGRESS.md
 
-Lightweight running log of project status and session history. **Not auto-loaded by Claude Code** — kept separate from `CLAUDE.md` on purpose to save tokens. Ask Claude Code to read this explicitly when resuming work after a break ("read PROGRESS.md first").
+Current status, session log and Azure cost ledger. Read at the start of every Claude Code session; update at the end.
 
 ---
 
-## Current focus
+## Current position
 
-Setting up the local environment and preparing to run Script 1 for the first time against the training set.
-
----
+- **Next:** Day 1 — first end-to-end run (see `PLAN.md`)
+- **Azure spent:** 0.00 / 20 CHF
+- **Blocking:** Groq API key not yet in `config.yml` (Day 1, manual step)
 
 ## Status snapshot
 
-- Repo cloned locally to `C:\Users\julia\salesforce-field-description-audit`
-- Python venv created, dependencies installed (`pyyaml`, `requests`, `openpyxl`)
-- Ollama installed locally, model `llama3.2:3b` pulled
-- `config.yml` created locally, set to `mode: experiment`, provider `ollama`, `experiment_file: data/sf_metadata_raw_training.json`
-- `venv/` added to `.gitignore`
-- **Script 1 has not been run yet.** No `sf_classified.json`, `llm_response.json`, or `review_queue_*.xlsx` exist yet.
-- `CLAUDE.md` and this file created and committed to root
+- Repo cloned to `C:\Users\julia\salesforce-field-description-audit`; venv with `pyyaml`, `requests`, `openpyxl`
+- Free LLM is the **Groq free tier** (open-weight models). Ollama was installed but never used and is dropped — not enough disk space
+- `config.yml` is local and still points to Ollama; switch it to Groq on Day 1 (see `config.example.yml`)
+- Scripts, prompts, synthetic training and test sets, wikis, licence (Apache 2.0) all committed
+- **Neither script has run yet.** Files in `data/` named `sf_classified.json`, `llm_response.json`, `review_queue_*`, `write_log_*` are placeholders
+- Known bugs from code review, not yet fixed — see `CLAUDE.md`, "Known open bugs"
+
+## Open decisions
+
+- Config shape for real orgs (proposed: `source: file | org`, `write_back: off | export | deploy`, `salesforce.target_org`) — decide at the start of Day 8
+- Default Azure model and recommended Groq model — decide on Day 6 from measured results
+
+---
+
+## Azure cost ledger
+
+| Date | Day | Model | Dataset | Fields sent | Tokens in / out | Cost CHF | Running total |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | 0.00 |
+
+## Results log
+
+Classifier accuracy and suggestion quality per iteration (filled from Day 1).
+
+| Date | Provider / model | Change | Classifier match | Prompt A pass | Prompt B pass | Prompt C rewrites | Notes |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+## Dataset label changes
+
+Any change to `_expected_status` / `_expected_rule`, with reason.
+
+| Date | Field | Old | New | Reason |
+|---|---|---|---|---|
+| | | | | |
 
 ---
 
 ## Session log (most recent first)
 
-### Setup session
-- Cloned repo from GitHub to local machine
-- Installed GitHub CLI, Git for Windows already present
-- Created Python venv, installed the three experiment-mode dependencies
-- Installed Ollama, worked through PATH issue (new terminal needed after winget install)
-- Hit a machine slowdown running the full `llama3` (8B) model — switched to `llama3.2:3b` for local testing to keep resource usage manageable
-- Installed Claude Code natively on Windows, resolved PATH issue with a permanent PATH addition
-- Confirmed `config.yml` correctly gitignored; added missing `venv/` entry to `.gitignore` and committed that fix
-- Created `CLAUDE.md` and `PROGRESS.md` for Claude Code sessions going forward
+### 2026-10-22 — Groq replaces Ollama; docs aligned
+- Ollama dropped for lack of disk space (never run). Free option is now the Groq free tier: open-weight models, OpenAI-compatible, no code change needed (`provider: openai`)
+- AOAI API Simulator also dropped: it returns fake responses, so it can't be used to judge prompt quality
+- Updated README, `config.example.yml`, `requirements.txt`, wikis 01/02/03/05, `CLAUDE.md`, `PLAN.md`, `ONBOARDING.md`
+- Fixed stale architecture in wikis 01, 02, 03, 05: they still described `PASSED` and ten rules; now `REVIEWED`, nine rules, three prompts. Wiki 02 now explains why there is no ambiguity rule
+- Fixed `config.example.yml`: the OpenAI endpoint example would have produced `/v1/v1/...`
+- Fixed `.gitignore`: the `venv/` line had been written in UTF-16 and was ignored by Git; added `data/description_cache.json`
+- `ONBOARDING_Johann.md` removed; `ONBOARDING.md` replaces it
 
-**Next session should start with:** running Script 1 against the training set, then working through classifier validation as described in `CLAUDE.md`'s "Typical session flow."
+### 2026-10-22 — Planning
+- Decided to finish the project to a handoff-ready state before withdrawing from the Salesforce space
+- Real-org testing will use a free Salesforce Developer Edition org (personal sign-up), which covers both read-only ingestion and write-back
+- Wrote `PLAN.md` (12 days); updated `CLAUDE.md`, `ONBOARDING.md` and this file for Claude Code sessions
+- Azure budget set at 20 CHF; budget alerts at 15 and 20 CHF to be set in Azure Cost Management
+- Code review found bugs: field-name collisions, deduplication losing results, stale cache after prompt changes
+
+### Setup session
+- Cloned repo, installed GitHub CLI, created venv, installed dependencies
+- Installed Ollama (later dropped) and Claude Code; added Claude Code to PATH
+- Confirmed `config.yml` is ignored by Git

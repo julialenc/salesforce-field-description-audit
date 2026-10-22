@@ -3,13 +3,13 @@
 #
 # This file covers:
 # 1) Experiment mode — the only packages needed to run the pipeline end-to-end
-#    against synthetic data with a local LLM
+#    against synthetic data with a free hosted LLM (Groq) or Azure OpenAI
 # 2) MVP / production — additional packages needed when connecting to a live
 #    Salesforce org and an enterprise LLM provider
 #
 # Notes:
-# - Local LLM runtimes (Ollama, AOAI API Simulator) are NOT installed via pip.
-#   They run as separate local services and are called via HTTP through requests.
+# - No LLM SDK is needed: Groq, other OpenAI-compatible APIs and Azure OpenAI
+#   are called over HTTP with requests.
 # - Real production secret handling and enterprise auth may later move outside this file.
 
 # =========================================================
@@ -19,7 +19,7 @@
 # Config file parsing (config.yml)
 PyYAML>=6.0
 
-# HTTP client — used for all LLM calls (OpenAI-compatible, Azure OpenAI, Ollama)
+# HTTP client — used for all LLM calls (Groq and other OpenAI-compatible APIs, Azure OpenAI)
 requests>=2.31.0
 
 # Excel generation — review queue and write log
