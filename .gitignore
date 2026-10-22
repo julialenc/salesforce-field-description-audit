@@ -6,3 +6,4 @@ data/description_cache.json
 CLAUDE.md
 PLAN.md
 PROGRESS.md
+__pycache__/

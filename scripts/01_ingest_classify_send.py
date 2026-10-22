@@ -427,6 +427,11 @@ def save_cache(cache: dict) -> None:
     log.info(f"Cache updated ({len(cache)} entries)")
 
 
+def field_key(f: dict) -> str:
+    """Unique key for a field: object.field_api_name (field names repeat across objects)."""
+    return f"{f.get('object', '')}.{f.get('field_api_name', '')}"
+
+
 def description_hash(desc: str) -> str:
     return hashlib.md5((desc or "").strip().encode()).hexdigest()
 
@@ -439,9 +444,11 @@ def apply_cache(fields: list[dict], cache: dict) -> tuple[list[dict], list[dict]
         if f["classifier_status"] == "SKIPPED":
             cached.append(f)
             continue
-        key = f"{f['object']}.{f['field_api_name']}"
+        key = field_key(f)
         h   = description_hash(f.get("description", ""))
-        if key in cache and cache[key].get("hash") == h:
+        entry = cache.get(key, {})
+        # A cached llm_error is not a result — send the field again
+        if entry.get("hash") == h and (entry.get("llm_result") or {}).get("action") not in ("llm_error", None):
             f["llm_result"] = cache[key].get("llm_result")
             f["cache_hit"]  = True
             cached.append(f)
@@ -483,25 +490,27 @@ def load_prompts() -> dict:
 # 7. SORT + DEDUPLICATE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def sort_and_deduplicate(fields: list[dict]) -> tuple[list[dict], dict]:
+def sort_and_deduplicate(fields: list[dict]) -> tuple[list[dict], list[dict]]:
     """
     Sort by field_type for consistent batching.
-    Deduplicate by description — identical descriptions share one LLM call.
-    Returns (sorted_fields, desc_to_primary) where desc_to_primary maps
-    a description to the first field that had it (the one that gets the LLM call).
+    Deduplicate by description — identical descriptions with the same status and
+    rule share one LLM call (the status/rule check keeps each field on its own prompt).
+    Returns (unique_fields, duplicates). Each duplicate's dedup_primary holds the
+    field_key of the field whose LLM result it reuses.
     """
     llm_fields = [f for f in fields if f["classifier_status"] != "SKIPPED"]
     llm_fields.sort(key=lambda f: (f.get("field_type", ""), f.get("object", "")))
 
-    seen_descs: dict[str, dict] = {}
+    seen_descs: dict[tuple, dict] = {}
     unique, duplicates = [], []
     for f in llm_fields:
-        key = (f.get("description") or "").strip()
-        if key and key in seen_descs:
-            f["dedup_primary"] = seen_descs[key]["field_api_name"]
+        desc = (f.get("description") or "").strip()
+        key  = (f["classifier_status"], f.get("rule_triggered"), desc)
+        if desc and key in seen_descs:
+            f["dedup_primary"] = field_key(seen_descs[key])
             duplicates.append(f)
         else:
-            if key:
+            if desc:
                 seen_descs[key] = f
             f["dedup_primary"] = None
             unique.append(f)
@@ -509,7 +518,7 @@ def sort_and_deduplicate(fields: list[dict]) -> tuple[list[dict], dict]:
     if duplicates:
         log.info(f"Deduplication: {len(duplicates)} fields share descriptions with earlier fields — will reuse LLM responses")
 
-    return unique, {v["field_api_name"]: v for v in unique}
+    return unique, duplicates
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -565,12 +574,12 @@ def build_llm_payload(batch: dict, prompts: dict) -> list[dict]:
 # 9. LLM CALLS
 # ─────────────────────────────────────────────────────────────────────────────
 
-def call_llm(payload: list[dict], batch: dict, prompts: dict, cfg: dict) -> list[dict]:
-    provider = cfg["llm"].get("provider", "aoai_simulator")
+def call_llm(payload: list[dict], batch: dict, prompts: dict, cfg: dict) -> dict[str, dict]:
+    provider = cfg["llm"].get("provider", "openai")
     system   = _build_system_message(batch["route_key"], prompts)
     user     = _build_user_message(payload, batch["route_key"], prompts)
 
-    if provider in ("aoai_simulator", "openai", "ollama"):
+    if provider == "openai":
         raw = _call_openai_compatible(system, user, cfg)
     elif provider == "azure_openai":
         raw = _call_azure_openai(system, user, cfg)
@@ -579,10 +588,10 @@ def call_llm(payload: list[dict], batch: dict, prompts: dict, cfg: dict) -> list
     elif provider == "vertex_ai":
         raw = _call_vertex_ai(system, user, cfg)
     else:
-        log.error(f"Unknown LLM provider: {provider}")
+        log.error(f"Unknown LLM provider: {provider} (use openai, azure_openai, bedrock or vertex_ai)")
         sys.exit(1)
 
-    return _parse_llm_response(raw, payload)
+    return _parse_llm_response(raw, batch["fields"])
 
 
 def _build_system_message(route_key: str, prompts: dict) -> str:
@@ -607,9 +616,9 @@ def _build_user_message(payload: list[dict], route_key: str, prompts: dict) -> s
 
 
 def _call_openai_compatible(system: str, user: str, cfg: dict) -> str:
-    endpoint = cfg["llm"].get("endpoint", "http://localhost:8080")
+    endpoint = cfg["llm"].get("endpoint", "https://api.openai.com")
     model    = cfg["llm"].get("model", "gpt-4o")
-    api_key  = cfg["llm"].get("api_key", "dummy")
+    api_key  = cfg["llm"].get("api_key", "")
     temp     = cfg["llm"].get("temperature", 0.2)
 
     url = endpoint.rstrip("/") + "/v1/chat/completions"
@@ -625,9 +634,36 @@ def _call_openai_compatible(system: str, user: str, cfg: dict) -> str:
             {"role": "user",   "content": user},
         ],
     }
-    resp = requests.post(url, headers=headers, json=body, timeout=120)
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"]
+    if cfg["llm"].get("reasoning_effort"):    # gpt-oss models only
+        body["reasoning_effort"] = cfg["llm"]["reasoning_effort"]
+    return _post_with_retry(url, headers, body, cfg)
+
+
+def _post_with_retry(url: str, headers: dict, body: dict, cfg: dict) -> str:
+    """POST a chat completion. On HTTP 429 wait and retry instead of failing the batch."""
+    max_retries = cfg.get("options", {}).get("llm_max_retries", 5)
+    for attempt in range(max_retries + 1):
+        resp = requests.post(url, headers=headers, json=body, timeout=120)
+        if resp.status_code == 429 and attempt < max_retries:
+            wait = _retry_wait_seconds(resp, attempt)
+            log.warning(f"Rate limited (HTTP 429) — waiting {wait:.0f}s, retry {attempt + 1}/{max_retries}")
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        choice  = resp.json()["choices"][0]
+        content = choice["message"].get("content") or ""
+        if not content.strip() and attempt < max_retries:
+            log.warning(f"Empty LLM reply (finish_reason: {choice.get('finish_reason')}) — retry {attempt + 1}/{max_retries}")
+            continue
+        return content
+
+
+def _retry_wait_seconds(resp, attempt: int) -> float:
+    """Use the provider's Retry-After header if present, else exponential backoff. Capped at 120s."""
+    try:
+        return min(float(resp.headers.get("Retry-After")) + 1, 120)
+    except (TypeError, ValueError):
+        return min(5 * 2 ** attempt, 120)
 
 
 def _call_azure_openai(system: str, user: str, cfg: dict) -> str:
@@ -649,9 +685,7 @@ def _call_azure_openai(system: str, user: str, cfg: dict) -> str:
             {"role": "user",   "content": user},
         ],
     }
-    resp = requests.post(url, headers=headers, json=body, timeout=120)
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"]
+    return _post_with_retry(url, headers, body, cfg)
 
 
 def _call_bedrock(system: str, user: str, cfg: dict) -> str:
@@ -691,23 +725,53 @@ def _call_vertex_ai(system: str, user: str, cfg: dict) -> str:
     )
 
 
-def _parse_llm_response(raw: str, payload: list[dict]) -> list[dict]:
-    """Parse LLM JSON response. Returns list of result dicts keyed by field_api_name."""
+def _parse_llm_response(raw: str, batch_fields: list[dict]) -> dict[str, dict]:
+    """Parse LLM JSON response. Returns dict: field_key → result."""
     # Strip markdown fences if present
     cleaned = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
     try:
         results = json.loads(cleaned)
     except json.JSONDecodeError as e:
         log.warning(f"LLM response JSON parse error: {e} — marking all fields in batch as llm_error")
-        return [
-            {"field_api_name": p["field_api_name"],
-             "action": "llm_error",
-             "suggested_description": p.get("description", ""),
-             "reasoning": f"LLM returned unparseable JSON: {str(e)[:100]}"}
-            for p in payload
-        ]
-    # Index by field_api_name for fast lookup
-    return results if isinstance(results, list) else [results]
+        log.warning(f"Raw reply near error: {cleaned[max(e.pos - 200, 0):e.pos + 80]!r}")
+        return {field_key(f): _llm_error(f, f"LLM returned unparseable JSON: {str(e)[:100]}")
+                for f in batch_fields}
+    return _match_results(results if isinstance(results, list) else [results], batch_fields)
+
+
+def _match_results(results: list, batch_fields: list[dict]) -> dict[str, dict]:
+    """
+    Match LLM results back to the batch's fields. The LLM returns field_api_name
+    only, and the prompts ask for input order — so fields sharing a name
+    (e.g. Name on Account and Contact) are matched in the order they were sent.
+    """
+    pending: dict[str, list] = defaultdict(list)
+    for f in batch_fields:
+        pending[f.get("field_api_name")].append(f)
+
+    matched: dict[str, dict] = {}
+    for r in results:
+        if not isinstance(r, dict) or not pending.get(r.get("field_api_name")):
+            continue
+        f = pending[r["field_api_name"]].pop(0)
+        matched[field_key(f)] = {**r, "object": f.get("object")}
+
+    missing = [f for f in batch_fields if field_key(f) not in matched]
+    if missing:
+        log.warning(f"LLM response had no result for {len(missing)} field(s) — marked as llm_error")
+        for f in missing:
+            matched[field_key(f)] = _llm_error(f, "No result for this field in the LLM response")
+    return matched
+
+
+def _llm_error(f: dict, reason: str) -> dict:
+    return {
+        "object":                f.get("object"),
+        "field_api_name":        f.get("field_api_name"),
+        "action":                "llm_error",
+        "suggested_description": f.get("description", ""),
+        "reasoning":             reason,
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -717,7 +781,7 @@ def _parse_llm_response(raw: str, payload: list[dict]) -> list[dict]:
 def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
     """
     Process all fields through the LLM.
-    Returns dict: field_api_name → llm_result dict.
+    Returns dict: field_key (object.field_api_name) → llm_result dict.
     """
     batch_size = cfg.get("options", {}).get("llm_batch_size", 50)
     batches    = build_batches(fields_needing_llm, batch_size)
@@ -728,22 +792,12 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
         n      = len(batch["fields"])
         log.info(f"Batch {i}/{len(batches)}: {status} — {n} fields")
 
-        payload = build_llm_payload(batch, prompts)
         try:
-            results = call_llm(payload, batch, prompts, cfg)
-            for r in results:
-                name = r.get("field_api_name")
-                if name:
-                    all_results[name] = r
+            all_results.update(_run_batch(batch, prompts, cfg))
         except Exception as e:
             log.warning(f"Batch {i} LLM call failed: {e} — fields marked as llm_error")
             for f in batch["fields"]:
-                all_results[f["field_api_name"]] = {
-                    "field_api_name": f["field_api_name"],
-                    "action": "llm_error",
-                    "suggested_description": f.get("description", ""),
-                    "reasoning": str(e)[:200],
-                }
+                all_results[field_key(f)] = _llm_error(f, str(e)[:200])
         # Brief pause between batches to avoid rate limiting
         if i < len(batches):
             time.sleep(0.5)
@@ -752,22 +806,38 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
     return all_results
 
 
+def _run_batch(batch: dict, prompts: dict, cfg: dict) -> dict[str, dict]:
+    """Call the LLM for one batch. On HTTP 413 (request too large) split it in half and retry."""
+    try:
+        return call_llm(build_llm_payload(batch, prompts), batch, prompts, cfg)
+    except requests.HTTPError as e:
+        n = len(batch["fields"])
+        if e.response is None or e.response.status_code != 413 or n < 2:
+            raise
+        half = n // 2
+        log.warning(f"Request too large (HTTP 413) — splitting {n} fields into {half} + {n - half}")
+        results: dict[str, dict] = {}
+        for part in (batch["fields"][:half], batch["fields"][half:]):
+            results.update(_run_batch({**batch, "fields": part}, prompts, cfg))
+        return results
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. SAVE llm_response.json
 # ─────────────────────────────────────────────────────────────────────────────
 
-def save_llm_response(all_results: dict, dedup_map: dict[str, dict]) -> None:
+def save_llm_response(all_results: dict, duplicates: list[dict]) -> dict:
     """Save raw LLM output, expanding deduplicated results back to all fields."""
-    # Expand dedup: any field whose dedup_primary points to another field
-    # gets the same result as that field
+    # Expand dedup: each duplicate gets the same result as its primary field
     expanded = dict(all_results)
-    for f in dedup_map.values():
+    for f in duplicates:
         primary = f.get("dedup_primary")
         if primary and primary in expanded:
-            expanded[f["field_api_name"]] = {
+            expanded[field_key(f)] = {
                 **expanded[primary],
+                "object":         f.get("object"),
                 "field_api_name": f["field_api_name"],
-                "dedup_reuse": True,
+                "dedup_reuse":    True,
             }
 
     out = DATA_DIR / "llm_response.json"
@@ -811,8 +881,7 @@ def generate_review_queue(all_fields: list[dict], llm_results: dict) -> Path:
 
     # Merge LLM results into fields
     for f in all_fields:
-        name   = f.get("field_api_name", "")
-        result = llm_results.get(name, {})
+        result = llm_results.get(field_key(f), {})
         f["llm_action"]              = result.get("action", "")
         f["llm_suggested_description"] = result.get("suggested_description", f.get("description", ""))
         f["llm_reasoning"]           = result.get("reasoning", "")
@@ -960,9 +1029,12 @@ def update_cache(cache: dict, all_fields: list[dict], llm_results: dict) -> None
     for f in all_fields:
         if f["classifier_status"] == "SKIPPED":
             continue
-        key    = f"{f['object']}.{f['field_api_name']}"
+        key    = field_key(f)
         h      = description_hash(f.get("description", ""))
-        result = llm_results.get(f["field_api_name"], {})
+        result = llm_results.get(key, {})
+        if result.get("action") in ("llm_error", None):
+            cache.pop(key, None)    # never cache a failed call
+            continue
         cache[key] = {
             "hash":       h,
             "last_run":   datetime.utcnow().isoformat(),
@@ -1002,21 +1074,20 @@ def main() -> None:
     prompts = load_prompts()
 
     # 7. Sort + deduplicate
-    unique_fields, dedup_name_map = sort_and_deduplicate(to_llm)
+    unique_fields, duplicates = sort_and_deduplicate(to_llm)
 
     # 8–9. LLM + save response
-    all_llm_results: dict = {}
+    raw_results: dict = {}
     if unique_fields:
-        raw_results    = run_llm(unique_fields, prompts, cfg)
-        all_llm_results = save_llm_response(raw_results, dedup_name_map)
+        raw_results = run_llm(unique_fields, prompts, cfg)
     else:
         log.info("All fields served from cache — no LLM calls needed")
-        save_llm_response({}, {})
 
-    # Merge cached LLM results
+    # Merge cached LLM results before saving, so llm_response.json covers every field
     for f in already_cached:
         if f.get("llm_result"):
-            all_llm_results[f["field_api_name"]] = f["llm_result"]
+            raw_results[field_key(f)] = f["llm_result"]
+    all_llm_results = save_llm_response(raw_results, duplicates)
 
     # 10. Generate Excel
     generate_review_queue(classified, all_llm_results)
