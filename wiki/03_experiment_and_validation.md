@@ -143,7 +143,7 @@ The table below reflects the updated rule numbering. Rules 1–5 produce FLAGGED
 | R3 | Wrong Type Hint | Step 1 | FLAGGED |
 | R4 | Undefined Picklist | Step 1 | FLAGGED |
 | R5 | Stale or Placeholder | Step 1 | FLAGGED |
-| R6 | Too Long (>200 chars) | Step 2 | UNCERTAIN |
+| R6 | Too Long (>200 chars and lists its contents) | Step 2 | UNCERTAIN |
 | R7 | Jargon Without Context | Step 2 | UNCERTAIN |
 | R8 | Contradictory | Step 2 | UNCERTAIN |
 | R9 | Audience Mismatch | Step 2 | UNCERTAIN |
@@ -311,11 +311,11 @@ Model:
 Temperature setting:
 Number of iterations before Phase 1 Definition of Done was met:
 
-Classifier accuracy (training set):
-  Rules 1-5 (FLAGGED): % correctly classified
-  Rules 6-9 (UNCERTAIN): % correctly classified
-  Near-miss fields (REVIEWED): % correctly not triggered
-  SKIPPED fields: % correctly identified
+Classifier accuracy (training set): 279/288 (96.9%)
+  Rules 1-5 (FLAGGED): 73/78 (93.6%) correctly classified
+  Rules 6-9 (UNCERTAIN): 32/35 (91.4%) correctly classified
+  Near-miss fields (REVIEWED): 157/158 (99.4%) correctly not triggered
+  SKIPPED fields: 17/17 (100%) correctly identified
 
 LLM output quality (training set):
   Tab A — % approved without editing:
@@ -328,6 +328,35 @@ LLM output quality (training set):
 Prompt changes made during iteration:
 Notable failure patterns observed during training:
 ```
+
+### Classifier changes during training
+
+The classifier started at 119/288 (41.3%). The main changes:
+
+- **R6 redefined.** The fields labelled R6 were 210–246 characters long. The long fields labelled REVIEWED were 201–330 characters, so no length threshold could separate the two groups. R6 now fires only when a description is over 200 characters **and** lists what goes into the field (see wiki 02, Rule 6). This rule is provisional: it matches how the synthetic set was written and should be re-checked on more realistic data.
+- **R4 skips placeholder text**, so a picklist described as "TODO" or "TBD" is recorded as R5.
+- **Whole-word matching** for placeholder tokens and picklist values. "ask" had matched inside "task", "to do" inside "to document", and a picklist value "A" had matched every letter a.
+- **R7 allow-list** extended with currency codes and common trade terms (CHF, VIP, VP, SMB, IVR, clothing sizes). ID format codes such as `RA-XXXXXXXX` are no longer treated as jargon.
+- **New R3/R8 patterns** for Text, Date and Currency fields.
+- **21 labels corrected** where the label contradicted the rule definitions in wiki 02. Most were picklists whose description ignores the values (R4), or fields whose unexplained acronym had been hidden by the old length-only R6.
+
+### Known classifier limits
+
+These 9 training-set mismatches are accepted. Fixing them would mean tuning keyword rules to individual sentences. The LLM still receives each field and can correct the outcome.
+
+| Field | Expected | Classifier | Why it is accepted |
+|---|---|---|---|
+| Account.Partner_Agreement_Notes__c | UNCERTAIN/R6 | REVIEWED | Lists only three items after "including" |
+| Contact.Expedition_History__c | UNCERTAIN/R6 | REVIEWED | Long, but has no "including" list |
+| Contact.Preferred_Language__c | REVIEWED | UNCERTAIN/R6 | Long and has an "including" list, but the list is useful context |
+| Account.Annual_Order_Value__c | FLAGGED/R2 | REVIEWED | Echoes the field name with synonyms ("total value of orders for the year") |
+| Account.Strategic_Value__c | FLAGGED/R2 | REVIEWED | Echo plus a filler sentence; just over the 30-character limit |
+| Contact.Event_Attendance__c | UNCERTAIN/R8 | FLAGGED/R3 | Checkbox described as "the list of events": both R3 and R8 apply, and R3 fires first |
+| Case.Resolution_Date__c | FLAGGED/R3 | UNCERTAIN/R8 | Date field asking for a "date range and a brief summary": the R8 date-range pattern fires |
+| Contact.Certification_Expiry__c | FLAGGED/R3 | REVIEWED | Date field that also asks for a certification body name; no generic keyword |
+| Opportunity.Contract_Signed_Date__c | FLAGGED/R3 | REVIEWED | Date field that also asks for a contract reference number; no generic keyword |
+
+R3 (wrong type hint) and R8 (contradicts the configuration) overlap when a description conflicts with the field type. The classifier records whichever fires first, which is always R3 because Step 1 runs before Step 2.
 
 ---
 

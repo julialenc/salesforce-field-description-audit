@@ -284,8 +284,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
     },
     {
       "object": "Account",
@@ -709,8 +709,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Account",
@@ -731,8 +731,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "REVIEWED",
+      "_expected_rule": null
     },
     {
       "object": "Account",
@@ -769,8 +769,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R9"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Account",
@@ -802,8 +802,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
     },
     {
       "object": "Account",
@@ -818,8 +818,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Account",
@@ -850,8 +850,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Account",
@@ -1189,8 +1189,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
     },
     {
       "object": "Contact",
@@ -1200,8 +1200,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
     },
     {
       "object": "Contact",
@@ -1529,8 +1529,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Contact",
@@ -1621,8 +1621,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Contact",
@@ -1637,8 +1637,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Contact",
@@ -1653,8 +1653,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R7"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Contact",
@@ -1708,8 +1708,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R2"
     },
     {
       "object": "Contact",
@@ -1735,8 +1735,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Contact",
@@ -2336,8 +2336,8 @@
       "picklist_values": [],
       "formula": null,
       "related_object": "User",
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "UNCERTAIN",
+      "_expected_rule": "R7"
     },
     {
       "object": "Opportunity",
@@ -2643,8 +2643,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R9"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Opportunity",
@@ -2681,8 +2681,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Opportunity",
@@ -3146,7 +3146,7 @@
       "picklist_values": [],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
+      "_expected_status": "SKIPPED",
       "_expected_rule": null
     },
     {
@@ -3536,8 +3536,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "UNCERTAIN",
-      "_expected_rule": "R9"
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Case",
@@ -3574,8 +3574,8 @@
       ],
       "formula": null,
       "related_object": null,
-      "_expected_status": "REVIEWED",
-      "_expected_rule": null
+      "_expected_status": "FLAGGED",
+      "_expected_rule": "R4"
     },
     {
       "object": "Case",

@@ -31,7 +31,7 @@ import re
 import sys
 import time
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import openpyxl
@@ -104,6 +104,11 @@ TYPE_MISMATCH_PATTERNS = [
         ["enter the ", "enter a ", "type in", "free text", "free-text",
          "freeform", "any text"],
     ),
+    (
+        {"Text"},
+        ["select the ", "select from", "choose from", "use the dropdown",
+         "pick from", "tick ", "check this box", "check the box", "dropdown"],
+    ),
 ]
 
 AUDIENCE_MISMATCH_PATTERNS = [
@@ -126,6 +131,9 @@ ACRONYM_ALLOW_LIST = {
     "KPI", "SLA", "ROI", "MRR", "ARR", "CSV", "JSON", "XML", "SQL",
     "ISO", "UTC", "GMT", "ETA", "ETA", "FAQ", "UI", "UX", "SaaS",
     "POS", "EDI", "KYC", "AML", "GDPR", "SEPA", "IBAN", "BIC",
+    "CHF", "EUR", "USD", "GBP", "VIP", "VP", "SMB", "IVR",
+    # Clothing sizes
+    "XS", "XL", "XXL",
     # Date format placeholders — should never trigger R7
     "YYYY", "MM", "DD", "HH", "UTC", "ISO",
 }
@@ -262,7 +270,8 @@ def _classify_one(f: dict, include_standard: bool) -> dict:
         return {"status": "FLAGGED", "rule": "R3"}
 
     # R4 — Undefined picklist
-    if field_type in ("Picklist", "MultiselectPicklist") and picklist:
+    # Don't fire R4 if the text is a placeholder — let R5 handle it
+    if field_type in ("Picklist", "MultiselectPicklist") and picklist and not _has_placeholder(desc):
         if not _picklist_values_mentioned(desc, picklist):
             return {"status": "FLAGGED", "rule": "R4"}
 
@@ -272,8 +281,8 @@ def _classify_one(f: dict, include_standard: bool) -> dict:
 
     # ── STEP 2: R6–R9 → UNCERTAIN ────────────────────────────────────────────
 
-    # R6 — Too long (>200 chars)
-    if len(desc.strip()) > 200:
+    # R6 — Too long (>200 chars) and padded with a list of contents
+    if _is_padded_inventory(desc):
         return {"status": "UNCERTAIN", "rule": "R6"}
 
     # R7 — Jargon without context
@@ -330,24 +339,40 @@ def _has_type_mismatch(desc: str, field_type: str) -> bool:
     return False
 
 
+def _is_padded_inventory(desc: str) -> bool:
+    # Length alone is not a quality problem: R6 fires only when a long
+    # description also lists what goes into the field ("including a, b, c, d")
+    clean = desc.strip()
+    if len(clean) <= 200:
+        return False
+    m = re.search(r"\bincluding\b(.*)", clean, flags=re.IGNORECASE | re.DOTALL)
+    return bool(m) and m.group(1).count(",") >= 3
+
+
 def _picklist_values_mentioned(desc: str, picklist: list) -> bool:
     desc_lower = desc.lower()
-    return any(v.lower() in desc_lower for v in picklist)
+    # Whole words only: a value "A" must not match every letter a
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(v.lower()) + r"(?![a-z0-9])", desc_lower)
+               for v in picklist)
 
 
 def _has_placeholder(desc: str) -> bool:
     desc_lower = desc.lower().strip()
     for token in PLACEHOLDER_TOKENS:
-        if token in desc_lower:
+        # Whole words only: "ask" must not match inside "task", "to do" inside "to document"
+        if re.search(r"(?<![a-z0-9])" + re.escape(token.strip()) + r"(?![a-z0-9])", desc_lower):
             return True
     return False
 
 
 def _has_unexplained_acronym(desc: str) -> bool:
-    # Find all-caps tokens of 2-5 characters
-    tokens = re.findall(r"\b[A-Z]{2,5}\b", desc)
+    # Find all-caps tokens of 2-6 characters (6 catches e.g. MEDDIC)
+    tokens = re.findall(r"\b[A-Z]{2,6}\b", desc)
     for token in tokens:
         if token in ACRONYM_ALLOW_LIST:
+            continue
+        # Skip ID format codes like RA-XXXXXXXX or BUG-12345
+        if re.search(r"-" + re.escape(token) + r"\b|\b" + re.escape(token) + r"-", desc):
             continue
         # Check if immediately followed by parenthetical expansion
         pattern = re.escape(token) + r"\s*\("
@@ -363,7 +388,9 @@ def _has_config_contradiction(desc: str, field_type: str) -> bool:
     if field_type in ("Date", "DateTime"):
         patterns = ["date range", "from … to", "yyyy-mm-dd to yyyy",
                     "start and end date", "range of date", "list of date",
-                    "multiple date", "start date to end date"]
+                    "multiple date", "start date to end date",
+                    # A single date described as a list or as a yes/no flag
+                    "list of", "indicates whether"]
         return any(p in desc_lower for p in patterns)
 
     if field_type == "Email":
@@ -388,7 +415,14 @@ def _has_config_contradiction(desc: str, field_type: str) -> bool:
     if field_type in ("Number", "Currency", "Percent"):
         patterns = ["hyphenated range", "from-to", "x to y", "band of",
                     "stored as a range", "expressed as a range"]
-        return any(p in desc_lower for p in patterns)
+        if any(p in desc_lower for p in patterns):
+            return True
+        # A Currency field described as a count of things
+        return field_type == "Currency" and desc_lower.startswith("number of")
+
+    if field_type == "Text":
+        # A Text field described as a count of things
+        return desc_lower.startswith("number of")
 
     return False
 
@@ -405,7 +439,7 @@ def _has_audience_mismatch(desc: str) -> bool:
 def save_classified(fields: list[dict]) -> None:
     out = DATA_DIR / "sf_classified.json"
     with open(out, "w") as f:
-        json.dump({"classified_at": datetime.utcnow().isoformat(),
+        json.dump({"classified_at": datetime.now(timezone.utc).isoformat(),
                    "total": len(fields), "fields": fields}, f, indent=2)
     log.info(f"Saved sf_classified.json ({len(fields)} fields)")
 
@@ -843,7 +877,7 @@ def save_llm_response(all_results: dict, duplicates: list[dict]) -> dict:
     out = DATA_DIR / "llm_response.json"
     with open(out, "w") as fp:
         json.dump({
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "total": len(expanded),
             "results": list(expanded.values()),
         }, fp, indent=2)
@@ -875,7 +909,7 @@ THIN_BORDER  = Border(
 
 
 def generate_review_queue(all_fields: list[dict], llm_results: dict) -> Path:
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out_path  = DATA_DIR / f"review_queue_{timestamp}.xlsx"
     wb        = openpyxl.Workbook()
 
@@ -1037,7 +1071,7 @@ def update_cache(cache: dict, all_fields: list[dict], llm_results: dict) -> None
             continue
         cache[key] = {
             "hash":       h,
-            "last_run":   datetime.utcnow().isoformat(),
+            "last_run":   datetime.now(timezone.utc).isoformat(),
             "status":     f["classifier_status"],
             "rule":       f.get("rule_triggered"),
             "llm_result": result,

@@ -23,7 +23,7 @@ See wiki/02_how_it_works.md for full pipeline documentation.
 import json
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import openpyxl
@@ -145,7 +145,7 @@ def _read_sheet(ws) -> list[dict]:
             sys.exit(1)
 
     rows = []
-    for row in ws.iter_rows(min_row=2, values_only=True):
+    for excel_row, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
         if not any(row):
             continue
         def get(col_name: str) -> str:
@@ -157,6 +157,7 @@ def _read_sheet(ws) -> list[dict]:
 
         rows.append({
             "sheet":          ws.title,
+            "excel_row":      excel_row,
             "object":         get(COL_OBJECT),
             "field_api_name": get(COL_API_NAME),
             "current_desc":   get(COL_CURRENT_DESC),
@@ -177,19 +178,21 @@ def validate_decisions(rows: list[dict]) -> list[str]:
     Returns list of error messages. Empty list = valid.
     """
     errors = []
-    for i, row in enumerate(rows, start=2):  # row 2 onwards in Excel
-        name     = row.get("field_api_name", f"<row {i}>")
+    for row in rows:
+        # Point at the sheet and Excel row, e.g. "Tab B — UNCERTAIN row 12"
+        i        = f"{row.get('sheet', '')} row {row.get('excel_row', '?')}"
+        name     = f"{row.get('object', '')}.{row.get('field_api_name', '')}"
         decision = row.get("decision", "")
 
         # Every row must have a decision
         if not decision:
-            errors.append(f"Row {i} ({name}): Decision is missing.")
+            errors.append(f"{i} ({name}): Decision is missing.")
             continue
 
         # Decision must be one of the valid values
         if decision not in VALID_DECISIONS:
             errors.append(
-                f"Row {i} ({name}): Invalid decision '{decision}'. "
+                f"{i} ({name}): Invalid decision '{decision}'. "
                 f"Must be one of: {', '.join(sorted(VALID_DECISIONS))}"
             )
             continue
@@ -198,10 +201,10 @@ def validate_decisions(rows: list[dict]) -> list[str]:
         if decision == "Edit":
             admin_ver = row.get("admin_version", "").strip()
             if not admin_ver:
-                errors.append(f"Row {i} ({name}): Decision is 'Edit' but Admin_Version is empty.")
+                errors.append(f"{i} ({name}): Decision is 'Edit' but Admin_Version is empty.")
             elif len(admin_ver) > MAX_DESC_LENGTH:
                 errors.append(
-                    f"Row {i} ({name}): Admin_Version is {len(admin_ver)} characters "
+                    f"{i} ({name}): Admin_Version is {len(admin_ver)} characters "
                     f"(maximum is {MAX_DESC_LENGTH})."
                 )
 
@@ -210,7 +213,7 @@ def validate_decisions(rows: list[dict]) -> list[str]:
             suggestion = row.get("llm_suggestion", "").strip()
             if len(suggestion) > MAX_DESC_LENGTH:
                 errors.append(
-                    f"Row {i} ({name}): LLM_Suggestion is {len(suggestion)} characters "
+                    f"{i} ({name}): LLM_Suggestion is {len(suggestion)} characters "
                     f"(maximum is {MAX_DESC_LENGTH}). Change decision to Edit and provide a shorter version."
                 )
 
@@ -276,7 +279,7 @@ def _log_record(row: dict, status: str, message: str, new_desc: str = "") -> dic
         "new_description": new_desc,
         "write_status":    status,
         "message":         message,
-        "timestamp":       datetime.utcnow().isoformat(),
+        "timestamp":       datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -343,7 +346,7 @@ STATUS_FILL = {
 
 
 def write_log(log_records: list[dict]) -> Path:
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out_path  = DATA_DIR / f"write_log_{timestamp}.xlsx"
     wb        = openpyxl.Workbook()
     ws        = wb.active

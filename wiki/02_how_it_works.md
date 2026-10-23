@@ -144,7 +144,7 @@ These rules are only evaluated if the field has passed all of Step 1. They repre
 
 |Rule|Name|What it detects|
 |-|-|-|
-|R6|Too Long|Description exceeds 200 characters — not necessarily wrong, but a candidate for shortening to improve token efficiency for Agentforce|
+|R6|Too Long|Description exceeds 200 characters and pads it with a list of what goes into the field — a candidate for shortening to improve token efficiency for Agentforce|
 |R7|Jargon Without Context|Description uses unexplained internal acronyms or terms|
 |R8|Contradictory|Description conflicts with something else observable in the field configuration|
 |R9|Audience Mismatch|Description is written for end users rather than systems or developers|
@@ -352,9 +352,11 @@ Examples: *"TBD"*, *"to be confirmed"*, *"ask John"*, *"deprecated"*, *"no longe
 
 **Step 2 → UNCERTAIN**
 
-The description exceeds 200 characters.
+The description exceeds 200 characters **and** lists what goes into the field — in the classifier, the word "including" followed by four or more items (e.g. *"Free-text field storing negotiation notes, including discount requests, justification, approval decisions, counter-proposals, and final terms."*).
 
-A description above this threshold is not necessarily wrong. It may be accurate, specific, and complete. However, Agentforce reads field descriptions at runtime as part of its context window. Shorter descriptions reduce token consumption and keep the metadata layer lean. The LLM is asked to evaluate whether the description can be meaningfully shortened without losing accuracy — not to replace it unconditionally.
+Length alone is not a quality problem. A description of 250 characters that says what the field stores, who fills it in and what it drives is doing its job. The pattern R6 targets is the inventory: a list of everything users type into the field. That belongs in Help Text or process documentation, not in the description an agent reads on every call.
+
+A description that fires R6 is not necessarily wrong. It may be accurate, specific, and complete. However, Agentforce reads field descriptions at runtime as part of its context window. Shorter descriptions reduce token consumption and keep the metadata layer lean. The LLM is asked to evaluate whether the description can be meaningfully shortened without losing accuracy — not to replace it unconditionally.
 
 Note: Salesforce enforces a hard limit of 255 characters for any field description. A description between 200 and 255 characters is technically valid but is a candidate for review under this rule.
 
@@ -377,6 +379,8 @@ Example: *"Used by the SFMC sync for BU segmentation"*. An AI agent — or a dev
 The description conflicts with something else observable in the field's metadata configuration.
 
 Examples: a field described as *"Always required at case creation"* that is not marked as required in Salesforce. A Date field described as storing a date range. An Email field described as storing a comma-separated list of addresses. These contradictions are more subtle than a Wrong Type Hint (Rule 3) — the description does not obviously misname the type, but it implies a behaviour or structure the field cannot support.
+
+In practice the line between Rule 3 and Rule 8 is blurred: a Checkbox described as *"the list of events attended"* both misnames the type and implies a structure the field cannot hold. When both could apply, Rule 3 fires first and the field is recorded as FLAGGED / R3.
 
 ---
 
