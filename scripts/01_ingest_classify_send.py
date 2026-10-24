@@ -57,6 +57,10 @@ DATA_DIR      = ROOT / "data"
 PROMPTS_DIR   = ROOT / "prompts"
 CACHE_PATH    = DATA_DIR / "description_cache.json"
 
+# ── token usage, summed over every LLM call in this run ──────────────────────
+
+TOKEN_USAGE = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "reasoning_tokens": 0}
+
 # ── classifier constants ──────────────────────────────────────────────────────
 
 SYSTEM_FIELD_NAMES = {
@@ -466,11 +470,28 @@ def field_key(f: dict) -> str:
     return f"{f.get('object', '')}.{f.get('field_api_name', '')}"
 
 
-def description_hash(desc: str) -> str:
-    return hashlib.md5((desc or "").strip().encode()).hexdigest()
+def run_fingerprint(prompts: dict, cfg: dict) -> str:
+    """
+    Hash of everything outside the field that shapes the LLM answer: all prompt
+    files plus provider, model and reasoning_effort. Any change invalidates the cache.
+    """
+    llm   = cfg.get("llm", {})
+    parts = [prompts[k] for k in PROMPT_FILES] + [
+        str(llm.get("provider", "openai")),
+        str(llm.get("model", "")),
+        str(llm.get("reasoning_effort", "")),
+    ]
+    return hashlib.md5("".join(parts).encode()).hexdigest()
 
 
-def apply_cache(fields: list[dict], cache: dict) -> tuple[list[dict], list[dict]]:
+def cache_hash(f: dict, fingerprint: str) -> str:
+    """Cache key for one field: description, route (status + rule) and run fingerprint."""
+    parts = [(f.get("description") or "").strip(), f["classifier_status"],
+             str(f.get("rule_triggered") or ""), fingerprint]
+    return hashlib.md5("".join(parts).encode()).hexdigest()
+
+
+def apply_cache(fields: list[dict], cache: dict, fingerprint: str) -> tuple[list[dict], list[dict]]:
     """Split fields into (needs_llm, cached). Cached fields already have llm_result."""
     needs_llm, cached = [], []
     skipped_count = 0
@@ -479,7 +500,7 @@ def apply_cache(fields: list[dict], cache: dict) -> tuple[list[dict], list[dict]
             cached.append(f)
             continue
         key = field_key(f)
-        h   = description_hash(f.get("description", ""))
+        h   = cache_hash(f, fingerprint)
         entry = cache.get(key, {})
         # A cached llm_error is not a result — send the field again
         if entry.get("hash") == h and (entry.get("llm_result") or {}).get("action") not in ("llm_error", None):
@@ -498,16 +519,18 @@ def apply_cache(fields: list[dict], cache: dict) -> tuple[list[dict], list[dict]
 # 6. PROMPTS
 # ─────────────────────────────────────────────────────────────────────────────
 
+PROMPT_FILES = {
+    "system":    "system_prompt.md",
+    "examples":  "golden_examples.json",
+    "prompt_a":  "prompt_a_flagged_fields.md",
+    "prompt_b":  "prompt_b_uncertain_fields.md",
+    "prompt_c":  "prompt_c_reviewed_fields.md",
+}
+
+
 def load_prompts() -> dict:
-    files = {
-        "system":    "system_prompt.md",
-        "examples":  "golden_examples.json",
-        "prompt_a":  "prompt_a_flagged_fields.md",
-        "prompt_b":  "prompt_b_uncertain_fields.md",
-        "prompt_c":  "prompt_c_reviewed_fields.md",
-    }
     prompts = {}
-    for key, fname in files.items():
+    for key, fname in PROMPT_FILES.items():
         path = PROMPTS_DIR / fname
         if not path.exists():
             log.error(f"Prompt file missing: {path}")
@@ -684,12 +707,52 @@ def _post_with_retry(url: str, headers: dict, body: dict, cfg: dict) -> str:
             time.sleep(wait)
             continue
         resp.raise_for_status()
-        choice  = resp.json()["choices"][0]
+        data    = resp.json()
+        _record_usage(data.get("usage") or {})
+        choice  = data["choices"][0]
         content = choice["message"].get("content") or ""
         if not content.strip() and attempt < max_retries:
             log.warning(f"Empty LLM reply (finish_reason: {choice.get('finish_reason')}) — retry {attempt + 1}/{max_retries}")
             continue
         return content
+
+
+def _record_usage(usage: dict) -> None:
+    """Add one call's token usage to the run totals. Reasoning tokens are part of completion_tokens."""
+    p = usage.get("prompt_tokens") or 0
+    c = usage.get("completion_tokens") or 0
+    r = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0
+    TOKEN_USAGE["calls"]             += 1
+    TOKEN_USAGE["prompt_tokens"]     += p
+    TOKEN_USAGE["completion_tokens"] += c
+    TOKEN_USAGE["reasoning_tokens"]  += r
+    log.info(f"Tokens: {p} in / {c} out" + (f" ({r} reasoning)" if r else ""))
+
+
+def usage_summary(cfg: dict, fields_sent: int) -> dict:
+    """Run totals plus estimated cost from the per-1M-token prices in config.yml (if set)."""
+    llm     = cfg.get("llm", {})
+    summary = {**TOKEN_USAGE, "fields_sent": fields_sent,
+               "provider": llm.get("provider", "openai"), "model": llm.get("model", "")}
+    p_in, p_out = llm.get("price_input_per_1m"), llm.get("price_output_per_1m")
+    if p_in is not None and p_out is not None:
+        cost = (TOKEN_USAGE["prompt_tokens"] * p_in + TOKEN_USAGE["completion_tokens"] * p_out) / 1_000_000
+        summary["estimated_cost"]  = round(cost, 4)
+        summary["cost_per_1000_fields"] = round(cost / fields_sent * 1000, 4) if fields_sent else None
+        summary["currency"] = llm.get("price_currency", "CHF")
+    return summary
+
+
+def log_usage_summary(summary: dict) -> None:
+    log.info(f"Run summary: {summary['fields_sent']} fields, {summary['calls']} LLM calls, "
+             f"{summary['prompt_tokens']} tokens in / {summary['completion_tokens']} out "
+             f"({summary['reasoning_tokens']} reasoning)")
+    if "estimated_cost" in summary:
+        per_1000 = (f" ({summary['cost_per_1000_fields']} {summary['currency']} per 1,000 fields)"
+                    if summary["cost_per_1000_fields"] is not None else "")
+        log.info(f"Estimated cost: {summary['estimated_cost']:.4f} {summary['currency']}{per_1000}")
+    else:
+        log.info("Estimated cost: not computed — set llm.price_input_per_1m and llm.price_output_per_1m in config.yml")
 
 
 def _retry_wait_seconds(resp, attempt: int) -> float:
@@ -821,6 +884,14 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
     batches    = build_batches(fields_needing_llm, batch_size)
     all_results: dict[str, dict] = {}
 
+    llm = cfg.get("llm", {})
+    log.info(f"About to send {len(fields_needing_llm)} fields in {len(batches)} batches "
+             f"(batch size {batch_size}) to {llm.get('provider', 'openai')} / {llm.get('model', '')}:")
+    for status in ROUTE_MAP:
+        route = [b for b in batches if b["status"] == status]
+        if route:
+            log.info(f"  {status:<9}  {sum(len(b['fields']) for b in route):>4} fields  {len(route):>3} batches")
+
     for i, batch in enumerate(batches, 1):
         status = batch["status"]
         n      = len(batch["fields"])
@@ -860,7 +931,7 @@ def _run_batch(batch: dict, prompts: dict, cfg: dict) -> dict[str, dict]:
 # 10. SAVE llm_response.json
 # ─────────────────────────────────────────────────────────────────────────────
 
-def save_llm_response(all_results: dict, duplicates: list[dict]) -> dict:
+def save_llm_response(all_results: dict, duplicates: list[dict], usage: dict) -> dict:
     """Save raw LLM output, expanding deduplicated results back to all fields."""
     # Expand dedup: each duplicate gets the same result as its primary field
     expanded = dict(all_results)
@@ -879,6 +950,7 @@ def save_llm_response(all_results: dict, duplicates: list[dict]) -> dict:
         json.dump({
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "total": len(expanded),
+            "usage": usage,
             "results": list(expanded.values()),
         }, fp, indent=2)
     log.info(f"Saved llm_response.json ({len(expanded)} results)")
@@ -1059,12 +1131,12 @@ def _write_header_row(ws, headers: list[str]) -> None:
 # 12. UPDATE CACHE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def update_cache(cache: dict, all_fields: list[dict], llm_results: dict) -> None:
+def update_cache(cache: dict, all_fields: list[dict], llm_results: dict, fingerprint: str) -> None:
     for f in all_fields:
         if f["classifier_status"] == "SKIPPED":
             continue
         key    = field_key(f)
-        h      = description_hash(f.get("description", ""))
+        h      = cache_hash(f, fingerprint)
         result = llm_results.get(key, {})
         if result.get("action") in ("llm_error", None):
             cache.pop(key, None)    # never cache a failed call
@@ -1100,12 +1172,13 @@ def main() -> None:
     # 4. Save sf_classified.json
     save_classified(classified)
 
-    # 5. Cache
-    cache    = load_cache()
-    to_llm, already_cached = apply_cache(classified, cache)
+    # 5. Prompts (loaded first: they are part of the cache key)
+    prompts     = load_prompts()
+    fingerprint = run_fingerprint(prompts, cfg)
 
-    # 6. Prompts
-    prompts = load_prompts()
+    # 6. Cache
+    cache    = load_cache()
+    to_llm, already_cached = apply_cache(classified, cache, fingerprint)
 
     # 7. Sort + deduplicate
     unique_fields, duplicates = sort_and_deduplicate(to_llm)
@@ -1116,19 +1189,21 @@ def main() -> None:
         raw_results = run_llm(unique_fields, prompts, cfg)
     else:
         log.info("All fields served from cache — no LLM calls needed")
+    usage = usage_summary(cfg, len(unique_fields))
 
     # Merge cached LLM results before saving, so llm_response.json covers every field
     for f in already_cached:
         if f.get("llm_result"):
             raw_results[field_key(f)] = f["llm_result"]
-    all_llm_results = save_llm_response(raw_results, duplicates)
+    all_llm_results = save_llm_response(raw_results, duplicates, usage)
 
     # 10. Generate Excel
     generate_review_queue(classified, all_llm_results)
 
     # 11. Update cache
-    update_cache(cache, classified, all_llm_results)
+    update_cache(cache, classified, all_llm_results, fingerprint)
 
+    log_usage_summary(usage)
     log.info("=" * 60)
     log.info("Script 1 complete.")
     log.info("=" * 60)

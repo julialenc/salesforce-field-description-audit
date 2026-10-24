@@ -100,6 +100,13 @@ llm:
   temperature: 0.2
   # reasoning_effort: low   # gpt-oss models only: low | medium | high
 
+  # Optional prices per 1M tokens, used only for the cost estimate in the
+  # run summary and in llm_response.json. Take them from your provider's
+  # price list. Leave them out (or 0 for a free tier) to skip the estimate.
+  # price_input_per_1m: 0.15
+  # price_output_per_1m: 0.60
+  # price_currency: CHF
+
 salesforce:
   # Used in production / MVP mode only
   # Keep all values local in config.yml only
