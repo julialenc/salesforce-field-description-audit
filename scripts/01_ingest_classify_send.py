@@ -767,8 +767,7 @@ def _call_azure_openai(system: str, user: str, cfg: dict) -> str:
     endpoint   = cfg["llm"].get("endpoint", "").rstrip("/")
     model      = cfg["llm"].get("model", "gpt-4o")
     api_key    = cfg["llm"].get("api_key", "")
-    api_version = cfg["llm"].get("api_version", "2024-02-01")
-    temp       = cfg["llm"].get("temperature", 0.2)
+    api_version = cfg["llm"].get("api_version", "2025-04-01-preview")
 
     url = f"{endpoint}/openai/deployments/{model}/chat/completions?api-version={api_version}"
     headers = {
@@ -776,12 +775,16 @@ def _call_azure_openai(system: str, user: str, cfg: dict) -> str:
         "api-key": api_key,
     }
     body = {
-        "temperature": temp,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user",   "content": user},
         ],
     }
+    # Reasoning models (gpt-5 family) reject temperature: leave it out of config.yml for them
+    if "temperature" in cfg["llm"]:
+        body["temperature"] = cfg["llm"]["temperature"]
+    if cfg["llm"].get("reasoning_effort"):
+        body["reasoning_effort"] = cfg["llm"]["reasoning_effort"]
     return _post_with_retry(url, headers, body, cfg)
 
 

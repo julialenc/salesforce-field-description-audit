@@ -86,19 +86,23 @@ llm:
   # openai (Groq)   -> https://api.groq.com/openai
   # openai (OpenAI) -> https://api.openai.com
   # azure_openai    -> https://YOUR-RESOURCE.openai.azure.com/
+  # api_version: "2025-04-01-preview"   # azure_openai only; default supports gpt-5
   endpoint: https://api.groq.com/openai
 
   # Groq: an open-weight model from Groq's model list, e.g.
   #       openai/gpt-oss-120b (names change — check the list)
-  # Azure: your deployment name, e.g. gpt-4o-mini
+  # Azure: your deployment name, e.g. gpt-5.4-mini. Older models (gpt-4o,
+  #        gpt-4.1) are closed to new Azure subscriptions — check the
+  #        Azure model retirement schedule before choosing
   model: openai/gpt-oss-120b
 
   # Keep local in config.yml only — never commit
   api_key: YOUR_API_KEY_HERE
 
   # Optional generation controls
-  temperature: 0.2
-  # reasoning_effort: low   # gpt-oss models only: low | medium | high
+  # temperature: 0.2       # Groq default 0.2. Leave it out on Azure for gpt-5 models: they reject it
+  # reasoning_effort: low   # reasoning models only (gpt-oss, gpt-5 family): low | medium | high.
+  #                         # Reasoning tokens bill as output, so low keeps cost down
 
   # Optional prices per 1M tokens, used only for the cost estimate in the
   # run summary and in llm_response.json. Take them from your provider's
