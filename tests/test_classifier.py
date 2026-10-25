@@ -61,6 +61,11 @@ CASES = [
     ("R3 text field described as dropdown", "Contact_Time__c", "Text", "Select the time window when this contact prefers to be called: Morning or Evening.", [], "FLAGGED", "R3"),
     ("R8 date field holds a list",   "Deadline__c",  "Date",     "Stores the list of deadlines applicable to this case for response and resolution.", [], "UNCERTAIN", "R8"),
     ("R8 currency field holds a count", "Units__c",  "Currency", "Number of product units expected in this order, as estimated by the sales rep.", [], "UNCERTAIN", "R8"),
+    ("fix 8: acronym after its expansion", "Score__c", "Number", "Net Promoter Score (NPS) from the quarterly survey, on a scale of -100 to 100.", [], "REVIEWED", None),
+    ("fix 8: expansion spelled by word prefixes", "CSAT__c", "Number", "Customer Satisfaction (CSAT) score submitted after the case is closed, from 1 to 5.", [], "REVIEWED", None),
+    ("fix 8: expansion with commas",  "Segment__c", "Text", "Segment from the Recency, Frequency, Monetary (RFM) model, refreshed after each order.", [], "REVIEWED", None),
+    ("fix 8: picklist values are not jargon", "Data_Residency__c", "Picklist", "Region where this record's data is stored for compliance. Values: EU, US, APAC.", ["EU", "US", "APAC"], "REVIEWED", None),
+    ("R7 acronym in brackets but never expanded", "Score__c", "Number", "Score from the quarterly risk model (QRT), refreshed nightly for every account.", [], "UNCERTAIN", "R7"),
     ("fix 5: picklist placeholder reaches R5", "Data_Residency__c", "Picklist", "TODO - confirm with legal before enabling.", ["EU", "US", "APAC"], "FLAGGED", "R5"),
 ]
 

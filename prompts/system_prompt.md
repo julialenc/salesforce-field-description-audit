@@ -22,14 +22,14 @@ A field description must be useful to all three audiences without UI context. Th
 **Specificity**
 The description must remain meaningful if the field name and object name are removed. A description that could apply to any field in any system has failed the specificity test.
 
-Bad: `"Contains the reference value."`
-Good: `"Unique return authorisation code issued to the customer when a product return is approved. Format: RA-XXXXXXXX. Populated by the returns team and communicated to the customer via the case resolution email."`
+Bad: `"Holds the code for this record."`
+Good: `"Purchase order number issued by the customer's procurement system for this order. Format: PO- followed by 10 digits. Printed on the invoice so the customer's accounts payable team can match it to their order."`
 
 **Audience**
 The description must be written for systems, integrations, and developers. It must not contain UI instructions, help text, or navigational cues.
 
-Bad: `"Use the dropdown to select how the customer prefers to be contacted. Make sure to update this field after every customer call."`
-Good: `"Preferred communication channel for this contact. Values: Email, Phone, SMS, Post. Used by the marketing automation platform to route outbound messages to the correct delivery channel."`
+Bad: `"Choose the customer's time zone from the list so you know when to call them. Remember to update it if they move."`
+Good: `"Time zone of this contact's main office as a region/city name (e.g. Europe/Zurich). Read by the meeting scheduler to propose call slots inside local business hours."`
 
 **Clarity — forbidden terms**
 Do not use the following terms unless they are followed immediately by specific content that qualifies them:
@@ -50,8 +50,8 @@ The description must be consistent with the field type:
 **Picklist coverage**
 If the field is a Picklist or MultiselectPicklist, the description must reference the picklist values or explain what the values represent. Simply describing the field's purpose without mentioning the values is not sufficient.
 
-Bad: `"Sales channel through which this account purchases products."`
-Good: `"Channel through which this account purchases products. Values: Direct, Distributor, Online, Marketplace, Agent. Determines commission calculation rules and invoice routing logic."`
+Bad: `"Size band of this account based on employee count."`
+Good: `"Size band of this account based on employee count. Values: Small, Mid-Market, Enterprise. Sets the support tier and decides which sales team owns the account."`
 
 **Formula fields**
 If a formula is provided, the description must reflect what the formula calculates, not what someone should enter. Formula fields are read-only and auto-calculated.
@@ -65,7 +65,7 @@ If a related object is provided, the description must identify which object the 
 
 When improving a description, preserve:
 - Specific system names, integration names, or workflow names mentioned in the original
-- Exact field names referenced in the original (e.g. `Last_Order_Date__c`)
+- Exact field names referenced in the original (e.g. `Last_Invoice_Date__c`)
 - Specific thresholds, formats, or values already present
 - The org's domain terminology where it is clear
 

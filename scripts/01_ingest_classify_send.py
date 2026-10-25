@@ -290,7 +290,7 @@ def _classify_one(f: dict, include_standard: bool) -> dict:
         return {"status": "UNCERTAIN", "rule": "R6"}
 
     # R7 — Jargon without context
-    if _has_unexplained_acronym(desc):
+    if _has_unexplained_acronym(desc, picklist):
         return {"status": "UNCERTAIN", "rule": "R7"}
 
     # R8 — Contradictory config
@@ -369,11 +369,14 @@ def _has_placeholder(desc: str) -> bool:
     return False
 
 
-def _has_unexplained_acronym(desc: str) -> bool:
+def _has_unexplained_acronym(desc: str, picklist: list | None = None) -> bool:
     # Find all-caps tokens of 2-6 characters (6 catches e.g. MEDDIC)
     tokens = re.findall(r"\b[A-Z]{2,6}\b", desc)
     for token in tokens:
         if token in ACRONYM_ALLOW_LIST:
+            continue
+        # A picklist value is defined by the field's own metadata ("Values: EU, US, APAC")
+        if picklist and token in picklist:
             continue
         # Skip ID format codes like RA-XXXXXXXX or BUG-12345
         if re.search(r"-" + re.escape(token) + r"\b|\b" + re.escape(token) + r"-", desc):
@@ -382,8 +385,34 @@ def _has_unexplained_acronym(desc: str) -> bool:
         pattern = re.escape(token) + r"\s*\("
         if re.search(pattern, desc):
             continue
+        # Or expanded first, with the acronym in brackets: "Net Promoter Score (NPS)"
+        if _expanded_before(token, desc):
+            continue
         return True
     return False
+
+
+def _expanded_before(token: str, desc: str) -> bool:
+    # True if the words just before "(TOKEN)" spell it: each word gives a prefix
+    # of itself ("Customer Satisfaction (CSAT)" = C + SAT); minor words may be skipped
+    m = re.search(r"([A-Za-z][A-Za-z\s\-,]*?)\s*\(\s*" + re.escape(token) + r"\s*\)", desc)
+    if not m:
+        return False
+    words = [w for w in re.split(r"[\s\-,]+", m.group(1).strip()) if w][-(len(token) + 3):]
+    minor = {"of", "and", "the", "for", "to", "in", "on", "a", "&"}
+
+    def spells(letters: str, ws: list[str]) -> bool:
+        if not letters:
+            return not ws          # the expansion must end right before the bracket
+        if not ws:
+            return False
+        word = ws[0].lower()
+        for n in range(min(len(word), len(letters)), 0, -1):
+            if word[:n] == letters[:n] and spells(letters[n:], ws[1:]):
+                return True
+        return word in minor and spells(letters, ws[1:])
+
+    return any(spells(token.lower(), words[i:]) for i in range(len(words)))
 
 
 def _has_config_contradiction(desc: str, field_type: str) -> bool:
@@ -470,28 +499,30 @@ def field_key(f: dict) -> str:
     return f"{f.get('object', '')}.{f.get('field_api_name', '')}"
 
 
-def run_fingerprint(prompts: dict, cfg: dict) -> str:
+def run_fingerprint(prompts: dict, cfg: dict) -> dict[str, str]:
     """
-    Hash of everything outside the field that shapes the LLM answer: all prompt
-    files plus provider, model and reasoning_effort. Any change invalidates the cache.
+    Hash, per route, of everything outside the field that shapes the LLM answer:
+    the system prompt, the golden examples and that route's prompt file, plus
+    provider, model and reasoning_effort. Editing Prompt B re-sends only the
+    UNCERTAIN fields; editing the system prompt or examples re-sends all of them.
     """
-    llm   = cfg.get("llm", {})
-    parts = [prompts[k] for k in PROMPT_FILES] + [
-        str(llm.get("provider", "openai")),
-        str(llm.get("model", "")),
-        str(llm.get("reasoning_effort", "")),
-    ]
-    return hashlib.md5("".join(parts).encode()).hexdigest()
+    llm    = cfg.get("llm", {})
+    shared = [prompts["system"], prompts["examples"],
+              str(llm.get("provider", "openai")),
+              str(llm.get("model", "")),
+              str(llm.get("reasoning_effort", ""))]
+    return {status: hashlib.md5("".join(shared + [prompts[route_key]]).encode()).hexdigest()
+            for status, route_key in ROUTE_MAP.items()}
 
 
-def cache_hash(f: dict, fingerprint: str) -> str:
-    """Cache key for one field: description, route (status + rule) and run fingerprint."""
+def cache_hash(f: dict, fingerprint: dict[str, str]) -> str:
+    """Cache key for one field: description, route (status + rule) and that route's fingerprint."""
     parts = [(f.get("description") or "").strip(), f["classifier_status"],
-             str(f.get("rule_triggered") or ""), fingerprint]
+             str(f.get("rule_triggered") or ""), fingerprint.get(f["classifier_status"], "")]
     return hashlib.md5("".join(parts).encode()).hexdigest()
 
 
-def apply_cache(fields: list[dict], cache: dict, fingerprint: str) -> tuple[list[dict], list[dict]]:
+def apply_cache(fields: list[dict], cache: dict, fingerprint: dict[str, str]) -> tuple[list[dict], list[dict]]:
     """Split fields into (needs_llm, cached). Cached fields already have llm_result."""
     needs_llm, cached = [], []
     skipped_count = 0
@@ -1134,7 +1165,7 @@ def _write_header_row(ws, headers: list[str]) -> None:
 # 12. UPDATE CACHE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def update_cache(cache: dict, all_fields: list[dict], llm_results: dict, fingerprint: str) -> None:
+def update_cache(cache: dict, all_fields: list[dict], llm_results: dict, fingerprint: dict[str, str]) -> None:
     for f in all_fields:
         if f["classifier_status"] == "SKIPPED":
             continue

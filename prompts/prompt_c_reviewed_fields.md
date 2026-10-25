@@ -38,7 +38,7 @@ Examples that warrant a rewrite:
 - `"Stores relevant data for the integration."` — which integration? what data?
 
 Examples that do NOT warrant a rewrite despite sounding vague:
-- `"Current operational status of this account in the customer lifecycle. Values: Prospect, Active, On Hold, Suspended, Churned, Reactivated. Controls order acceptance rules and automated outreach eligibility."` — specific enough with values and consequences
+- `"Current hold state of this account's orders. Values: None, Credit Hold, Compliance Hold, Customer Request. Any value other than None stops order release in the ERP."` — specific enough with values and consequences
 
 **Missing critical context the metadata provides**
 The description ignores important information visible in the field metadata — such as picklist values that are present but not mentioned, a formula that explains the calculation, or a related object that is the core purpose of the field.
@@ -52,7 +52,7 @@ The description passes the classifier because it is long enough and contains no 
 
 Preserve everything specific that is already present:
 - System names, workflow names, integration names
-- Field name references (e.g. `Last_Order_Date__c`)
+- Field name references (e.g. `Last_Invoice_Date__c`)
 - Thresholds, formats, and values already stated
 - Picklist values if already listed
 
@@ -77,16 +77,16 @@ Return a JSON array in the same order as the input.
 ```json
 [
   {
-    "field_api_name": "Account_Status__c",
+    "field_api_name": "Order_Hold_Status__c",
     "action": "keep",
-    "suggested_description": "Current operational status of this account in the customer lifecycle. Values: Prospect, Active, On Hold, Suspended, Churned, Reactivated. Controls order acceptance rules and automated outreach eligibility.",
+    "suggested_description": "Current hold state of this account's orders. Values: None, Credit Hold, Compliance Hold, Customer Request. Any value other than None stops order release in the ERP.",
     "reasoning": "Description is specific, lists all values, and explains the consequences. No improvement needed."
   },
   {
-    "field_api_name": "Flag_Field__c",
+    "field_api_name": "Net_Margin_Pct__c",
     "action": "rewrite",
-    "suggested_description": "Internal flag used by the sales operations team to mark accounts requiring manual review before the next forecast cycle. Set manually by the sales ops analyst. Cleared automatically at the start of each quarter.",
-    "reasoning": "Original description 'Used by the team for tracking purposes' is too vague to be actionable — rewrote using field name context and inferred usage."
+    "suggested_description": "Net margin of this order as a percentage, calculated by formula as (Amount__c - Cost__c) / Amount__c. Read-only; recalculated whenever either amount changes.",
+    "reasoning": "Original 'Margin figure kept for internal purposes and analysis.' named no calculation; rewrote from the formula provided in the metadata."
   }
 ]
 ```

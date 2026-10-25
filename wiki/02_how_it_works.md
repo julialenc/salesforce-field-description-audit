@@ -202,7 +202,7 @@ The input for this step is `data/sf_classified.json` — the file produced by th
 Before any fields are sent to the LLM, Script 1 assembles a reusable instruction layer for the session:
 
 * `system_prompt.md` — the universal definition of a good field description, including the expected tone, length, format, and quality criteria
-* `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding
+* `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding. The examples are invented fields that appear in neither synthetic dataset, so the model can never copy the answer for a field it is processing
 
 This shared context is injected once per session. For each batch, the script then adds the relevant task instruction — `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` or `prompt_c_reviewed_fields.md` — together with the field data for that batch.
 
@@ -215,7 +215,9 @@ Routing logic:
 |**REVIEWED**|Sent to the LLM with `prompt_c_reviewed_fields.md` — the LLM keeps the description unless it is clearly inadequate, in which case it proposes a rewrite|
 |**SKIPPED**|Not sent to the LLM — logged for visibility only and carried forward without change|
 
-Fields are sent in batches (default 50 per API call, set by `options.llm_batch_size`; free-tier providers may need smaller batches). Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
+Fields are sent in batches (default 50 per API call, set by `options.llm_batch_size`). Free tiers need smaller batches: on Groq's free tier a single request may not exceed 8,000 tokens, so 10 fields per batch is the practical size. Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
+
+**Cache.** Answers are stored in `data/description_cache.json` and reused on the next run when nothing that shapes the answer has changed: the description, the status and rule (which decide the prompt), the system prompt, the golden examples, the field's own task prompt, and the provider, model and `reasoning_effort`. Editing Prompt B therefore re-sends only the UNCERTAIN fields; editing the system prompt or the examples re-sends everything. Failed calls are never cached. Temperature is deliberately not part of the key: it changes sampling, not the question asked.
 
 ---
 
@@ -369,6 +371,8 @@ Note: Salesforce enforces a hard limit of 255 characters for any field descripti
 The description uses internal acronyms, product-specific shorthand, or team-specific terms that are not explained.
 
 Example: *"Used by the SFMC sync for BU segmentation"*. An AI agent — or a developer new to the org — cannot interpret `SFMC` or `BU` without prior knowledge. Internal shorthand creates silent knowledge gaps in the metadata layer.
+
+An acronym counts as explained when it is expanded in brackets, in either order: *"NPS (Net Promoter Score)"* or *"Net Promoter Score (NPS)"*. Common terms (currency codes, ISO, VAT, KPI and similar) and acronyms that are the field's own picklist values are not treated as jargon.
 
 ---
 

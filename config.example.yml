@@ -136,7 +136,8 @@ options:
   include_standard_fields: false
 
   # Number of fields sent per LLM request.
-  # Lower it (e.g. 15) if a free tier returns rate-limit errors (HTTP 429).
+  # Use 10 on Groq's free tier: a single request may not exceed 8,000 tokens (HTTP 413),
+  # and smaller batches also hit the per-minute limit (HTTP 429) less often.
   llm_batch_size: 50
 
   # Keep intermediate JSON/XLSX artifacts for inspection and debugging

@@ -24,19 +24,19 @@ The description exceeds 200 characters. It is not wrong — it is too verbose. S
 The description contains an unexplained acronym or internal term. Expand the acronym inline on first use using the format: `ACRONYM (Full Name)`. If you do not know what the acronym stands for, do not guess — note in your reasoning that the expansion is unknown and rewrite the description to remove or replace the term with plain language.
 
 - `action`: `"rewrite"`
-- Preserve all other content in the description.
+- Preserve all other content in the description, unless the expansion pushes the result over 255 characters. The 255-character limit wins: then shorten process detail (who populates it, how it is checked) and keep what the field stores, formats, thresholds and values.
 
 **R8 — Contradictory configuration**
 The description conflicts with what the field type can store. For example: a Date field described as storing a range, an Email field described as storing multiple addresses, a Checkbox described as storing written text. Rewrite the description to match what the field type actually stores.
 
 - `action`: `"rewrite"`
-- Preserve the business intent of the original description. Only fix the structural contradiction.
+- Preserve the business intent of the original description. Only fix the structural contradiction, and remove the words that describe the impossible structure rather than qualifying them.
 
 **R9 — Audience mismatch**
 The description is written as a UI instruction for the person filling in the form, not as a metadata description for systems and developers. Rewrite in third person, passive voice where appropriate, describing what the field stores and what it drives — not what a user should do.
 
-Bad: `"Use the dropdown to select how the customer prefers to be contacted. Make sure to update this field after every customer call."`
-Good: `"Preferred communication channel for this contact. Values: Email, Phone, SMS, Post. Used by the marketing automation platform to route outbound messages to the correct delivery channel."`
+Bad: `"Choose the customer's time zone from the list so you know when to call them. Remember to update it if they move."`
+Good: `"Time zone of this contact's main office as a region/city name (e.g. Europe/Zurich). Read by the meeting scheduler to propose call slots inside local business hours."`
 
 - `action`: `"rewrite"`
 - Preserve the factual content. Only fix the audience and voice.
@@ -47,7 +47,7 @@ Good: `"Preferred communication channel for this contact. Values: Email, Phone, 
 
 In all cases, preserve:
 - Specific system names, workflow names, or integration names
-- Exact field names referenced (e.g. `Last_Order_Date__c`)
+- Exact field names referenced (e.g. `Last_Invoice_Date__c`)
 - Specific thresholds, formats, or values already stated
 - Picklist values — if already listed in the description, keep them; if the field is a Picklist and values are in `picklist_values`, add them if missing
 
@@ -73,27 +73,27 @@ Return a JSON array in the same order as the input.
 ```json
 [
   {
-    "field_api_name": "Stakeholder_Map_Notes__c",
+    "field_api_name": "Site_Visit_Notes__c",
     "action": "shorten",
-    "suggested_description": "Free-text field storing the stakeholder map for this opportunity, including buyer roles, support level, internal dynamics, and the engagement strategy agreed between the AE and manager.",
-    "reasoning": "R6: original was 214 chars; shortened to 178 chars without removing any key content."
+    "suggested_description": "Free-text notes from on-site visits to this account: attendees, equipment inspected, issues found and agreed follow-up actions.",
+    "reasoning": "R6: original was 236 chars; shortened to 127 chars without removing any key content."
   },
   {
-    "field_api_name": "NPS_Segment__c",
+    "field_api_name": "MTBF_Hours__c",
     "action": "rewrite",
-    "suggested_description": "NPS (Net Promoter Score) segment assigned to this contact after the quarterly survey cycle. Values: Detractor, Passive, Promoter. Used to prioritise re-engagement and customer success outreach.",
-    "reasoning": "R7: NPS was unexplained; expanded inline and added values and usage context."
+    "suggested_description": "MTBF (Mean Time Between Failures) of this installed machine in operating hours, calculated from its service history. A value below 500 hours triggers a preventive maintenance proposal.",
+    "reasoning": "R7: MTBF was unexplained; expanded inline and kept the 500-hour threshold."
   },
   {
-    "field_api_name": "Primary_Contact_Email__c",
+    "field_api_name": "Invoice_Email__c",
     "action": "rewrite",
-    "suggested_description": "Primary email address for the main contact at this account. Used for transactional notifications and account-level correspondence. For multiple contacts, use the related Contact records.",
-    "reasoning": "R8: Email field cannot store a list; rewrote to reflect single-value storage and redirected multi-contact use case."
+    "suggested_description": "Single email address that receives invoices for this account. Further invoice recipients are stored as Contact records with the Billing role.",
+    "reasoning": "R8: an Email field cannot store a list; rewrote it as a single address and pointed further recipients to Contact records."
   },
   {
-    "field_api_name": "Newsletter_Opt_In__c",
+    "field_api_name": "Paperless_Billing__c",
     "action": "rewrite",
-    "suggested_description": "Checked when this contact has opted in to receive the monthly newsletter and promotional emails. Requires explicit written consent. Drives inclusion in newsletter distribution lists in the marketing automation platform.",
+    "suggested_description": "Checked when this account has agreed in writing to receive invoices by email only. Stops the billing system from printing and posting paper invoices.",
     "reasoning": "R9: original was a UI instruction; rewritten as a system-oriented description in third person."
   }
 ]
@@ -102,3 +102,15 @@ Return a JSON array in the same order as the input.
 **Length:**
 - For R6 (shorten): target 60–200 characters. Must be shorter than the original.
 - For R7, R8, R9 (rewrite): aim for 60–180 characters. Do not exceed 255 characters.
+
+---
+
+## Check Before You Answer
+
+Read each `suggested_description` once more and fix it if any of these fail:
+1. **Length:** at most 255 characters, counted including spaces. If it is longer, cut process detail, not facts.
+2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.
+3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system instead, or leave the clause out.
+4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
+5. **R6 only:** at most 200 characters and shorter than the original. Do not keep the "including a, b, c, d" list form: summarise the list in a few words or keep only the items a developer needs.
+6. **R8 only:** the words that describe the impossible structure ("list of", "range", "written feedback", "multiple addresses") are gone, not just qualified.

@@ -9,8 +9,9 @@ Run with plain Python (no pytest needed):
   python tests/test_cache.py
 
 A cached LLM answer may only be reused when the description, the route
-(status + rule), every prompt file, the provider, the model and
-reasoning_effort are all unchanged.
+(status + rule), the system prompt, the golden examples, the prompt file of
+the field's own route, the provider, the model and reasoning_effort are all
+unchanged. Editing another route's prompt file keeps the hit.
 """
 
 import importlib.util
@@ -48,7 +49,9 @@ CASES = [
     ("description changed -> miss",       {**FIELD, "description": "Tier set by finance."}, PROMPTS, CFG, False),
     ("status changed -> miss",            {**FIELD, "classifier_status": "REVIEWED", "rule_triggered": None}, PROMPTS, CFG, False),
     ("rule changed -> miss",              {**FIELD, "rule_triggered": "R9"}, PROMPTS, CFG, False),
-    ("prompt C edited -> miss",           FIELD, {**PROMPTS, "prompt_c": "edited"}, CFG, False),
+    ("own prompt (B) edited -> miss",     FIELD, {**PROMPTS, "prompt_b": "edited"}, CFG, False),
+    ("other prompt (C) edited -> hit",    FIELD, {**PROMPTS, "prompt_c": "edited"}, CFG, True),
+    ("system prompt edited -> miss",      FIELD, {**PROMPTS, "system": "edited"}, CFG, False),
     ("golden examples edited -> miss",    FIELD, {**PROMPTS, "examples": "edited"}, CFG, False),
     ("model changed -> miss",             FIELD, PROMPTS, with_llm(model="model-b"), False),
     ("provider changed -> miss",          FIELD, PROMPTS, with_llm(provider="azure_openai"), False),

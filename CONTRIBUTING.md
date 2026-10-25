@@ -54,12 +54,14 @@ providers/implement-bedrock
 
 Keep changes focused. One logical change per pull request.
 
-If you change the classifier, validate it against the training set:
-- Run Script 1 with `data/sf_metadata_raw_training.json`
-- Check `data/sf_classified.json` against the `_expected_status` and `_expected_rule` fields
-- All training set fields must classify correctly before submitting
+If you change the classifier, validate it against the training set (no LLM needed):
+- `python scripts/validate_classifier.py data/sf_metadata_raw_training.json` — no new mismatches compared with the accepted limits listed in wiki 03
+- `python tests/test_classifier.py` — all tests pass; add a test for the case you fixed
 
-If you change a prompt, evaluate LLM output quality against the criteria in `wiki/03_experiment_and_validation.md`.
+If you change a prompt:
+- Run Script 1 on the training set, then `python scripts/evaluate_suggestions.py` and report the pass rate per prompt before and after your change. A free Groq key is enough; the cache re-sends only the fields your prompt handles
+- Use invented fields for any new example. Never copy a field or description from `data/`, or the training results stop meaning anything
+- The automatic check is a proxy. Read a sample of the suggestions against the criteria in `wiki/03_experiment_and_validation.md`
 
 ### 4. Do not commit secrets
 
