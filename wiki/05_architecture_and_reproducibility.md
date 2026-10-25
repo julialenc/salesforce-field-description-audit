@@ -224,6 +224,8 @@ It combines:
 
 This keeps the LLM in a narrow role: grounded suggestion generation under explicit routing rules.
 
+Answers are cached per field. The cache key covers everything that shapes an answer: the description, the route (status and rule), the system prompt, the golden examples, the route's own task prompt, and the provider, model and `reasoning_effort`. A prompt edit therefore re-sends only the fields that prompt handles. A cache keyed on the description alone, as in the first version, silently returned old answers after a prompt, model or routing change; a key over every prompt file re-sent all fields after any edit, which used most of a free tier's daily token limit per iteration.
+
 ### Review Artifact and Human Decision Layers
 
 After LLM processing, Script 1 merges `FLAGGED`, `UNCERTAIN`, `REVIEWED`, and `SKIPPED` into:
@@ -374,8 +376,18 @@ The LLM layer is not assembled from hidden strings inside the code. Its prompt a
 - `golden_examples.json`
 - `prompt_a_flagged_fields.md`
 - `prompt_b_uncertain_fields.md`
+- `prompt_c_reviewed_fields.md`
 
-This makes prompt behavior visible and reviewable rather than implicit.
+This makes prompt behavior visible and reviewable rather than implicit. Every example in these files is an invented field that appears in neither dataset: an example taken from the data being measured lets the model copy answers and inflates results.
+
+### Automated Checks
+
+Three checks make each change measurable, and none needs an LLM call:
+- `scripts/validate_classifier.py` compares the classifier with the labels in a dataset and lists every mismatch
+- `tests/` holds plain-Python unit tests for the classifier rules, the cache key and the suggestion checker (`python tests/test_classifier.py`, no test framework needed)
+- `scripts/evaluate_suggestions.py` scores the latest LLM answers: each rewrite is run back through the classifier and checked for length, vague terms, picklist coverage and the action its prompt asks for, with a pass rate per prompt and rule
+
+The suggestion checker is built on the classifier, so it also tests the classifier: suggestions that are clearly good but fail the check point to a rule that is too strict.
 
 ### Synthetic Datasets for Experiment Mode
 
@@ -396,6 +408,9 @@ The main persisted artifacts are:
 - `llm_response.json`
 - `review_queue_{timestamp}.xlsx`
 - `write_log_{timestamp}.xlsx`
+- `description_cache.json` (reused answers, see the Prompt and LLM Layer)
+
+Each run overwrites `llm_response.json`. To compare models or prompt versions, copy it under a descriptive name first (for example `llm_response_groq_gpt-oss-120b_20261025.json`); `evaluate_suggestions.py` accepts such a file as an argument.
 
 Together, these files make the system inspectable from raw input to classification, generation, review, and deployment outcome.
 
@@ -411,6 +426,8 @@ The **classifier** is deterministic, but the **LLM** is not fully deterministic,
 - review workflow
 
 With those elements held constant, repeated runs should lead to **comparable outcomes**, even if the exact wording of suggestions is not identical every time.
+
+Measured on the training set, this holds across providers as well: an open-weight model on Groq (`gpt-oss-120b`) and Azure OpenAI (`gpt-5.4-mini`) chose the same action (rewrite, shorten or keep) for all 271 fields sent. They differed only in wording. Between repeated runs of the same prompts, pass rates moved by one or two fields out of 74.
 
 ---
 

@@ -12,16 +12,18 @@ Why it matters: Agentforce, Claude and other AI agents read field descriptions t
 
 ## Where it stands
 
-As of October 2026:
-- Design, classifier, prompts, synthetic datasets and docs are complete
-- In progress: the first end-to-end run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
+As of late October 2026:
+- The pipeline runs end to end on the synthetic training set, on Groq's free tier and on Azure OpenAI
+- Classifier: 279 of 288 training fields match their labels; the 9 accepted limits are listed in wiki 03
+- Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
+- In progress: human review of a suggestion sample, model choice, the one-time test-set run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
 
 ## Read in this order
 
 1. `README.md` — what it does, architecture, quickstart (10 minutes)
 2. `wiki/02_how_it_works.md` — classifier rules, LLM routing, review and write-back
 
-The other wikis are reference: `01` problem and audience, `03` experiment method and results, `04` the Admin's review process, `05` architecture and what is safe to change.
+The other wikis are reference: `01` problem and audience, `03` experiment method and results, `04` the Admin's review process, `05` architecture and what is safe to change, `06` lessons learned while building it (worth reading if you are new to building LLM pipelines).
 
 ## Key concepts
 
@@ -40,8 +42,21 @@ For real-org use, also the Salesforce CLI and a sandbox or free Developer Editio
 
 ## What is safe to change
 
-- **Free to tune:** prompt wording, classifier patterns (re-run the validator after), batch size, model choice
+- **Free to tune:** prompt wording, classifier patterns, batch size, model choice. After any change, run the checks below
+- **Prompt examples** must be invented fields that appear in no dataset, or results stop meaning anything
 - **Discuss before changing:** the four statuses, the R1–R9 rule set, the three-prompt routing — they are deliberate design decisions, explained in wiki 02 and 05
+
+## Checking a change
+
+None of these call an LLM:
+```
+python tests/test_classifier.py
+python tests/test_cache.py
+python tests/test_evaluate.py
+python scripts/validate_classifier.py data/sf_metadata_raw_training.json
+python scripts/evaluate_suggestions.py
+```
+The last one scores the most recent Script 1 run; add `--failures` to see each failed suggestion.
 
 ## Contact and licence
 

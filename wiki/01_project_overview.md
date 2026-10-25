@@ -86,19 +86,26 @@ Intended users:
 │   └── write_log_{timestamp}.xlsx     # Deployment audit log — one row per field write attempt, with decision and outcome. Committed as experiment reference only
 ├── prompts/
 │   ├── system_prompt.md               # Quality criteria and instructions — injected once per session for all LLM calls
-│   ├── golden_examples.json           # Hand-picked high-quality field descriptions used for few-shot grounding
+│   ├── golden_examples.json           # High-quality descriptions of invented fields (in neither dataset) used for few-shot grounding
 │   ├── prompt_a_flagged_fields.md     # Task instruction for FLAGGED fields — clear quality failures (Rules 1–5)
 │   ├── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–9)
 │   └── prompt_c_reviewed_fields.md    # Task instruction for REVIEWED fields — passed all rules; LLM keeps unless clearly inadequate
 ├── scripts/
 │   ├── 01_ingest_classify_send.py     # Extract from Salesforce (or synthetic file), classify, call LLM, produce review file
-│   └── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
+│   ├── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
+│   ├── validate_classifier.py         # Compare classifier output with the dataset labels; list every mismatch
+│   └── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
+├── tests/
+│   ├── test_classifier.py             # Unit tests for the R1–R9 rules and the known classifier fixes
+│   ├── test_cache.py                  # Unit tests for the cache key
+│   └── test_evaluate.py               # Unit tests for the suggestion checker
 ├── wiki/
 │   ├── 01_project_overview.md
 │   ├── 02_how_it_works.md
 │   ├── 03_experiment_and_validation.md
 │   ├── 04_human_review_process.md
-│   └── 05_architecture_and_reproducibility.md
+│   ├── 05_architecture_and_reproducibility.md
+│   └── 06_lessons_learned.md          # What building and testing the pipeline taught, for anyone building a similar system
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE

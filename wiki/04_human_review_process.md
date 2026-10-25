@@ -110,8 +110,8 @@ The Admin then opens the generated Excel file `data/review_queue_{timestamp}.xls
 The spreadsheet is the main review interface for the tool. It contains one row per field and is split into three tabs:
 
 - **Tab A — FLAGGED**: fields whose descriptions are missing or clearly unusable, with an AI-written replacement
-- **Tab B — UNCERTAIN**: fields whose descriptions may be problematic, with an AI suggestion where appropriate
-- **Tab C — REVIEWED / SKIPPED**: fields where the LLM confirmed the description is adequate (REVIEWED) or system fields that cannot be written (SKIPPED), included only for visibility
+- **Tab B — UNCERTAIN**: fields whose descriptions may be problematic, with an AI suggestion, plus REVIEWED fields for which the LLM proposes a rewrite
+- **Tab C — REVIEWED / SKIPPED**: fields where the LLM kept the description (REVIEWED) or system fields that cannot be written (SKIPPED), included only for visibility
 
 The Admin works only in **Tab A** and **Tab B**.
 
@@ -147,6 +147,14 @@ The Admin’s task is to judge whether the AI suggestion is:
 - acceptable for the org’s business language and standards
 
 Every row in **Tab A** and **Tab B** must then receive one of three decisions:
+
+### What to watch for in AI suggestions
+
+The automatic check (wiki 03) already catches over-long text, forbidden vague terms, missing picklist values and unexplained acronyms. What it cannot catch, and what testing showed the models do:
+- **Invented process detail.** A suggestion may name a system, team or schedule ("read by the billing integration", "updated nightly") that the metadata does not support. If you cannot confirm it, use Edit and remove it
+- **Acronyms copied from the original** ("AE", "CC") that are still not expanded
+- **Deprecated fields.** For a field described as no longer used, the AI writes an honest "Deprecated…" description. Decide whether the field should be retired instead of described
+- **Long originals that stay long.** When the original is already very long, the suggestion often keeps every clause
 
 ### Approve
 

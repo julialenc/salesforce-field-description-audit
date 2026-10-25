@@ -63,9 +63,9 @@ Return a JSON array in the same order as the input. For every field:
 ```json
 [
   {
-    "field_api_name": "Churn_Risk_Score__c",
+    "field_api_name": "Renewal_Risk_Score__c",
     "action": "rewrite",
-    "suggested_description": "Numeric churn risk score calculated monthly by the predictive analytics model. Scale 0–100, where higher values indicate greater churn probability. Used to prioritise re-engagement outreach and trigger account review tasks when the score exceeds 70.",
+    "suggested_description": "Score from 0 to 100 estimating the chance that this account will not renew its service contract. Written nightly by the renewal forecasting model; a score above 70 creates a renewal review task.",
     "reasoning": "R1: description was blank — wrote from field name and type."
   }
 ]
@@ -78,3 +78,13 @@ Return a JSON array in the same order as the input. For every field:
 **Formula fields:** base the description on what the formula calculates. Do not describe the formula expression itself — describe the result.
 
 **Lookup fields:** always name the related object. Format: "Reference to the [Object] record of..."
+
+---
+
+## Check Before You Answer
+
+Read each `suggested_description` once more and fix it if any of these fail:
+1. **Length:** at most 255 characters, counted including spaces. If it is longer, cut process detail, not facts.
+2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.
+3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system instead, or leave the clause out.
+4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
