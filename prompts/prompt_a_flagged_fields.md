@@ -38,7 +38,7 @@ A good description for this org explains:
 2. Who or what populates it — a person, a workflow, an integration, or a formula
 3. What it controls or drives — a workflow trigger, a calculation input, a routing rule, an eligibility gate
 
-Not all three are always possible from metadata alone. Write what you can confirm from the field name, type, picklist values, formula, and related object. Do not invent business logic that the metadata does not support.
+Not all three are always possible from metadata alone. Write what you can confirm from the field name, type, picklist values, formula, and related object. Do not invent business logic that the metadata does not support. A blank or one-word original gives you little to confirm: a short, accurate description is better than a complete-sounding guess. Any detail you add without support goes into `assumptions`; any needed detail you leave out goes into `missing`.
 
 ---
 
@@ -59,14 +59,18 @@ Return a JSON array in the same order as the input. For every field:
 - `action` must be `"rewrite"`
 - `suggested_description` must be your new description — not the original
 - `reasoning` must name the rule and describe in one sentence what was wrong
+- `assumptions` lists every claim in your description that the input does not support (see the system prompt); `[]` if there are none
+- `missing` lists, as questions, the facts the description needs but the input does not give; `[]` if there are none
 
 ```json
 [
   {
     "field_api_name": "Renewal_Risk_Score__c",
     "action": "rewrite",
-    "suggested_description": "Score from 0 to 100 estimating the chance that this account will not renew its service contract. Written nightly by the renewal forecasting model; a score above 70 creates a renewal review task.",
-    "reasoning": "R1: description was blank — wrote from field name and type."
+    "suggested_description": "Score estimating the chance that this account will not renew its service contract. Higher values mean a higher risk of non-renewal.",
+    "reasoning": "R1: description was blank — wrote from field name and type; the scale and the process that sets the score are unknown and left out.",
+    "assumptions": ["Higher values mean a higher risk of non-renewal"],
+    "missing": ["What is the score's range?", "Which process or model sets the score?"]
   }
 ]
 ```
@@ -88,3 +92,4 @@ Read each `suggested_description` once more and fix it if any of these fail:
 2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.
 3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system instead, or leave the clause out.
 4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
+5. **Assumptions:** every person, team, process, system, scale or consequence you named is either in the input or listed in `assumptions`.

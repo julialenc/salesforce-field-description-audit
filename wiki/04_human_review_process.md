@@ -150,8 +150,14 @@ Every row in **Tab A** and **Tab B** must then receive one of three decisions:
 
 ### What to watch for in AI suggestions
 
+Your decision is about the **LLM_Suggestion** text only: the text that would be written to Salesforce. The other columns help you judge it:
+- **Unverified** lists claims in the suggestion that the AI could not confirm from the field's data. If you cannot confirm one either, treat it as wrong: Edit (remove it) or Reject. Do not approve what you cannot confirm
+- **Missing** lists, as questions, facts the AI did not have. They do not decide anything by themselves: if the text is correct but thin, decide whether it is useful as it stands (Approve) or needs the fact first (Edit, and write the answer into Admin Version)
+- **LLM_Reasoning** is background only
+
 The automatic check (wiki 03) already catches over-long text, forbidden vague terms, missing picklist values and unexplained acronyms. What it cannot catch, and what testing showed the models do:
-- **Invented process detail.** A suggestion may name a system, team or schedule ("read by the billing integration", "updated nightly") that the metadata does not support. If you cannot confirm it, use Edit and remove it
+- **Invented process detail.** A suggestion may name a system, team or schedule ("read by the billing integration", "updated nightly") that the metadata does not support. The AI is asked to list such claims in Unverified, but a weaker model may still leave one unlisted. If you cannot confirm it, use Edit and remove it
+- **Dropped caveats.** A rewrite may lose a warning the original had ("confirm with legal before activating", "no longer used for routing"). Compare with the current description before approving
 - **Acronyms copied from the original** ("AE", "CC") that are still not expanded
 - **Deprecated fields.** For a field described as no longer used, the AI writes an honest "Deprecated…" description. Decide whether the field should be retired instead of described
 - **Long originals that stay long.** When the original is already very long, the suggestion often keeps every clause

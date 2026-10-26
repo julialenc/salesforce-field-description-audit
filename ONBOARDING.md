@@ -56,7 +56,13 @@ python tests/test_evaluate.py
 python scripts/validate_classifier.py data/sf_metadata_raw_training.json
 python scripts/evaluate_suggestions.py
 ```
-The last one scores the most recent Script 1 run; add `--failures` to see each failed suggestion.
+The last one scores the most recent Script 1 run; add `--failures` to see each failed suggestion, or `--assumptions` to see what the model guessed or could not know.
+
+The automatic check cannot tell whether a suggestion is true. For that, draw a human review sample from the latest review file, fill in the decisions in Excel, and score it:
+```
+python scripts/review_sample.py make
+python scripts/review_sample.py score data/review_sample_<timestamp>.xlsx
+```
 
 ## Contact and licence
 
