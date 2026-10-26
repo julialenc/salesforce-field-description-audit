@@ -389,6 +389,10 @@ Three checks make each change measurable, and none needs an LLM call:
 
 The suggestion checker is built on the classifier, so it also tests the classifier: suggestions that are clearly good but fail the check point to a rule that is too strict.
 
+Every LLM answer also returns two lists: `assumptions` (claims in the suggestion the input does not support) and `missing` (facts the description needs that the input does not give, as questions). Script 1 shows them in the review file as the "Unverified" and "Missing" columns; the checker counts them as notes and lists them with `--assumptions`. They make guessing measurable without a human.
+
+What no automatic check can judge (whether a suggestion is true and worth approving) is measured with `scripts/review_sample.py`: `make` draws a fixed, stratified 40-field sample from a review file, a person decides on each row, and `score` prints the approval rate per tab and rule. The sample file is named `review_sample_*`, so Script 2 never mistakes it for a review queue.
+
 ### Synthetic Datasets for Experiment Mode
 
 In experiment mode, the pipeline uses synthetic metadata rather than a live Salesforce org. Two files are provided:

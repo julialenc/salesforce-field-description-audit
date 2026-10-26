@@ -76,25 +76,33 @@ Return a JSON array in the same order as the input.
     "field_api_name": "Site_Visit_Notes__c",
     "action": "shorten",
     "suggested_description": "Free-text notes from on-site visits to this account: attendees, equipment inspected, issues found and agreed follow-up actions.",
-    "reasoning": "R6: original was 236 chars; shortened to 127 chars without removing any key content."
+    "reasoning": "R6: original was 236 chars; shortened to 127 chars without removing any key content.",
+    "assumptions": [],
+    "missing": []
   },
   {
     "field_api_name": "MTBF_Hours__c",
     "action": "rewrite",
     "suggested_description": "MTBF (Mean Time Between Failures) of this installed machine in operating hours, calculated from its service history. A value below 500 hours triggers a preventive maintenance proposal.",
-    "reasoning": "R7: MTBF was unexplained; expanded inline and kept the 500-hour threshold."
+    "reasoning": "R7: MTBF was unexplained; expanded inline and kept the 500-hour threshold.",
+    "assumptions": [],
+    "missing": []
   },
   {
     "field_api_name": "Invoice_Email__c",
     "action": "rewrite",
     "suggested_description": "Single email address that receives invoices for this account. Further invoice recipients are stored as Contact records with the Billing role.",
-    "reasoning": "R8: an Email field cannot store a list; rewrote it as a single address and pointed further recipients to Contact records."
+    "reasoning": "R8: an Email field cannot store a list; rewrote it as a single address and pointed further recipients to Contact records.",
+    "assumptions": [],
+    "missing": []
   },
   {
     "field_api_name": "Paperless_Billing__c",
     "action": "rewrite",
     "suggested_description": "Checked when this account has agreed in writing to receive invoices by email only. Stops the billing system from printing and posting paper invoices.",
-    "reasoning": "R9: original was a UI instruction; rewritten as a system-oriented description in third person."
+    "reasoning": "R9: original was a UI instruction; rewritten as a system-oriented description in third person.",
+    "assumptions": [],
+    "missing": []
   }
 ]
 ```
@@ -114,3 +122,4 @@ Read each `suggested_description` once more and fix it if any of these fail:
 4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
 5. **R6 only:** at most 200 characters and shorter than the original. Do not keep the "including a, b, c, d" list form: summarise the list in a few words or keep only the items a developer needs.
 6. **R8 only:** the words that describe the impossible structure ("list of", "range", "written feedback", "multiple addresses") are gone, not just qualified.
+7. **Assumptions:** every person, team, process, system or consequence you added is either in the input or listed in `assumptions`. A shorten never adds anything, so its list is `[]`.

@@ -60,6 +60,16 @@ Only add or replace what is genuinely missing or unclear.
 
 ---
 
+## Do Not Invent
+
+This rule is about what you add, never about what is already there. Everything the original description states counts as confirmed input: do not remove it, and do not rewrite a description only to make it shorter or more cautious. A description that passes the "When to Keep" test is kept, even if you cannot verify its claims.
+
+A rewrite may only state facts that the original description or the metadata supports: the field name, type, picklist values, formula and related object. Do not add who populates the field, which process or system reads it, or what it triggers, unless the input says so. An invented consequence reads as fact to Agentforce and to an Admin approving in bulk, and is worse than a short description.
+
+When the original is vague and the metadata cannot fill the gap (for example a checkbox described only as "used for tracking"), still rewrite: state plainly what the field name and type confirm, keep it short, and list the facts the Admin must add in `missing` as questions ("What does checked mean?", "Which process reads it?"). If you include a likely detail anyway, list it in `assumptions`.
+
+---
+
 ## Input Format
 
 You will receive a JSON array. Each element contains:
@@ -80,13 +90,17 @@ Return a JSON array in the same order as the input.
     "field_api_name": "Order_Hold_Status__c",
     "action": "keep",
     "suggested_description": "Current hold state of this account's orders. Values: None, Credit Hold, Compliance Hold, Customer Request. Any value other than None stops order release in the ERP.",
-    "reasoning": "Description is specific, lists all values, and explains the consequences. No improvement needed."
+    "reasoning": "Description is specific, lists all values, and explains the consequences. No improvement needed.",
+    "assumptions": [],
+    "missing": []
   },
   {
     "field_api_name": "Net_Margin_Pct__c",
     "action": "rewrite",
     "suggested_description": "Net margin of this order as a percentage, calculated by formula as (Amount__c - Cost__c) / Amount__c. Read-only; recalculated whenever either amount changes.",
-    "reasoning": "Original 'Margin figure kept for internal purposes and analysis.' named no calculation; rewrote from the formula provided in the metadata."
+    "reasoning": "Original 'Margin figure kept for internal purposes and analysis.' named no calculation; rewrote from the formula provided in the metadata.",
+    "assumptions": [],
+    "missing": []
   }
 ]
 ```
@@ -96,6 +110,17 @@ Return a JSON array in the same order as the input.
 **For `action: "rewrite"`:** return your improved description. Aim for 60–180 characters. Do not exceed 255 characters.
 
 **Reasoning:** always include one sentence. For keep: explain why the description is adequate. For rewrite: explain what was wrong and what you added or changed.
+
+---
+
+## Check Before You Answer
+
+Read each rewritten `suggested_description` once more and fix it if any of these fail:
+1. **Length:** at most 255 characters, counted including spaces. If it is longer, cut process detail, not values.
+2. **Acronyms and abbreviations:** every acronym or short form is written out on first use, e.g. "Ops" becomes "Operations". Picklist values are written exactly as given. Do not add acronyms that are not in the input.
+3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system if the input gives it; otherwise leave the clause out.
+4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
+5. **No invented facts:** every process, team, system or consequence named is in the original or the metadata. If you kept a likely but unconfirmed detail, it is listed in `assumptions`.
 
 ---
 

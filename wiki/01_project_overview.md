@@ -94,7 +94,8 @@ Intended users:
 │   ├── 01_ingest_classify_send.py     # Extract from Salesforce (or synthetic file), classify, call LLM, produce review file
 │   ├── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
 │   ├── validate_classifier.py         # Compare classifier output with the dataset labels; list every mismatch
-│   └── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
+│   ├── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
+│   └── review_sample.py               # Draw a 40-field human review sample from a review file, and score it
 ├── tests/
 │   ├── test_classifier.py             # Unit tests for the R1–R9 rules and the known classifier fixes
 │   ├── test_cache.py                  # Unit tests for the cache key

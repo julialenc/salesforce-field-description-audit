@@ -61,7 +61,9 @@ If you change the classifier, validate it against the training set (no LLM neede
 If you change a prompt:
 - Run Script 1 on the training set, then `python scripts/evaluate_suggestions.py` and report the pass rate per prompt before and after your change. A free Groq key is enough; the cache re-sends only the fields your prompt handles
 - Use invented fields for any new example. Never copy a field or description from `data/`, or the training results stop meaning anything
-- The automatic check is a proxy. Read a sample of the suggestions against the criteria in `wiki/03_experiment_and_validation.md`
+- The automatic check is a proxy. Read a sample of the suggestions against the criteria in `wiki/03_experiment_and_validation.md`, or score a human sample with `python scripts/review_sample.py`
+- Keep the `assumptions` and `missing` lists in every prompt's output format. An example in a prompt must not state anything its input does not support: the model follows an example more closely than a rule
+- When you add a prohibition ("do not invent"), state its boundary too ("this is about what you add, not about removing what the original says"). Without it, the model overshoots
 
 ### 4. Do not commit secrets
 

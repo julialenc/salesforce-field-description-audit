@@ -27,6 +27,11 @@ Two findings are counted as notes, not failures:
                code"), which a keyword check can't judge
   deprecated   an R5 rewrite that states the field is deprecated, as Prompt A
                asks for genuinely retired fields. It re-flags as R5 by design
+  assumptions  the LLM listed claims it could not confirm from the input
+               (the "assumptions" field, shown as "Unverified" in the review
+               file). Not wrong by itself, but the Admin must check them
+  missing      the LLM listed facts the input does not give ("missing", shown
+               as "Missing" in the review file). The Admin adds them
 
 Usage:
   python scripts/evaluate_suggestions.py
@@ -34,6 +39,9 @@ Usage:
   python scripts/evaluate_suggestions.py data/llm_response_groq_gpt-oss-120b_20261024.json
       Evaluates another saved LLM response file against data/sf_classified.json.
   Add --failures to list every failed suggestion with its reasons.
+  Add --assumptions to list every suggestion with assumptions or missing
+  facts, grouped by prompt and rule, to look for patterns in what the model
+  guesses and what it cannot know.
 
 Exit code is 0 (this is a report, not a gate).
 """
@@ -71,7 +79,7 @@ UNFINISHED_TOKENS = [
 ]
 
 CHECKS = ["reclassify", "length", "vague", "picklist", "shorter", "action"]
-NOTES  = ["used-phrase", "deprecated"]
+NOTES  = ["used-phrase", "deprecated", "assumptions", "missing"]
 
 
 def load_fields(path: Path) -> list[dict]:
@@ -133,6 +141,13 @@ def evaluate_one(f: dict, result: dict) -> tuple[dict[str, str], dict[str, str]]
         if missing:
             failures["picklist"] = "missing " + ", ".join(missing)
 
+    assumed = [str(a).strip() for a in (result.get("assumptions") or []) if str(a).strip()]
+    if assumed:
+        notes["assumptions"] = "; ".join(assumed)
+    missing = [str(m).strip() for m in (result.get("missing") or []) if str(m).strip()]
+    if missing:
+        notes["missing"] = "; ".join(missing)
+
     if rule == "R6" and not (len(suggestion) < len(original) and len(suggestion) <= R6_MAX_LEN):
         failures["shorter"] = f"{len(original)} -> {len(suggestion)} chars"
 
@@ -153,6 +168,7 @@ def main() -> int:
     sys.stdout.reconfigure(errors="replace")   # LLM text may hold characters the Windows console can't show
     args          = [a for a in sys.argv[1:] if not a.startswith("--")]
     show_failures = "--failures" in sys.argv
+    show_assumed  = "--assumptions" in sys.argv
     response_path = Path(args[0]) if args else RESPONSE
     if not response_path.is_absolute():
         response_path = ROOT / response_path
@@ -169,6 +185,7 @@ def main() -> int:
     check_fails             = defaultdict(lambda: defaultdict(int))
     note_counts             = defaultdict(lambda: defaultdict(int))
     failed_rows             = []
+    assumed_rows            = []
 
     for f in fields:
         prompt = prompt_for(f)
@@ -191,6 +208,9 @@ def main() -> int:
         failures, notes = evaluate_one(f, result)
         for note in notes:
             note_counts[prompt][note] += 1
+        if "assumptions" in notes or "missing" in notes:
+            assumed_rows.append((group, key, notes.get("assumptions", ""), notes.get("missing", ""),
+                                 result.get("suggested_description", "")))
         if failures:
             for check in failures:
                 check_fails[prompt][check] += 1
@@ -224,6 +244,13 @@ def main() -> int:
         for group, key, failures, text in failed_rows:
             reasons = "; ".join(f"{c}: {r}" for c, r in failures.items())
             print(f"  [{group}] {key}: {reasons}\n      {text}")
+
+    if show_assumed and assumed_rows:
+        print(f"\nSuggestions with assumptions or missing facts ({len(assumed_rows)} of {all_eval} checked):")
+        for group, key, assumed, missing, text in sorted(assumed_rows):
+            print(f"  [{group}] {key}\n      {text}"
+                  + (f"\n      assumed: {assumed}" if assumed else "")
+                  + (f"\n      missing: {missing}" if missing else ""))
     return 0
 
 

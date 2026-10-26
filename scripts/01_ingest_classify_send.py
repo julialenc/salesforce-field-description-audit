@@ -1025,6 +1025,8 @@ def generate_review_queue(all_fields: list[dict], llm_results: dict) -> Path:
         f["llm_action"]              = result.get("action", "")
         f["llm_suggested_description"] = result.get("suggested_description", f.get("description", ""))
         f["llm_reasoning"]           = result.get("reasoning", "")
+        f["llm_assumptions"]         = format_assumptions(result.get("assumptions"))
+        f["llm_missing"]             = format_assumptions(result.get("missing"))
 
     # Tab A — FLAGGED
     tab_a = [f for f in all_fields if f["classifier_status"] == "FLAGGED"]
@@ -1047,11 +1049,18 @@ def generate_review_queue(all_fields: list[dict], llm_results: dict) -> Path:
     return out_path
 
 
+def format_assumptions(value) -> str:
+    """An LLM list (assumptions or missing facts) as one cell: "item one; item two"."""
+    if isinstance(value, list):
+        return "; ".join(str(v).strip() for v in value if str(v).strip())
+    return str(value or "").strip()
+
+
 def _col_width(col: str) -> int:
     widths = {
         "Object": 12, "Field_API_Name": 32, "Field_Type": 16,
         "Rule": 8, "Original_Status": 14,
-        "Current_Description": 55, "LLM_Suggestion": 55, "LLM_Reasoning": 40,
+        "Current_Description": 55, "LLM_Suggestion": 55, "Unverified": 40, "Missing": 40, "LLM_Reasoning": 40,
         "Decision": 12, "Admin_Version": 55,
     }
     return widths.get(col, 20)
@@ -1061,10 +1070,11 @@ def _write_action_tab(wb, title: str, fields: list[dict], include_decision: bool
     ws = wb.create_sheet(title)
     headers = [
         "Object", "Field_API_Name", "Field_Type", "Rule", "Original_Status",
-        "Current_Description", "LLM_Suggestion", "LLM_Reasoning",
+        "Current_Description", "LLM_Suggestion", "Unverified", "Missing", "LLM_Reasoning",
         "Decision", "Admin_Version",
     ]
     _write_header_row(ws, headers)
+    decision_col = headers.index("Decision") + 1
 
     for ri, f in enumerate(fields, 2):
         status = f["classifier_status"]
@@ -1078,6 +1088,8 @@ def _write_action_tab(wb, title: str, fields: list[dict], include_decision: bool
             status,
             f.get("description", ""),
             f.get("llm_suggested_description", ""),
+            f.get("llm_assumptions", ""),   # claims the LLM could not confirm from the input
+            f.get("llm_missing", ""),       # facts the Admin must add, as questions
             f.get("llm_reasoning", ""),
             "",   # Decision — Admin fills in
             "",   # Admin_Version — Admin fills in if Decision=Edit
@@ -1085,14 +1097,14 @@ def _write_action_tab(wb, title: str, fields: list[dict], include_decision: bool
         for ci, val in enumerate(row_data, 1):
             c = ws.cell(row=ri, column=ci, value=val)
             c.font, c.fill, c.border = CELL_FONT, fill, THIN_BORDER
-            c.alignment = CENTER_AL if ci in (1, 3, 4, 5, 9) else LEFT_AL
+            c.alignment = CENTER_AL if ci in (1, 3, 4, 5, decision_col) else LEFT_AL
 
     ws.auto_filter.ref = f"A1:{get_column_letter(len(headers))}1"
     ws.freeze_panes = "A2"
     for ci, h in enumerate(headers, 1):
         ws.column_dimensions[get_column_letter(ci)].width = _col_width(h)
 
-    # Add dropdown validation for Decision column (col 9)
+    # Add dropdown validation for the Decision column
     try:
         from openpyxl.worksheet.datavalidation import DataValidation
         dv = DataValidation(
@@ -1101,7 +1113,8 @@ def _write_action_tab(wb, title: str, fields: list[dict], include_decision: bool
             allow_blank=True,
             showDropDown=False,
         )
-        dv.sqref = f"I2:I{max(len(fields) + 1, 2)}"
+        letter = get_column_letter(decision_col)
+        dv.sqref = f"{letter}2:{letter}{max(len(fields) + 1, 2)}"
         ws.add_data_validation(dv)
     except Exception:
         pass  # Non-critical: validation is cosmetic

@@ -59,6 +59,11 @@ CASES = [
     ("R5 still TBD fails",           field("R5", ftype="Text"),
                                      answer("Segment code, purpose TBD with the sales operations team."), {"reclassify"}, set()),
     ("rewrite that changes nothing", field("R9", desc=GOOD), answer(GOOD), {"action"}, set()),
+    ("listed assumption is a note",  field("R1", desc=""),
+                                     {**answer(GOOD), "assumptions": ["entered by the account manager"]}, set(), {"assumptions"}),
+    ("listed missing fact is a note", field("R1", desc=""),
+                                     {**answer(GOOD), "missing": ["Which process reads it?"]}, set(), {"missing"}),
+    ("empty assumptions, no note",   field("R1", desc=""), {**answer(GOOD), "assumptions": [" "]}, set(), set()),
 ]
 
 

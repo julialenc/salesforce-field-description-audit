@@ -76,6 +76,30 @@ Test the cache with a mocked LLM call before spending real tokens. It proves hit
 
 An open-weight model on a free tier (gpt-oss-120b on Groq) and a paid model (gpt-5.4-mini on Azure) chose the same action, rewrite, shorten or keep, for all 271 training fields. They differed in wording: the paid model followed the banned-term list more closely. For this task the routing and the prompts decide the outcome far more than the choice of model. That is the point of keeping a deterministic classifier in front of the LLM.
 
-## 11. Synthetic Data Has Its Own Style
+## 11. A Perfect Score Can Hide the Main Defect
+
+Prompt C passed the automatic check 11 out of 11, and it looked like the task was to tune which fields it rewrites. Reading the rewrites one by one showed the real defect: they invented facts ("...triggers internal audit processes") that no rule could catch. Read a sample of the output yourself before you tune anything, even when, and especially when, the score is perfect.
+
+## 12. One Example Outweighs One Rule
+
+Prompt A said "do not invent business logic". Its only example rewrote a blank field as "Written nightly by the renewal forecasting model; a score above 70 creates a renewal review task", which is invented. The open-weight model copied the pattern almost word for word ("Calculated nightly by the churn prediction model; scores above 80 trigger a retention outreach task"). When an example and an instruction disagree, the model follows the example.
+
+## 13. Prohibitions Overshoot; State the Boundary
+
+After "do not invent" was strengthened, the model started deleting true facts from good descriptions, because it could not verify them either. The fix was one sentence saying what the rule is *not* about: claims already in the original are input, keep them. Every "do not" needs its "but do".
+
+## 14. Make Uncertainty an Output Field
+
+You cannot stop a model from guessing with an instruction alone, and a guess is invisible once it reads like fact. Asking for an `assumptions` list (what it guessed) and a `missing` list (what it could not know) turned the problem into two review columns and two numbers. Two models read the same rule differently: one left guesses out, the other wrote them and listed them. Both became traceable.
+
+## 15. A Checker and a Human Measure Different Things
+
+On the same suggestions, the automatic check passed 98.6% and a human approved 30%. The checker saw rule violations; the human saw unconfirmable guesses, dropped warnings, and questions that missed the point (asking who calculates a score instead of what its scale is). Neither number is wrong. Report both, and do not let the easy one stand in for the hard one.
+
+## 16. The Prompt Cannot Supply What the Input Lacks
+
+Many rejected suggestions had no prompt problem: the facts were not in the input. What a grade "A" means, or which scale an engagement score uses, is org knowledge; a notes field may only make sense next to its neighbouring fields. Before you rewrite a prompt again, ask whether the model had the information at all. If not, the fix is more context (metadata sent with the field, a short org glossary), not more instructions.
+
+## 17. Synthetic Data Has Its Own Style
 
 Synthetic data is only as realistic as whoever wrote it. In the training set, the "good" descriptions were long and followed one template. That produced a length-based rule that could not separate good from bad, and the rule had to be redefined. No description used the common "Full Name (ACRONYM)" order, so the classifier never saw it until an LLM wrote one. Before trusting a rule, ask whether the data that shaped it looks like a real org.

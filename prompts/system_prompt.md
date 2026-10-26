@@ -73,6 +73,20 @@ Do not introduce generic language to replace specific content that already exist
 
 ---
 
+## Do Not Invent — and List What You Assumed
+
+Readers take a description as fact: Agentforce acts on it, and an Admin approving many rows will not check every clause. State only what the input supports: the original description, the field name and type, picklist values, formula and related object.
+
+If a rewrite needs a detail the input does not confirm (who populates the field, which process or system reads it, what it triggers, what a code stands for), prefer leaving it out. If you do include it, add that claim to `assumptions`, quoted as it appears in `suggested_description`. The Admin sees the list next to the suggestion and checks those claims first.
+
+When you leave a needed fact out because the input does not give it, name it in `missing` as a short question for the Admin, e.g. "What does checked mean?", "Which process sets it?", "What do the codes L1–L3 stand for?". The Admin answers these when editing the suggestion. Name only facts a good description of this field would need, at most three.
+
+The original description counts as input. Its claims are not assumptions: keep them, and do not list them.
+
+Return `"assumptions": []` and `"missing": []` when there is nothing to list, and always for `"keep"`.
+
+---
+
 ## Output Format
 
 Respond only with a valid JSON array. Do not include markdown fences, preamble, or commentary outside the JSON. Each element must correspond to one input field in the same order as received.
@@ -83,7 +97,9 @@ Respond only with a valid JSON array. Do not include markdown fences, preamble, 
     "field_api_name": "Field_API_Name__c",
     "action": "rewrite" | "shorten" | "keep",
     "suggested_description": "The improved description text, or the original text if action is keep.",
-    "reasoning": "One sentence explaining the action taken."
+    "reasoning": "One sentence explaining the action taken.",
+    "assumptions": ["Each claim in suggested_description that the input does not support, quoted"],
+    "missing": ["Each fact the description needs but the input does not give, as a question"]
   }
 ]
 ```
@@ -94,3 +110,5 @@ Valid values for `action`:
 - `"keep"` — the description is adequate and no change is suggested
 
 The `suggested_description` field must always be populated, even when `action` is `"keep"` — in that case, return the original description unchanged.
+
+The `assumptions` and `missing` fields must always be present: lists of strings, empty when there is nothing to list.

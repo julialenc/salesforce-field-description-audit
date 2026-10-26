@@ -237,6 +237,15 @@ The file contains three tabs:
 |**Tab B — UNCERTAIN**|UNCERTAIN fields with the AI-suggested revision, plus REVIEWED fields the AI proposes to rewrite|Approve, edit, or reject each row|
 |**Tab C — Reference**|REVIEWED fields the AI kept, and SKIPPED fields|No action required — included for full visibility|
 
+Next to each suggestion in Tabs A and B, two columns show what the AI could not confirm:
+
+|Column|What it holds|How the Admin uses it|
+|-|-|-|
+|**Unverified**|Claims in the suggestion that the AI could not support from the field's own data (current description, name, type, picklist values, formula, related object)|Check these first. A claim that cannot be confirmed is removed (Edit) or the row is rejected|
+|**Missing**|Facts a good description needs but the input does not give, written as questions ("What does checked mean?")|Answer them in the Admin Version when choosing Edit|
+
+They come from two lists every LLM answer must return, `assumptions` and `missing` (see the system prompt). Testing showed that "do not invent" alone does not stop a model from inventing; asking it to list what it assumed turns an invisible problem into a column the Admin can check and a number the experiment can track.
+
 The timestamp in the filename ensures that multiple runs do not overwrite each other, and every review file can be traced back to the exact run that produced it.
 
 This file is a proposal, not an action.

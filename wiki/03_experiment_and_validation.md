@@ -269,7 +269,7 @@ The experiment is complete when all of the following are true.
 - In all multi-rule cases, the first-firing rule is recorded and the status follows that rule's step
 
 **LLM Output — Tab A (FLAGGED fields)**
-- At least 80% of suggestions are approvable without editing
+- At least 80% of suggestions are approvable without editing, measured twice with the same prompts and model: once **without** org context (where a field's data says nothing, the suggestion must leave the gap to Missing instead of guessing, and 80% must be approvable once the Missing questions are answered) and once **with** an org context file (80% approvable as written). Decided on Day 5: a blank field cannot be described correctly from its name alone
 - No suggestion contains vague terms from the rejection list above
 - No suggestion exceeds 255 characters
 - No suggestion contradicts the field type
@@ -280,6 +280,7 @@ The experiment is complete when all of the following are true.
 - Where a rewrite is suggested for any other rule, it meets the same quality bar as Tab A
 
 **LLM Output — REVIEWED fields (Prompt C)**
+- No suggestion states a fact the input does not support without listing it in `assumptions`; no rewrite removes a fact the original stated
 - The subtly vague descriptions in the dataset are rewritten
 - Clean and near-miss descriptions are kept; unnecessary rewrites are rare
 - Every proposed rewrite meets the same quality bar as Tab A
@@ -304,6 +305,55 @@ The experiment is complete when all of the following are true.
 
 ---
 
+## Testing Matrix
+
+Every run of the experiment is one cell in a matrix of four dimensions. Changing one dimension at a time is what makes a result explainable: if two things change between runs, the difference cannot be attributed to either. The matrix also keeps paid runs honest: a cell is only run when it answers a stated question.
+
+### Dimensions
+
+| Dimension | Values | What it isolates |
+|---|---|---|
+| **Model** | `gpt-oss-120b` on Groq (free, open-weight) · `gpt-5.4-mini` on Azure OpenAI (paid) | How much of the result depends on the model rather than the prompt |
+| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6, planned) | The effect of instructions, with the input held constant |
+| **Context** | **C0** the field's own data only (description, name, type, picklist values, formula, related object) · **C1** + metadata sent with the field (neighbouring fields on the object; label, help text, length, decimals where present) · **C2** + org glossary only · **C3** + metadata and full org context file | Whether a weak suggestion lacked instructions or lacked information |
+| **Dataset** | Training (288 fields, iterate freely) · Test (144 fields, run once at the end) | Whether results generalise beyond the data the prompts were tuned on |
+
+Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in every cell, so every cell reports all three prompts.
+
+### Measures recorded per cell
+
+- **Automatic pass rate** per prompt (`evaluate_suggestions.py`): rule violations only
+- **Prompt C rewrites** out of 163 REVIEWED fields: how conservative the model is
+- **Assumptions** and **missing** counts (`evaluate_suggestions.py --assumptions`): how much the model guesses and how much it cannot know
+- **Human approval rate** on the 40-field sample (`review_sample.py`): the Definition of Done measure. Expensive in reviewer time, so only for cells that decide something
+- **Cost** per 1,000 fields sent, and run time
+
+### Cells run so far (training set, context C0)
+
+| Prompt | Model | A pass (74) | B pass (34) | C rewrites (163) | Assumptions / missing | Human Tab A approval | Cost (est.) |
+|---|---|---|---|---|---|---|---|
+| P1 | gpt-oss-120b | 86.5% | 76.5% | 11 | — | — | free |
+| P1 | gpt-5.4-mini | 98.6% | 73.5% | 12 | — | — | 0.18 CHF |
+| P2 | gpt-oss-120b | 95.9% | 85.3% | 11 | — | — | free |
+| P2 | gpt-5.4-mini | 97.3% | 82.4% | 11 | — | — | 0.19 CHF |
+| P3 | gpt-oss-120b | 91.9% | 79.4% | 12 | 75 / 53 | — | free |
+| P3 | gpt-5.4-mini | 98.6% | 88.2% | 16 | 46 / 50 | **30%** (6/20) | 0.22 CHF |
+
+P1 is scored with the Day 4 checker, so all rows are comparable. Intermediate iterations are listed under "Prompt iteration with the automatic check" below. Both models chose the same action (rewrite, shorten or keep) for 267–271 of 271 fields in every prompt version: the model changes the wording, not the decisions.
+
+### Cells planned
+
+| Day | Prompt | Context | Model | Question it answers |
+|---|---|---|---|---|
+| 6 | P4 | C0 | gpt-oss-120b, then gpt-5.4-mini | Do prompt fixes alone remove guesses from the text and fix the Missing questions? (target: Tab A ≥60%) |
+| 6 | P4 | C1 | gpt-5.4-mini | Does metadata sent with the field answer Missing items, and at what token cost? |
+| 6 | P4 | C2 | gpt-5.4-mini | How much does an org glossary alone add? |
+| 6 | P4 | C3 | gpt-5.4-mini | With all context, is 80% of Tab A approvable as written? If not, the gap is prompt or model |
+| 7 | best P4 | C0 and C3 | 2–3 models incl. gpt-oss-120b | Which model to recommend, with cost per 1,000 fields |
+| 7 | chosen | C0 and C3 | chosen | Test set, run once: do the training results hold on unseen fields? |
+
+The Definition of Done for Tab A is checked in two cells with the same prompt and model: C0 (gaps left to Missing, 80% approvable once the questions are answered) and C3 (80% approvable as written).
+
 ## Training Set Results
 
 *To be completed after Phase 1 is stable.*
@@ -324,9 +374,9 @@ Classifier accuracy (training set): 279/288 (96.9%)
   SKIPPED fields: 17/17 (100%) correctly identified
 
 LLM output quality (training set):
-  Tab A — % approved without editing:
-  Tab A — % edited before approving:
-  Tab A — % rejected:
+  Tab A — % approved without editing: 30% (Day 5 sample, 6/20, no org context)
+  Tab A — % edited before approving: 50% (10/20)
+  Tab A — % rejected: 20% (4/20)
   Tab B — % where LLM correctly preserved existing description:
   Tab B — % where LLM suggested a revision that was approved:
   Tab B — R6 (Too Long): % where shortened description was approved without further editing:
@@ -347,6 +397,10 @@ Notable failure patterns observed during training: see the same section
 | 2. "Check Before You Answer" list in Prompts A and B | gpt-oss-120b | 71 (95.9%) | 28 (82.4%) | unchanged |
 | 3. R7: the 255-character limit wins over keeping every clause | gpt-oss-120b | 71 (95.9%) | 29 (85.3%) | unchanged |
 | 3. Confirmation run | gpt-5.4-mini | 72 (97.3%) | 28 (82.4%) | 11 of 163, all pass |
+| 4. Prompt C: "Do Not Invent" + final checklist | gpt-5.4-mini | (unchanged) | (unchanged) | 11 of 163, all pass |
+| 5. All prompts return `assumptions` | gpt-5.4-mini | 71 (95.9%) | 28 (82.4%) | 16 of 163, all pass |
+| 6. The original's claims are input; all prompts return `missing` | gpt-5.4-mini | 73 (98.6%) | 30 (88.2%) | 16 of 163, 15 pass |
+| 6. Same prompts | gpt-oss-120b | 68 (91.9%) | 27 (79.4%) | 12 of 163, 11 pass |
 
 What changed and why:
 
@@ -361,6 +415,34 @@ Failure patterns that remain:
 - **Model differences are in wording, not decisions.** gpt-oss-120b and gpt-5.4-mini chose the same action (rewrite, shorten, keep) for all 271 fields. gpt-5.4-mini follows the forbidden-term list more closely: "used to / for / by" appears in 8 of its Prompt A rewrites against 32 for gpt-oss-120b.
 
 The automatic check is a proxy. The Definition of Done is about suggestions a human would approve without editing, which only the human review sample can measure.
+
+### Invented facts (iterations 4–6)
+
+Prompt C looked like it needed work on *detection* (which reviewed fields to rewrite). It did not: both models rewrote the same 11 of 163 fields, and a hand check of the 152 kept descriptions found none that was vague. Reading the 11 rewrites, rather than scoring them, showed the real defect: they **invented facts**. "Used by the team for internal tracking" became "...triggers internal audit processes". The checker passes such text because invention breaks no rule. The same happened in Prompt A for blank fields, and the single Prompt A example itself invented a process ("Written nightly by the renewal forecasting model…"), which gpt-oss-120b copied almost structurally.
+
+- **Iteration 4** added a "Do Not Invent" section and a final checklist to Prompt C. Invented processes mostly disappeared from gpt-5.4-mini's rewrites.
+- **Iteration 5** moved the rule into the system prompt and made every answer return `assumptions`: the claims in the suggestion that the input does not support. The review file shows them as an "Unverified" column. The model overshot: it read "do not invent" as "remove what you cannot verify" and stripped five good descriptions of their own facts.
+- **Iteration 6** stated the boundary (the original description is input; keep its claims, do not list them) and added `missing`: the facts a description needs but the input does not give, as questions for the Admin ("Missing" column). Stripping stopped.
+
+The two models read the same rule differently. gpt-5.4-mini mostly leaves an unconfirmed detail out (46 assumptions listed in Prompt A); gpt-oss-120b writes it and lists it (72). Listing works as tracing on both models, as prevention only on gpt-5.4-mini.
+
+### Human review sample
+
+`python scripts/review_sample.py make` draws a fixed, stratified sample from a review queue: 20 Tab A rows (4 per rule), 12 Tab B rows (R6–R9 and Prompt C rewrites) and 8 kept fields. The reviewer decides on the suggestion text only (Approve / Edit / Reject; Agree / Disagree for kept fields) and may add a note. `python scripts/review_sample.py score <file>` prints the rates per tab and rule.
+
+First sample (gpt-5.4-mini, iteration 6 prompts, Day 5):
+
+| Tab | Approve | Edit | Reject |
+|---|---|---|---|
+| A (20) | 6 (30%) | 10 | 4 |
+| B (12) | 5 (+1 rejected only because the sample lacked picklist values) | 4 | 3 |
+| C kept (8) | 8 agree | | |
+
+Why Tab A rows were not approved (a row can count twice): an unconfirmed guess left in the text although listed as Unverified (about 8); a fact or caveat of the original dropped, including 3 of 4 R5 rewrites (about 6); meaning that only the org can give, such as what grades A–D stand for (4); Missing asking the wrong question, such as who calculates a score instead of its scale (3); a type mismatch left unfixed (2).
+
+The automatic check passed 98.6% of the same Prompt A suggestions. The two numbers measure different things: the checker sees rule violations, the reviewer sees truth, lost caveats and usefulness. Neither replaces the other.
+
+The reviewer's notes pointed to information the model never receives: the field's neighbours on the same object (a size-notes field only makes sense next to the size fields), org knowledge (what a score's scale and bands are) and Salesforce knowledge (which standard objects already hold SLAs or consents). Day 6 tests these as separate hypotheses: prompt fixes, neighbour fields sent with each field, and an org context file, each measured on the same sample.
 
 ### Classifier changes during training
 
