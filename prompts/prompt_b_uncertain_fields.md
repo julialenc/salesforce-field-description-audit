@@ -19,27 +19,32 @@ The description exceeds 200 characters. It is not wrong — it is too verbose. S
 
 - `action`: `"shorten"`
 - Do not change the meaning. Do not introduce new content.
+- At most 200 characters is required. The items of an "including a, b, c, d" list are examples of what the notes hold, not facts that must all survive: summarise them in a few words.
 
 **R7 — Jargon without context**
-The description contains an unexplained acronym or internal term. Expand the acronym inline on first use using the format: `ACRONYM (Full Name)`. If you do not know what the acronym stands for, do not guess — note in your reasoning that the expansion is unknown and rewrite the description to remove or replace the term with plain language.
+The description contains an unexplained acronym or internal term. Expand the acronym inline on first use using the format: `ACRONYM (Full Name)`. If you do not know what the acronym stands for, do not guess — keep the term, and ask what it stands for in `missing`. A standard expansion the input does not state (e.g. QBR as Quarterly Business Review) goes into `assumptions`.
+
+Never change a picklist value. When the acronym appears only inside a value ("IFMGA Guide"), keep the value exactly and expand the acronym in a separate short sentence after the list, e.g. "IFMGA: International Federation of Mountain Guide Associations." 
 
 - `action`: `"rewrite"`
-- Preserve all other content in the description, unless the expansion pushes the result over 255 characters. The 255-character limit wins: then shorten process detail (who populates it, how it is checked) and keep what the field stores, formats, thresholds and values.
+- Preserve all other content in the description, unless the expansion pushes the result over 255 characters. The 255-character limit wins: then shorten wording and process detail (how it is checked), and keep what the field stores, formats, thresholds, values and consequences (what it blocks, allows or decides).
 
 **R8 — Contradictory configuration**
 The description conflicts with what the field type can store. For example: a Date field described as storing a range, an Email field described as storing multiple addresses, a Checkbox described as storing written text. Rewrite the description to match what the field type actually stores.
 
 - `action`: `"rewrite"`
 - Preserve the business intent of the original description. Only fix the structural contradiction, and remove the words that describe the impossible structure rather than qualifying them.
+- Say what the field can actually hold. A Checkbox holds true or false, not the feedback or the list the original describes: say what the checkbox is about and that the content itself is not stored in it, and ask what checked means unless the input says so. Do not guess it ("checked when feedback has been recorded" is a guess). A Date holds one date, not several deadlines: do not list the deadlines, ask which one it stores.
+- Keep the original's examples and categories (event types, tiers) where the rewrite can still use them.
 
 **R9 — Audience mismatch**
-The description is written as a UI instruction for the person filling in the form, not as a metadata description for systems and developers. Rewrite in third person, passive voice where appropriate, describing what the field stores and what it drives — not what a user should do.
+The description is written as a UI instruction for the person filling in the form, not as a metadata description for systems and developers. Rewrite in third person, passive voice where appropriate, describing what the field stores — not what a user should do. Do not add what it drives or enables unless the original says so.
 
 Bad: `"Choose the customer's time zone from the list so you know when to call them. Remember to update it if they move."`
 Good: `"Time zone of this contact's main office as a region/city name (e.g. Europe/Zurich). Read by the meeting scheduler to propose call slots inside local business hours."`
 
 - `action`: `"rewrite"`
-- Preserve the factual content. Only fix the audience and voice.
+- Preserve the factual content. Only fix the audience and voice. Who does what and how is content, not voice: "confirmed with the contact directly during the fitting call" keeps "with the contact directly". Instructions to the user ("leave blank if…", "make sure to…") become facts ("Blank when the contact was not referred.").
 
 ---
 
@@ -65,6 +70,8 @@ You will receive a JSON array. Each element contains:
 - `formula` — the formula expression if Formula type (otherwise null)
 - `related_object` — the target object if Lookup or MasterDetail (otherwise null)
 - `rule_triggered` — the classifier rule: R6, R7, R8, or R9
+- `neighbour_fields` — other fields on the same object with a shared name word (may be absent)
+- `label`, `help_text`, `length`, `decimal_places` — further metadata, only when the org provides it
 
 ## Output Format
 
@@ -116,10 +123,11 @@ Return a JSON array in the same order as the input.
 ## Check Before You Answer
 
 Read each `suggested_description` once more and fix it if any of these fail:
-1. **Length:** at most 255 characters, counted including spaces. If it is longer, cut process detail, not facts.
+1. **Length:** at least 30 and at most 255 characters (R6: at most 200), counted including spaces. If it is longer, cut process detail and example lists, not facts.
 2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.
 3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system instead, or leave the clause out.
-4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
+4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given, with nothing inserted inside a value.
 5. **R6 only:** at most 200 characters and shorter than the original. Do not keep the "including a, b, c, d" list form: summarise the list in a few words or keep only the items a developer needs.
 6. **R8 only:** the words that describe the impossible structure ("list of", "range", "written feedback", "multiple addresses") are gone, not just qualified.
-7. **Assumptions:** every person, team, process, system or consequence you added is either in the input or listed in `assumptions`. A shorten never adds anything, so its list is `[]`.
+7. **Nothing guessed:** every person, team, process, system or consequence you added is in the input. If not, take it out and ask in `missing`; keep it only if it is a confident reading listed in `assumptions`. The description contains no question and no remark about what is unknown; those belong in `missing`. Sentences such as "Used by …", "Read by …", "Populated by …", "Set by …", "Drives …", "Enables …" and words such as "manual" or "automatic" must come from the input; delete them otherwise. A shorten never adds anything, so its list is `[]`.
+8. **Nothing lost:** every fact, consequence and "who / how" detail of the original is still there (R6 may summarise lists of examples).

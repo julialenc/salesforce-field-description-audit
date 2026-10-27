@@ -204,7 +204,15 @@ Before any fields are sent to the LLM, Script 1 assembles a reusable instruction
 * `system_prompt.md` — the universal definition of a good field description, including the expected tone, length, format, and quality criteria
 * `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding. The examples are invented fields that appear in neither synthetic dataset, so the model can never copy the answer for a field it is processing
 
+* **Org context** (optional, `options.org_context_file`) — a short Markdown file the Admin writes once: a glossary of codes, grades and scales, the systems and teams, and the org's conventions. The model may state its facts without listing them as assumptions. `data/org_context_synthetic.md` is an example for the synthetic org (and `org_context_synthetic_glossary.md` the glossary part only)
+
 This shared context is injected once per session. For each batch, the script then adds the relevant task instruction — `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` or `prompt_c_reviewed_fields.md` — together with the field data for that batch.
+
+Each field is sent with its name, type, current description, picklist values, formula, related object and (outside Prompt C) the rule that fired. Two optional additions give the model more to work from:
+* **Neighbour fields** (`options.neighbour_fields`, e.g. 5; 0 = off): up to that many other fields on the same object whose names share a word, or that name each other in their descriptions, each with its type and the first 120 characters of its description. Rare words weigh more; the object's own name and words in more than a fifth of its field names are ignored, and form words (Notes, Date, Flag, Code…) count half. So `Gear_Size_Notes__c` arrives with `Clothing_Size__c`, `Shoe_Size_EU__c` and `Size_Confirmed__c`. About 80 input tokens per field on the training set
+* **Label, help text, length and decimal places**, whenever the source provides them (an org does; the synthetic sets do not)
+
+**What the prompts ask for (Day 6).** The description states only what the input supports: the original description, the metadata, the neighbour fields and the org context. The original's facts and caveats are kept even when the field was flagged ("no longer used for routing" stays exactly that). Anything else the description would need, such as who sets the field, what a code means, a score's range or what checked means, is not guessed into the text but asked for in `missing`, with the question the field type needs first. A short Salesforce section tells the model which standard features already hold common data (Case Origin, Lead Source, Entitlements, Campaign Members, consent fields), so it asks how a custom field differs instead of describing a duplicate.
 
 Routing logic:
 
@@ -217,7 +225,7 @@ Routing logic:
 
 Fields are sent in batches (default 50 per API call, set by `options.llm_batch_size`). Free tiers need smaller batches: on Groq's free tier a single request may not exceed 8,000 tokens, so 10 fields per batch is the practical size. Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
 
-**Cache.** Answers are stored in `data/description_cache.json` and reused on the next run when nothing that shapes the answer has changed: the description, the status and rule (which decide the prompt), the system prompt, the golden examples, the field's own task prompt, and the provider, model and `reasoning_effort`. Editing Prompt B therefore re-sends only the UNCERTAIN fields; editing the system prompt or the examples re-sends everything. Failed calls are never cached. Temperature is deliberately not part of the key: it changes sampling, not the question asked.
+**Cache.** Answers are stored in `data/description_cache.json` and reused on the next run when nothing that shapes the answer has changed: the description, the status and rule (which decide the prompt), the field's neighbour fields and further metadata, the system prompt, the golden examples, the org context, the field's own task prompt, and the provider, model and `reasoning_effort`. Editing Prompt B therefore re-sends only the UNCERTAIN fields; editing the system prompt or the examples re-sends everything. Failed calls are never cached. Temperature is deliberately not part of the key: it changes sampling, not the question asked.
 
 ---
 
@@ -241,7 +249,7 @@ Next to each suggestion in Tabs A and B, two columns show what the AI could not 
 
 |Column|What it holds|How the Admin uses it|
 |-|-|-|
-|**Unverified**|Claims in the suggestion that the AI could not support from the field's own data (current description, name, type, picklist values, formula, related object)|Check these first. A claim that cannot be confirmed is removed (Edit) or the row is rejected|
+|**Unverified**|Claims in the suggestion that the AI could not support from its input (current description, name, type, picklist values, formula, related object, neighbour fields, org context). Since Day 6 the prompts keep this list short: a guess is asked for in Missing instead of being written|Check these first. A claim that cannot be confirmed is removed (Edit) or the row is rejected|
 |**Missing**|Facts a good description needs but the input does not give, written as questions ("What does checked mean?")|Answer them in the Admin Version when choosing Edit|
 
 They come from two lists every LLM answer must return, `assumptions` and `missing` (see the system prompt). Testing showed that "do not invent" alone does not stop a model from inventing; asking it to list what it assumed turns an invisible problem into a column the Admin can check and a number the experiment can track.

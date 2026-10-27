@@ -314,7 +314,7 @@ Every run of the experiment is one cell in a matrix of four dimensions. Changing
 | Dimension | Values | What it isolates |
 |---|---|---|
 | **Model** | `gpt-oss-120b` on Groq (free, open-weight) · `gpt-5.4-mini` on Azure OpenAI (paid) | How much of the result depends on the model rather than the prompt |
-| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6, planned) | The effect of instructions, with the input held constant |
+| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6) | The effect of instructions, with the input held constant |
 | **Context** | **C0** the field's own data only (description, name, type, picklist values, formula, related object) · **C1** + metadata sent with the field (neighbouring fields on the object; label, help text, length, decimals where present) · **C2** + org glossary only · **C3** + metadata and full org context file | Whether a weak suggestion lacked instructions or lacked information |
 | **Dataset** | Training (288 fields, iterate freely) · Test (144 fields, run once at the end) | Whether results generalise beyond the data the prompts were tuned on |
 
@@ -328,7 +328,7 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 - **Human approval rate** on the 40-field sample (`review_sample.py`): the Definition of Done measure. Expensive in reviewer time, so only for cells that decide something
 - **Cost** per 1,000 fields sent, and run time
 
-### Cells run so far (training set, context C0)
+### Cells run so far (training set)
 
 | Prompt | Model | A pass (74) | B pass (34) | C rewrites (163) | Assumptions / missing | Human Tab A approval | Cost (est.) |
 |---|---|---|---|---|---|---|---|
@@ -338,6 +338,16 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 | P2 | gpt-5.4-mini | 97.3% | 82.4% | 11 | — | — | 0.19 CHF |
 | P3 | gpt-oss-120b | 91.9% | 79.4% | 12 | 75 / 53 | — | free |
 | P3 | gpt-5.4-mini | 98.6% | 88.2% | 16 | 46 / 50 | **30%** (6/20) | 0.22 CHF |
+| P4, C0 | gpt-5.4-mini | 83.8% | 70.6% | 24 | 7 / 48 | — | 0.37 CHF (two runs) |
+| P4, C1 | gpt-5.4-mini | 81.1% | 70.6% | 14 | 7 / 54 | **30%** (6/20); 55% once Missing is answered | 0.28 CHF |
+| P4, C1 + glossary | gpt-5.4-mini | 82.4% | 70.6% | 13 | 3 / 72 | — | 0.30 CHF |
+| P4, C3 | gpt-5.4-mini | 86.5% | 79.4% | 18 | 6 / 46 | **40%** (8/20) | 0.31 CHF |
+| P5, C1 | gpt-5.4-mini | sample only | sample only | — | 2 / 13 (sample) | **35%** (7/20); 65% once Missing is answered | 0.05 CHF (40 fields) |
+| P5, C3 | gpt-5.4-mini | sample only | sample only | — | 4 / 4 (sample) | **70%** (14/20); R1–R4 88% | 0.05 CHF (40 fields) |
+
+P5 cells were run on the 40 sample fields only (about a tenth of a full run's cost); their automatic checks cover those fields, so the pass-rate columns are left empty. A full P5 run is the first Day 7 step.
+
+Context column: none means C0. From P4 on, assumptions and missing are counted in Prompt A only (rows with assumptions / missing questions), the measure the Day 6 hypotheses name. The P4 pass rates are lower for a known reason, see "Day 6" below.
 
 P1 is scored with the Day 4 checker, so all rows are comparable. Intermediate iterations are listed under "Prompt iteration with the automatic check" below. Both models chose the same action (rewrite, shorten or keep) for 267–271 of 271 fields in every prompt version: the model changes the wording, not the decisions.
 
@@ -345,11 +355,9 @@ P1 is scored with the Day 4 checker, so all rows are comparable. Intermediate it
 
 | Day | Prompt | Context | Model | Question it answers |
 |---|---|---|---|---|
-| 6 | P4 | C0 | gpt-oss-120b, then gpt-5.4-mini | Do prompt fixes alone remove guesses from the text and fix the Missing questions? (target: Tab A ≥60%) |
-| 6 | P4 | C1 | gpt-5.4-mini | Does metadata sent with the field answer Missing items, and at what token cost? |
-| 6 | P4 | C2 | gpt-5.4-mini | How much does an org glossary alone add? |
-| 6 | P4 | C3 | gpt-5.4-mini | With all context, is 80% of Tab A approvable as written? If not, the gap is prompt or model |
-| 7 | best P4 | C0 and C3 | 2–3 models incl. gpt-oss-120b | Which model to recommend, with cost per 1,000 fields |
+| 7 | P5 | C0 and C3 | gpt-5.4-mini, full training set | Do the sample results hold on all 271 fields (automatic check, remark count)? |
+| 7 | P5 | C0 and C3 | a larger model, same 40 sample fields | Does a stronger model close the gap to 80% that prompts and context left? |
+| 7 | best | C0 and C3 | 2–3 models incl. gpt-oss-120b | Which model to recommend, with cost per 1,000 fields |
 | 7 | chosen | C0 and C3 | chosen | Test set, run once: do the training results hold on unseen fields? |
 
 The Definition of Done for Tab A is checked in two cells with the same prompt and model: C0 (gaps left to Missing, 80% approvable once the questions are answered) and C3 (80% approvable as written).
@@ -374,7 +382,7 @@ Classifier accuracy (training set): 279/288 (96.9%)
   SKIPPED fields: 17/17 (100%) correctly identified
 
 LLM output quality (training set):
-  Tab A — % approved without editing: 30% (Day 5 sample, 6/20, no org context)
+  Tab A — % approved without editing: 30% (Day 5 sample, 6/20, no org context); Day 6: 30% without context (55% once Missing is answered), 40% with full org context
   Tab A — % edited before approving: 50% (10/20)
   Tab A — % rejected: 20% (4/20)
   Tab B — % where LLM correctly preserved existing description:
@@ -443,6 +451,45 @@ Why Tab A rows were not approved (a row can count twice): an unconfirmed guess l
 The automatic check passed 98.6% of the same Prompt A suggestions. The two numbers measure different things: the checker sees rule violations, the reviewer sees truth, lost caveats and usefulness. Neither replaces the other.
 
 The reviewer's notes pointed to information the model never receives: the field's neighbours on the same object (a size-notes field only makes sense next to the size fields), org knowledge (what a score's scale and bands are) and Salesforce knowledge (which standard objects already hold SLAs or consents). Day 6 tests these as separate hypotheses: prompt fixes, neighbour fields sent with each field, and an org context file, each measured on the same sample.
+
+### Day 6: prompt fixes and context (P4, C0–C3)
+
+Five hypotheses came out of the Day 5 review notes. Each run changed one thing, on gpt-5.4-mini with the same 271 fields; the human review used the same 40 rows as Day 5 (`review_sample.py rereview`: unchanged rows keep their decision).
+
+| Hypothesis | Run | Deciding number | Result | Verdict |
+|---|---|---|---|---|
+| **H1** ask, don't write: a guess goes to Missing, the original's facts and caveats stay | P4, C0 | Prompt A rows with Unverified 46 → ≤10; Tab A approval 30% → ≥60% | Unverified rows **46 → 7**. Tab A approval: 30% as written (6/20), the same as Day 5 but for other reasons: the guesses are gone and 5 more rows are approvable once their Missing questions are answered (55%) | Guesses left the text; approval target not met |
+| **H2** Missing asks first what the field type needs (range, what checked means, what codes mean, which event) | same run | No "wrong question" notes in the re-review | 1 note left (Custom_Pricing_Ref: "identify the reference target first") against 3 on Day 5 | Mostly confirmed |
+| **H3** neighbour fields sent with each field | P4, C1 | Missing falls where a neighbour holds the answer; cost stays under ~1 CHF per 1,000 fields | Missing in Prompt A **48 → 52**; the model rarely names the neighbour (Gear_Size_Notes asks "clothing, footwear, or both?" instead). Input tokens +13%, 1.03 CHF per 1,000 fields estimated (~0.7 real) | Refuted on this set: affordable, but no measurable gain. Option kept, off by default |
+| **H4** org context file | P4, C1 + glossary; P4, C3 | Unverified + Missing and Tab A approval per run; if full context stays under 80%, the gap is prompt or model | Glossary only: Unverified 3, Missing **72** (more questions, not fewer). Full context: Unverified 6, Missing **46**, Tab A **40%** (8/20); the model used the file well (Jira reference format, tagging convention, grade bands) | Context helps (30% → 40%) but is not the gap: **prompt or model** |
+| **H5** Salesforce facts in the system prompt (one value per Date/Checkbox, standard features, Percent encoding) | folded into H1 | R8 and duplicate-of-standard rows in the re-review | SLA_Deadline and Pilot_Feedback now hold one value (both Reject → Edit); "Manual" gone from Case_Priority_Override (Edit → Approve) | Confirmed for type fixes |
+
+**Why the automatic pass rate fell** (Prompt A 98.6% → 81–87%). Most failures are R5 rows where the suggestion keeps the original's caveat ("Deprecated…", "Not yet in use: to be confirmed with legal and HR…") or returns the original unchanged: the classifier reads those words as placeholders again. This is what the reviewer asked for (two such rows went from Reject to Approve), so here the checker and the review disagree, and the review decides.
+
+**What still blocks approval** (full context, 12 of 20 Tab A rows not approved; reviewer's notes):
+- Remarks to the Admin written into the description ("The original description cannot store a list…", "…are not specified"), although the prompt forbids them
+- Opaque codes left unexplained although the org context defines them (Ops_Queue Alpha–Delta, Case_Classifier Type A–D)
+- A Number field described with its tier names as if it stored them (Discount_Rate, SLA_Target_Hours)
+- Small drifts from the original's wording ("calling" → "contacting"; "with the contact directly" → "directly")
+- A lifecycle claim built from a bare "TBD" ("Not yet in use…", Certification_Body)
+
+**Questions in the description.** The first P4 runs wrote the Missing questions into the description itself ("Checkbox flag on this record. What does checked mean?"), 11–14 times per run. One sentence in the system prompt (the description is the text written to Salesforce; it never contains a question or a note to the Admin) removed all of them.
+
+**Run-to-run variance.** Two runs with nearly the same prompts gave Prompt B 70.6% and 85.3%. Single-run differences of a few points are noise; the human sample and the Unverified/Missing counts moved far more than that.
+
+**Iteration P5 (one more prompt iteration on the reviewer's notes).** Five changes: no remarks to the Admin in the text (and a new automatic "remark" check, which found 8 such rows in Prompt A without context and 13 with it in the P4 runs); org context meanings written into opaque codes ("Alpha (order exceptions), …"); tiers of a Number field written as a mapping to the stored value ("Basic 48, Standard 24 … hours"); the original's specific words kept ("calling", "with the contact"); no status claim from a bare "TBD". The org context file's grade definition was also corrected to match the original ("net revenue and the engagement score"). Neighbour fields stayed on for comparability.
+
+| Cell | Tab A approve | Tab B approve | Tab C agree |
+|---|---|---|---|
+| P5, no context | 7/20 (35%); 13/20 (65%) once Missing is answered | 5/12 | 8/8 |
+| P5, full context | **14/20 (70%)**; R1–R4 14/16 (88%), R5 0/4 | 6/12 | 8/8 |
+
+What remains:
+- **R5 cannot reach approval by design.** Two of the four R5 rows are honest, useful originals ("Deprecated. Queue routing code … No longer used for routing."). Prompt A must rewrite every FLAGGED field, so the model either repeats the original (Reject: no improvement) or changes a good text. Without these two rows, full context reaches 14/18 (78%). Allowing "keep" for an honest R5 caveat is a routing decision, open
+- **Neighbour fields add guesses.** Flag__c became part of an "ambassador workflow" (from Ambassador_Flag__c), and Gear_Size_Notes and Certification_Body took unverified scope from neighbours. With H3 already showing no gain, neighbours stay off
+- **Single cases:** a checkbox whose meaning is still guessed (Event_Attendance, Pilot_Feedback), an R6 shortening that drops specific items (Investigation_Log, Expedition_Waiver_Notes), a Prompt C rewrite of a good description (Case_Source_Channel)
+
+**Reviewing a context run needs the context.** The first scoring of the C3 sample gave 20%: the reviewer marked five rows Edit only because the org context was not in the sample file. With the file at hand, four became Approve (40%). A reviewer of a context run must see the context the model saw.
 
 ### Classifier changes during training
 

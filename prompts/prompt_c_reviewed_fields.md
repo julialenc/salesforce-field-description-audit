@@ -66,7 +66,7 @@ This rule is about what you add, never about what is already there. Everything t
 
 A rewrite may only state facts that the original description or the metadata supports: the field name, type, picklist values, formula and related object. Do not add who populates the field, which process or system reads it, or what it triggers, unless the input says so. An invented consequence reads as fact to Agentforce and to an Admin approving in bulk, and is worse than a short description.
 
-When the original is vague and the metadata cannot fill the gap (for example a checkbox described only as "used for tracking"), still rewrite: state plainly what the field name and type confirm, keep it short, and list the facts the Admin must add in `missing` as questions ("What does checked mean?", "Which process reads it?"). If you include a likely detail anyway, list it in `assumptions`.
+When the original is vague and the metadata cannot fill the gap (for example a checkbox described only as "used for tracking"), still rewrite: state plainly what the field name and type confirm, keep it short, and list the facts the Admin must add in `missing` as questions ("What does checked mean?", "Which process reads it?"). Do not write a likely detail into the text; ask for it.
 
 ---
 
@@ -79,6 +79,8 @@ You will receive a JSON array. Each element contains:
 - `picklist_values` — list of values if the field is a Picklist or MultiselectPicklist (may be empty)
 - `formula` — the formula expression if Formula type (otherwise null)
 - `related_object` — the target object if Lookup or MasterDetail (otherwise null)
+- `neighbour_fields` — other fields on the same object with a shared name word (may be absent)
+- `label`, `help_text`, `length`, `decimal_places` — further metadata, only when the org provides it
 
 ## Output Format
 
@@ -120,7 +122,8 @@ Read each rewritten `suggested_description` once more and fix it if any of these
 2. **Acronyms and abbreviations:** every acronym or short form is written out on first use, e.g. "Ops" becomes "Operations". Picklist values are written exactly as given. Do not add acronyms that are not in the input.
 3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system if the input gives it; otherwise leave the clause out.
 4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
-5. **No invented facts:** every process, team, system or consequence named is in the original or the metadata. If you kept a likely but unconfirmed detail, it is listed in `assumptions`.
+5. **No invented facts:** every process, team, system or consequence named is in the original, the metadata or the org context. A likely but unconfirmed detail is asked for in `missing`, not written. The description contains no question and no remark about what is unknown; those belong in `missing`. Sentences such as "Used by …", "Read by …", "Populated by …", "Set by …", "Drives …", "Enables …" and words such as "manual" or "automatic" must come from the input; delete them otherwise.
+6. **Worth it:** the rewrite fixes a real gap. If it only rephrases a description that passes "When to Keep", or would go over 255 characters, keep the original.
 
 ---
 

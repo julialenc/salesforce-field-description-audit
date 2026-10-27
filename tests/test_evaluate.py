@@ -64,6 +64,10 @@ CASES = [
     ("listed missing fact is a note", field("R1", desc=""),
                                      {**answer(GOOD), "missing": ["Which process reads it?"]}, set(), {"missing"}),
     ("empty assumptions, no note",   field("R1", desc=""), {**answer(GOOD), "assumptions": [" "]}, set(), set()),
+    ("question in the text fails",   field("R1", desc=""), answer(GOOD + " What does it trigger?"), {"remark"}, set()),
+    ("remark about original fails",  field("R1", desc=""), answer(GOOD + " The original named three tiers."), {"remark"}, set()),
+    ("'not specified' remark fails", field("R1", desc=""), answer(GOOD + " The unit is not specified."), {"remark"}, set()),
+    ("'the original request' passes", field("R1", desc=""), answer(GOOD + " Holds the original request and the approval."), set(), set()),
 ]
 
 

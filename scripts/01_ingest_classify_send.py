@@ -13,7 +13,7 @@ Workflow:
   3. Classify every field against Rules R1-R9
   4. Save sf_classified.json
   5. Check description cache — skip fields unchanged since last run
-  6. Load prompt assets
+  6. Load prompt assets (and the optional org context file); add neighbour fields
   7. Deduplicate and sort fields before batching
   8. Route to LLM: FLAGGED → Prompt A | UNCERTAIN → Prompt B | REVIEWED → Prompt C
   9. Save llm_response.json
@@ -499,6 +499,97 @@ def field_key(f: dict) -> str:
     return f"{f.get('object', '')}.{f.get('field_api_name', '')}"
 
 
+# ── neighbour fields and further metadata ────────────────────────────────────
+
+# Sent with a field when the org provides them (Tooling API ingestion); the
+# synthetic sets have none of these.
+METADATA_EXTRAS = ("label", "help_text", "length", "decimal_places")
+
+# Name words that say nothing about a field's subject
+NAME_STOPWORDS = {"c", "id", "is", "of", "the", "and", "to", "for", "has", "by", "at", "in", "on"}
+
+# Name words that say what form a value takes, not what it is about: they
+# count half, so Gear_Size_Notes__c ranks Clothing_Size__c above other *_Notes__c
+NAME_FORM_WORDS = {"notes", "date", "flag", "code", "type", "status", "number", "name",
+                   "count", "score", "hours", "time", "ref", "reference", "override"}
+
+# A neighbour's description is cut to this many characters
+NEIGHBOUR_DESC_CHARS = 120
+
+
+def _name_words(api_name: str) -> set[str]:
+    """Lower-case words of a field name: Shoe_Size_EU__c -> {shoe, size, eu}, OwnerId -> {owner}."""
+    base  = re.sub(r"__c$", "", api_name or "")
+    words = re.findall(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+", base)
+    return {w.lower() for w in words if w.lower() not in NAME_STOPWORDS and len(w) > 1}
+
+
+def _short(desc: str, limit: int = NEIGHBOUR_DESC_CHARS) -> str:
+    desc = " ".join((desc or "").split())
+    if len(desc) <= limit:
+        return desc
+    return desc[:limit].rsplit(" ", 1)[0] + " …"
+
+
+def add_neighbour_fields(fields: list[dict], max_neighbours: int) -> None:
+    """
+    Give each field up to max_neighbours other fields on the same object that
+    share a name word (Gear_Size_Notes__c -> Clothing_Size__c, Shoe_Size_EU__c)
+    or that name each other in their descriptions. Rare words weigh more; a
+    word in more than a fifth of the object's field names, or the object's
+    own name (Case_ on Case), is ignored; form words (Notes, Date, Flag) count
+    half. Stored as f["neighbour_fields"]: name, type, start of description.
+    """
+    if max_neighbours <= 0:
+        return
+    by_object: dict[str, list[dict]] = defaultdict(list)
+    for f in fields:
+        by_object[f.get("object", "")].append(f)
+
+    for obj, obj_fields in by_object.items():
+        words = {f["field_api_name"]: _name_words(f["field_api_name"]) - {obj.lower()} for f in obj_fields}
+        freq: dict[str, int] = defaultdict(int)
+        for ws in words.values():
+            for w in ws:
+                freq[w] += 1
+        too_common = max(3, len(obj_fields) // 5)
+
+        for f in obj_fields:
+            if f["classifier_status"] == "SKIPPED":
+                continue
+            name, desc = f["field_api_name"], f.get("description") or ""
+            scored = []
+            for other in obj_fields:
+                oname = other["field_api_name"]
+                if oname == name:
+                    continue
+                score = sum((0.5 if w in NAME_FORM_WORDS else 1) / freq[w]
+                            for w in words[name] & words[oname] if freq[w] <= too_common)
+                if oname in desc or name in (other.get("description") or ""):
+                    score += 1
+                if score > 0:
+                    scored.append((-score, oname, other))
+            scored.sort(key=lambda t: (t[0], t[1]))
+            f["neighbour_fields"] = [{"field_api_name": o["field_api_name"],
+                                      "field_type":     o.get("field_type"),
+                                      "description":    _short(o.get("description") or "")}
+                                     for _, _, o in scored[:max_neighbours]]
+    with_n = sum(1 for f in fields if f.get("neighbour_fields"))
+    log.info(f"Neighbour fields: {with_n} of {len(fields)} fields have at least one (max {max_neighbours})")
+
+
+def field_context(f: dict) -> dict:
+    """
+    Metadata sent with a field besides its own description: neighbour fields
+    and, where the org provides them, label, help text, length and decimal
+    places. Part of the payload, the cache key and the deduplication key.
+    """
+    ctx = {k: f[k] for k in METADATA_EXTRAS if f.get(k) not in (None, "")}
+    if f.get("neighbour_fields"):
+        ctx["neighbour_fields"] = f["neighbour_fields"]
+    return ctx
+
+
 def run_fingerprint(prompts: dict, cfg: dict) -> dict[str, str]:
     """
     Hash, per route, of everything outside the field that shapes the LLM answer:
@@ -507,7 +598,7 @@ def run_fingerprint(prompts: dict, cfg: dict) -> dict[str, str]:
     UNCERTAIN fields; editing the system prompt or examples re-sends all of them.
     """
     llm    = cfg.get("llm", {})
-    shared = [prompts["system"], prompts["examples"],
+    shared = [prompts["system"], prompts["examples"], prompts.get("org_context", ""),
               str(llm.get("provider", "openai")),
               str(llm.get("model", "")),
               str(llm.get("reasoning_effort", ""))]
@@ -516,9 +607,12 @@ def run_fingerprint(prompts: dict, cfg: dict) -> dict[str, str]:
 
 
 def cache_hash(f: dict, fingerprint: dict[str, str]) -> str:
-    """Cache key for one field: description, route (status + rule) and that route's fingerprint."""
+    """Cache key for one field: description, route (status + rule), metadata context and that route's fingerprint."""
     parts = [(f.get("description") or "").strip(), f["classifier_status"],
              str(f.get("rule_triggered") or ""), fingerprint.get(f["classifier_status"], "")]
+    ctx = field_context(f)
+    if ctx:
+        parts.append(json.dumps(ctx, sort_keys=True))
     return hashlib.md5("".join(parts).encode()).hexdigest()
 
 
@@ -559,7 +653,7 @@ PROMPT_FILES = {
 }
 
 
-def load_prompts() -> dict:
+def load_prompts(cfg: dict | None = None) -> dict:
     prompts = {}
     for key, fname in PROMPT_FILES.items():
         path = PROMPTS_DIR / fname
@@ -570,6 +664,18 @@ def load_prompts() -> dict:
             prompts[key] = f.read()
     # Parse golden examples
     prompts["examples_parsed"] = json.loads(prompts["examples"])
+    # Optional org context: the Admin's glossary of codes, scales, systems and teams
+    prompts["org_context"] = ""
+    ctx_file = ((cfg or {}).get("options") or {}).get("org_context_file")
+    if ctx_file:
+        path = Path(ctx_file)
+        if not path.is_absolute():
+            path = ROOT / path
+        if not path.exists():
+            log.error(f"org_context_file not found: {path}")
+            sys.exit(1)
+        prompts["org_context"] = path.read_text(encoding="utf-8")
+        log.info(f"Org context loaded from {path.name} ({len(prompts['org_context'])} chars)")
     log.info("All prompt assets loaded")
     return prompts
 
@@ -593,7 +699,9 @@ def sort_and_deduplicate(fields: list[dict]) -> tuple[list[dict], list[dict]]:
     unique, duplicates = [], []
     for f in llm_fields:
         desc = (f.get("description") or "").strip()
-        key  = (f["classifier_status"], f.get("rule_triggered"), desc)
+        ctx  = field_context(f)
+        key  = (f["classifier_status"], f.get("rule_triggered"), desc,
+                json.dumps(ctx, sort_keys=True) if ctx else "")
         if desc and key in seen_descs:
             f["dedup_primary"] = field_key(seen_descs[key])
             duplicates.append(f)
@@ -654,6 +762,7 @@ def build_llm_payload(batch: dict, prompts: dict) -> list[dict]:
         }
         if f["classifier_status"] != "REVIEWED":
             entry["rule_triggered"] = f.get("rule_triggered")
+        entry.update(field_context(f))
         payload.append(entry)
     return payload
 
@@ -684,13 +793,17 @@ def call_llm(payload: list[dict], batch: dict, prompts: dict, cfg: dict) -> dict
 
 def _build_system_message(route_key: str, prompts: dict) -> str:
     examples_block = json.dumps(prompts["examples_parsed"], indent=2)
-    return (
+    message = (
         prompts["system"]
         + "\n\n---\n\n## Golden Examples\n\n"
-        + "The following are examples of high-quality field descriptions. "
-        + "Use them to calibrate the quality bar.\n\n"
+        + "The following are examples of high-quality field descriptions, written by Admins "
+        + "who know their org. Use them to calibrate the quality bar: they show the target, "
+        + "not facts you may guess for a field whose input does not give them.\n\n"
         + "```json\n" + examples_block + "\n```"
     )
+    if prompts.get("org_context"):
+        message += "\n\n---\n\n## Org Context\n\n" + prompts["org_context"].strip()
+    return message
 
 
 def _build_user_message(payload: list[dict], route_key: str, prompts: dict) -> str:
@@ -1219,8 +1332,11 @@ def main() -> None:
     # 4. Save sf_classified.json
     save_classified(classified)
 
+    # Neighbour fields: part of the payload and the cache key
+    add_neighbour_fields(classified, int(cfg.get("options", {}).get("neighbour_fields", 0) or 0))
+
     # 5. Prompts (loaded first: they are part of the cache key)
-    prompts     = load_prompts()
+    prompts     = load_prompts(cfg)
     fingerprint = run_fingerprint(prompts, cfg)
 
     # 6. Cache

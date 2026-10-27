@@ -80,6 +80,7 @@ Intended users:
 ├── data/
 │   ├── sf_metadata_raw_training.json  # Synthetic training set — 288 fields across 4 objects, used during classifier development and prompt iteration
 │   ├── sf_metadata_raw_test.json      # Synthetic test set — 144 fields across 4 objects, held out for final validation only
+│   ├── org_context_synthetic.md       # Example org context file for the synthetic org (glossary, systems, teams, conventions); _glossary.md is the glossary part only
 │   ├── sf_classified.json             # Classifier output — each field labelled FLAGGED, UNCERTAIN, REVIEWED, or SKIPPED. Committed as experiment reference only
 │   ├── llm_response.json              # Raw LLM suggestions before human review. Committed as experiment reference only
 │   ├── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs (FLAGGED, UNCERTAIN, Reference). Committed as experiment reference only
@@ -95,10 +96,11 @@ Intended users:
 │   ├── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
 │   ├── validate_classifier.py         # Compare classifier output with the dataset labels; list every mismatch
 │   ├── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
-│   └── review_sample.py               # Draw a 40-field human review sample from a review file, and score it
+│   └── review_sample.py               # Draw a 40-field human review sample from a review file, re-review it after a change, and score it
 ├── tests/
 │   ├── test_classifier.py             # Unit tests for the R1–R9 rules and the known classifier fixes
 │   ├── test_cache.py                  # Unit tests for the cache key
+│   ├── test_context.py                # Unit tests for neighbour fields, extra metadata and the org context file
 │   └── test_evaluate.py               # Unit tests for the suggestion checker
 ├── wiki/
 │   ├── 01_project_overview.md

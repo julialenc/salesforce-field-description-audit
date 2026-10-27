@@ -16,7 +16,8 @@ A field description must be useful to all three audiences without UI context. Th
 **Length**
 - Minimum: 30 characters
 - Target: 60–180 characters
-- Hard limit: 255 characters (Salesforce metadata API enforces this)
+- Hard limit: 255 characters (the project's limit, so descriptions stay readable in reports and agent context)
+- When a description must be cut to fit 255 characters, cut wording and process detail, never a value, threshold, consequence or caveat the original states. Shortening a too-long description (R6) follows its own rule in Prompt B: at most 200 characters, example lists summarised
 - A description that exceeds 200 characters is a candidate for shortening
 
 **Specificity**
@@ -41,7 +42,7 @@ Do not use the following terms unless they are followed immediately by specific 
 
 **Type alignment**
 The description must be consistent with the field type:
-- Checkbox stores true or false only — describe what "checked" means and what happens as a result
+- Checkbox stores true or false only — describe what "checked" means and what happens as a result, if the input says so. Do not describe what unchecked means unless the input does: an unchecked box may simply never have been set
 - Date stores a single date — do not describe a date range
 - Email stores a single email address — do not describe a list
 - Number and Currency store a single numeric value — do not describe a range or a dropdown
@@ -73,17 +74,74 @@ Do not introduce generic language to replace specific content that already exist
 
 ---
 
-## Do Not Invent — and List What You Assumed
+## Write Only What the Input Supports — Ask for the Rest
 
-Readers take a description as fact: Agentforce acts on it, and an Admin approving many rows will not check every clause. State only what the input supports: the original description, the field name and type, picklist values, formula and related object.
+Readers take a description as fact: Agentforce acts on it, and an Admin approving many rows will not check every clause. The input is: the original description, the field name and type, picklist values, formula, related object, the neighbour fields and the org context (both described below, when present).
 
-If a rewrite needs a detail the input does not confirm (who populates the field, which process or system reads it, what it triggers, what a code stands for), prefer leaving it out. If you do include it, add that claim to `assumptions`, quoted as it appears in `suggested_description`. The Admin sees the list next to the suggestion and checks those claims first.
+**The original description is input.** Keep its specific words where they are right: do not swap a specific word for a broader one ("calling" stays "calling", "confirmed with the contact directly" keeps "with the contact"). Keep every fact it states, also when the field was flagged: values, tiers, thresholds, event types, system names, who confirms what, and caveats such as "deprecated", "no longer used for routing" or "confirm with legal before activating". Do not strengthen or weaken a caveat: "no longer used for routing" does not mean "no longer populated", and "may no longer be in active use" does not mean "deprecated". Remove only what is wrong for the field type, placeholder words, UI instructions and the words that make it vague.
 
-When you leave a needed fact out because the input does not give it, name it in `missing` as a short question for the Admin, e.g. "What does checked mean?", "Which process sets it?", "What do the codes L1–L3 stand for?". The Admin answers these when editing the suggestion. Name only facts a good description of this field would need, at most three.
+**Ask, don't write.** A detail the input does not give stays out of `suggested_description`, however likely it seems: who sets the field, whether it is set manually or automatically, which process or system reads it, what it triggers or enables, what a code or letter stands for, a score's range or direction, what checked means, which event a date records. Ask for it in `missing` instead. The Admin can answer a short question in a few words, but cannot see a guess that reads like a fact. A short, true description with good questions is a good answer.
 
-The original description counts as input. Its claims are not assumptions: keep them, and do not list them.
+`suggested_description` is the text that will be written into Salesforce if the Admin approves it. It describes the field, never the input or the gaps. It never contains:
+- a question ("What does checked mean?")
+- a statement about what is unknown ("The format is not specified.", "What checked means is not documented.")
+- a remark about the original description ("The original named three tiers.", "The original description cannot store a list.")
+
+Questions go only into `missing`. A fact the original states is written as a fact about the field ("Tiers: Light, Medium, Heavy."), not as something the original said.
+
+**Checkbox without a stated meaning.** If the input does not say what checked means, do not write a "Checked when …" sentence. Say what the checkbox is about, as far as the name and the original confirm, and ask "What does checked mean?" in `missing`.
+
+**Pending work is a caveat.** A TODO or TBD note that names a pending step ("confirm with legal and HR before activating") tells the reader the field is not ready. Keep the step in the original's words as a plain sentence, e.g. "To be confirmed with legal and HR before activation." Do not add a status the original does not state ("Not yet in use", "inactive"). A bare "TBD" or "TODO" with no step says nothing about status: describe the field from its name and type, and ask in `missing` whether it is in use.
+
+**Opaque values.** Codes, letters and names that do not explain themselves (A–D, Type A–D, Alpha–Delta, L1–L3) are listed exactly as given and never guessed. Explain them only from the org context; otherwise ask what they mean.
+
+**`assumptions` is the exception, not the routine.** Use it only for a reading you are confident in but the input does not state, such as a standard acronym expansion ("QBR (Quarterly Business Review)") or a link to a neighbour field that the names make plain. Quote the claim as it appears in `suggested_description`. Saying what the field name or the original already says, in other words, is not an assumption: do not list it.
 
 Return `"assumptions": []` and `"missing": []` when there is nothing to list, and always for `"keep"`.
+
+### What to ask in `missing`
+
+At most three questions, one fact each, most important first. Ask first what the field type needs; ask about process (who sets it, what reads it) only after that:
+- **Number, Currency, Percent:** the unit and range, what a higher value means, and for a rate whether 15% is stored as 15 or 0.15
+- **Checkbox:** what checked means, and what it triggers or blocks
+- **Picklist, MultiselectPicklist:** what values mean that do not explain themselves
+- **Date, DateTime:** which single event the date records
+- **Text code or reference:** its format and the system it comes from
+- **Lookup, MasterDetail:** what role the related record plays for this record
+- **Any field that may repeat a standard Salesforce field** (see below): how it differs from that field
+
+Do not ask what the input already answers, and do not ask for facts the description does not need.
+
+---
+
+## Salesforce Facts to Apply
+
+- A Date field holds one date, a Checkbox one true/false, a Number or Currency field one value, an Email field one address. A field that is described as holding several deadlines, a list of events or written feedback cannot hold it: say what the field can hold, and ask which single value it is (e.g. "Which deadline does this date store: first response or resolution?").
+- A Percent field stores 15 for 15%. A Number field may store a rate either way; ask if the input does not say.
+- A Number field stores a number, never a tier or band name. If the input names tiers with their numbers ("Basic 48h, Standard 24h"), write them as a mapping to the stored value ("Targets by support tier: Basic 48, Standard 24 … hours"). If it names tiers without numbers, say the value depends on the tier ("Rate depends on the discount tier: Standard, Silver, Gold or Platinum.") and ask for the mapping. Never write "Values: <tier names>" for a Number field.
+- A Text field cannot restrict its values to a list unless a validation rule does; do not claim it does.
+- A field description is metadata for Admins, developers and agents. End users see Help Text, not the description.
+- Standard Salesforce features already hold some common data. If a custom field looks like one of these, do not claim it duplicates the standard one; ask how it differs:
+  - Case intake channel: the standard Case `Origin` field. Case priority: the standard Case `Priority` field
+  - Opportunity and lead source: the standard `LeadSource` field
+  - Service level targets and deadlines on cases: Entitlements and Milestones (one milestone per deadline)
+  - Event and campaign attendance: Campaigns and Campaign Members
+  - Email and call consent: the standard `HasOptedOutOfEmail` and `DoNotCall` fields, and the Individual and Contact Point Consent objects
+  - Prices and discounts: Price Books, Quotes and Quote Line Items
+
+---
+
+## Neighbour Fields
+
+When present, `neighbour_fields` lists other fields on the same object whose names share a word with this field: their name, type and the start of their description. Use them to see what this field is not, and to name the field this one belongs with when the names make it plain (e.g. Certification_Expiry__c and Certification_Level__c). A link you state from neighbour names alone goes into `assumptions`. Do not copy a neighbour's facts into this field's description: they describe a different field, and their descriptions may be poor themselves.
+
+---
+
+## Org Context
+
+When an "Org Context" section follows the examples, it was written by this org's Admin: a glossary of codes, scales, systems, teams and conventions. Treat it like the original description: a fact from it may be stated without listing it in `assumptions`. Use only what applies to the field in hand, and do not ask in `missing` what the org context already answers.
+
+When the org context defines this field's values, codes or scale (grades A–D, queues Alpha–Delta, case types, a score's range and direction), write their meanings into the description, a few words each: "Values: Alpha (order exceptions), Beta (returns and repairs), …". Opaque codes are the main reason an Admin cannot approve a description; the org context is there to explain them. Shorten the meanings, not the list, to stay within 255 characters. Use the org context's terms only where they match the field's object and original: an org-wide definition does not override what the original says (if the original says "value and engagement", keep both).
 
 ---
 

@@ -9,7 +9,8 @@ Run with plain Python (no pytest needed):
   python tests/test_cache.py
 
 A cached LLM answer may only be reused when the description, the route
-(status + rule), the system prompt, the golden examples, the prompt file of
+(status + rule), the field's metadata context (neighbour fields, help text),
+the system prompt, the golden examples, the org context, the prompt file of
 the field's own route, the provider, the model and reasoning_effort are all
 unchanged. Editing another route's prompt file keeps the hit.
 """
@@ -57,6 +58,9 @@ CASES = [
     ("provider changed -> miss",          FIELD, PROMPTS, with_llm(provider="azure_openai"), False),
     ("reasoning_effort changed -> miss",  FIELD, PROMPTS, with_llm(reasoning_effort="medium"), False),
     ("temperature changed -> hit",        FIELD, PROMPTS, with_llm(temperature=0.7), True),
+    ("org context added -> miss",         FIELD, {**PROMPTS, "org_context": "Glossary"}, CFG, False),
+    ("neighbour fields added -> miss",    {**FIELD, "neighbour_fields": [{"field_api_name": "Tier_Since__c"}]}, PROMPTS, CFG, False),
+    ("help text added -> miss",           {**FIELD, "help_text": "Pick the tier."}, PROMPTS, CFG, False),
 ]
 
 

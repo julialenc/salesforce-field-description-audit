@@ -52,6 +52,7 @@ None of these call an LLM:
 ```
 python tests/test_classifier.py
 python tests/test_cache.py
+python tests/test_context.py
 python tests/test_evaluate.py
 python scripts/validate_classifier.py data/sf_metadata_raw_training.json
 python scripts/evaluate_suggestions.py
@@ -63,6 +64,9 @@ The automatic check cannot tell whether a suggestion is true. For that, draw a h
 python scripts/review_sample.py make
 python scripts/review_sample.py score data/review_sample_<timestamp>.xlsx
 ```
+After a prompt change, `python scripts/review_sample.py rereview <filled-in sample>` puts the same rows next to the newest review file and keeps the decisions of rows that did not change, so only the changed rows need a person again. If the run used an org context file, review with that file at hand.
+
+Two optional inputs in `config.yml` give the model more to work from: `options.neighbour_fields` (other fields on the same object with a shared name word) and `options.org_context_file` (a short glossary the Admin writes once; `data/org_context_synthetic.md` is the example for the synthetic org). Both are off by default; wiki 03, "Day 6", has what they changed.
 
 ## Contact and licence
 

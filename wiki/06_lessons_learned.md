@@ -100,6 +100,16 @@ On the same suggestions, the automatic check passed 98.6% and a human approved 3
 
 Many rejected suggestions had no prompt problem: the facts were not in the input. What a grade "A" means, or which scale an engagement score uses, is org knowledge; a notes field may only make sense next to its neighbouring fields. Before you rewrite a prompt again, ask whether the model had the information at all. If not, the fix is more context (metadata sent with the field, a short org glossary), not more instructions.
 
-## 17. Synthetic Data Has Its Own Style
+Then test the context claim too. With a full org context file, approval first rose only from 30% to 40%: the model used the glossary where a field matched it, but the remaining rejections were prompt faults (remarks to the Admin in the text, codes left unexplained although the glossary defined them). One more prompt iteration aimed at exactly those notes took the same context run to 70%. Context and instructions work together: context supplies the facts, the prompt has to say where they go. Neighbour fields cost little and added more guesses than answers.
+
+## 17. A Rule That Removes a Problem Can Move It
+
+Telling the model to ask instead of guess took the guesses out of the descriptions (rows with unverified claims fell from 46 to 7), and put the questions into the descriptions instead ("Checkbox flag on this record. What does checked mean?"), in about one row in twenty. Telling it to keep the original's caveats made the classifier re-flag them as placeholders. After every rule, read a handful of outputs for where the problem went, not only whether it left.
+
+## 18. A Reviewer Must See What the Model Saw
+
+The first score of the run with org context was 20%, lower than without it: the reviewer had the suggestions but not the context file, and could not confirm what it said. With the file next to the sample, four rows became approvals. If an experiment gives the model extra input, the review sample must give the reviewer the same input.
+
+## 19. Synthetic Data Has Its Own Style
 
 Synthetic data is only as realistic as whoever wrote it. In the training set, the "good" descriptions were long and followed one template. That produced a length-based rule that could not separate good from bad, and the rule had to be redefined. No description used the common "Full Name (ACRONYM)" order, so the classifier never saw it until an LLM wrote one. Before trusting a rule, ask whether the data that shaped it looks like a real org.
