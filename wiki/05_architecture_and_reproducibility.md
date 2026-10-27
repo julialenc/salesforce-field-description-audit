@@ -219,12 +219,13 @@ Its output is stored in `data/sf_classified.json`.
 The **prompt and LLM layer** generates suggestions only where the classifier says they are needed.
 
 It combines:
-- shared session context: `system_prompt.md` and `golden_examples.json`
+- shared session context: `system_prompt.md` and `golden_examples.json`, plus the optional org context file (`options.org_context_file`)
 - task-specific prompts: `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` and `prompt_c_reviewed_fields.md`
+- per field: its metadata, and optionally its neighbour fields on the same object (`options.neighbour_fields`)
 
 This keeps the LLM in a narrow role: grounded suggestion generation under explicit routing rules.
 
-Answers are cached per field. The cache key covers everything that shapes an answer: the description, the route (status and rule), the system prompt, the golden examples, the route's own task prompt, and the provider, model and `reasoning_effort`. A prompt edit therefore re-sends only the fields that prompt handles. A cache keyed on the description alone, as in the first version, silently returned old answers after a prompt, model or routing change; a key over every prompt file re-sent all fields after any edit, which used most of a free tier's daily token limit per iteration.
+Answers are cached per field. The cache key covers everything that shapes an answer: the description, the route (status and rule), the field's neighbour fields and further metadata, the system prompt, the golden examples, the org context, the route's own task prompt, and the provider, model and `reasoning_effort`. Deduplication (one LLM call for fields with the same description) also requires the same neighbour fields and metadata. A prompt edit therefore re-sends only the fields that prompt handles. A cache keyed on the description alone, as in the first version, silently returned old answers after a prompt, model or routing change; a key over every prompt file re-sent all fields after any edit, which used most of a free tier's daily token limit per iteration.
 
 ### Review Artifact and Human Decision Layers
 
@@ -384,14 +385,14 @@ This makes prompt behavior visible and reviewable rather than implicit. Every ex
 
 Three checks make each change measurable, and none needs an LLM call:
 - `scripts/validate_classifier.py` compares the classifier with the labels in a dataset and lists every mismatch
-- `tests/` holds plain-Python unit tests for the classifier rules, the cache key and the suggestion checker (`python tests/test_classifier.py`, no test framework needed)
+- `tests/` holds plain-Python unit tests for the classifier rules, the cache key, the per-field context (neighbour fields, metadata, org context) and the suggestion checker (`python tests/test_classifier.py`, no test framework needed)
 - `scripts/evaluate_suggestions.py` scores the latest LLM answers: each rewrite is run back through the classifier and checked for length, vague terms, picklist coverage and the action its prompt asks for, with a pass rate per prompt and rule
 
 The suggestion checker is built on the classifier, so it also tests the classifier: suggestions that are clearly good but fail the check point to a rule that is too strict.
 
 Every LLM answer also returns two lists: `assumptions` (claims in the suggestion the input does not support) and `missing` (facts the description needs that the input does not give, as questions). Script 1 shows them in the review file as the "Unverified" and "Missing" columns; the checker counts them as notes and lists them with `--assumptions`. They make guessing measurable without a human.
 
-What no automatic check can judge (whether a suggestion is true and worth approving) is measured with `scripts/review_sample.py`: `make` draws a fixed, stratified 40-field sample from a review file, a person decides on each row, and `score` prints the approval rate per tab and rule. The sample file is named `review_sample_*`, so Script 2 never mistakes it for a review queue.
+What no automatic check can judge (whether a suggestion is true and worth approving) is measured with `scripts/review_sample.py`: `make` draws a fixed, stratified 40-field sample from a review file, a person decides on each row, and `score` prints the approval rate per tab and rule. After a prompt change, `rereview` puts the same rows next to the new suggestions: a row whose suggestion, Unverified and Missing are unchanged keeps its decision, so only the changed rows need a person again. The sample file is named `review_sample_*`, so Script 2 never mistakes it for a review queue.
 
 ### Synthetic Datasets for Experiment Mode
 

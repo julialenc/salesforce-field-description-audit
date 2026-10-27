@@ -17,6 +17,10 @@ measured in under an hour.
          Tab B: 12 rows, spread over R6-R9 and the REVIEWED fields Prompt C rewrote
          Tab C: 8 REVIEWED fields Prompt C kept (do you agree they need no change?)
   score  Read a filled-in sample and print approval rates per tab and per rule
+  rereview  Same rows as an earlier, filled-in sample, with the suggestions of a
+         newer review queue. A row whose suggestion, Unverified and Missing are
+         unchanged keeps its decision (Changed = no); the others are blank and
+         show the previous suggestion and decision, so only they need reviewing
 
 Decisions in the sample file:
   Tab A and Tab B   Approve (usable as written), Edit (right idea, needs changes),
@@ -35,6 +39,9 @@ Usage:
       Samples the newest data/review_queue_*.xlsx.
   python scripts/review_sample.py make data/review_queue_20261025_135129.xlsx
   python scripts/review_sample.py score data/review_sample_20261025_190000.xlsx
+  python scripts/review_sample.py rereview review_sample_20261025_202746_checked.xlsx
+      Same rows, suggestions from the newest data/review_queue_*.xlsx
+      (or pass the queue as a third argument).
 """
 
 import json
@@ -65,6 +72,10 @@ WIDTHS    = {"Object": 12, "Field_API_Name": 30, "Field_Type": 14, "Rule": 8,
              "Original_Status": 13, "Picklist_Values": 25, "Current_Description": 50, "LLM_Suggestion": 50,
              "Unverified": 35, "Missing": 35, "LLM_Reasoning": 40, "Decision": 12, "Note": 30}
 SHEETS    = {"A": "Tab A — FLAGGED", "B": "Tab B — UNCERTAIN", "C": "Tab C — Kept"}
+
+# Extra columns of a re-review sample
+REREVIEW_COLUMNS = ["Changed", "Previous_Suggestion", "Previous_Decision", "Previous_Note"]
+WIDTHS.update({"Changed": 10, "Previous_Suggestion": 50, "Previous_Decision": 12, "Previous_Note": 30})
 
 
 def read_tab(ws) -> list[dict]:
@@ -104,20 +115,17 @@ def spread(rows: list[dict], n: int, rng: random.Random) -> list[dict]:
     return sorted(picked, key=lambda r: (stratum(r), r.get("Object") or "", r.get("Field_API_Name") or ""))
 
 
-def make(source: Path) -> Path:
+def read_queue(source: Path) -> dict[str, list[dict]]:
     wb_in = openpyxl.load_workbook(source, read_only=True)
-    tab_a = read_tab(find_sheet(wb_in, "Tab A"))
-    tab_b = read_tab(find_sheet(wb_in, "Tab B"))
     # Tab C of the review queue has no suggestion column: a kept field's suggestion is its original
-    tab_c = [dict(r, Rule="", LLM_Suggestion=r.get("Current_Description"))
-             for r in read_tab(find_sheet(wb_in, "Tab C")) if r.get("Original_Status") == "REVIEWED"]
+    return {"A": read_tab(find_sheet(wb_in, "Tab A")),
+            "B": read_tab(find_sheet(wb_in, "Tab B")),
+            "C": [dict(r, Rule="", LLM_Suggestion=r.get("Current_Description"))
+                  for r in read_tab(find_sheet(wb_in, "Tab C")) if r.get("Original_Status") == "REVIEWED"]}
 
-    rng    = random.Random(SEED)
-    sample = {"A": spread(tab_a, SIZES["A"], rng),
-              "B": spread(tab_b, SIZES["B"], rng),
-              "C": spread(tab_c, SIZES["C"], rng)}
 
-    # The review queue has no picklist values; the reviewer needs them to check value names
+def add_picklists(sample: dict[str, list[dict]]) -> None:
+    """The review queue has no picklist values; the reviewer needs them to check value names."""
     picklists = {}
     classified = DATA_DIR / "sf_classified.json"
     if classified.exists():
@@ -127,32 +135,87 @@ def make(source: Path) -> Path:
         for r in rows:
             r["Picklist_Values"] = picklists.get((r.get("Object"), r.get("Field_API_Name")), "")
 
+
+def write_sample(sample: dict[str, list[dict]], columns: list[str], keep_decisions: bool = False) -> Path:
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     for tab, rows in sample.items():
         ws = wb.create_sheet(SHEETS[tab])
-        ws.append(COLUMNS)
+        ws.append(columns)
         for c in ws[1]:
             c.font = Font(bold=True, color="FFFFFF")
             c.fill = PatternFill("solid", fgColor="1F4E78")
         for r in rows:
-            ws.append([r.get(c, "") if c not in ("Decision", "Note") else "" for c in COLUMNS])
+            ws.append([r.get(c, "") if keep_decisions or c not in ("Decision", "Note") else "" for c in columns])
         for row in ws.iter_rows(min_row=2):
             for c in row:
                 c.alignment = Alignment(wrap_text=True, vertical="top")
-        for ci, h in enumerate(COLUMNS, 1):
+        for ci, h in enumerate(columns, 1):
             ws.column_dimensions[openpyxl.utils.get_column_letter(ci)].width = WIDTHS[h]
         ws.freeze_panes = "A2"
         dv = DataValidation(type="list", formula1='"' + ",".join(DECISIONS[tab]) + '"', allow_blank=True)
-        col = openpyxl.utils.get_column_letter(COLUMNS.index("Decision") + 1)
+        col = openpyxl.utils.get_column_letter(columns.index("Decision") + 1)
         dv.sqref = f"{col}2:{col}{len(rows) + 1}"
         ws.add_data_validation(dv)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out = DATA_DIR / f"review_sample_{timestamp}.xlsx"
     wb.save(out)
+    return out
+
+
+def make(source: Path) -> Path:
+    queue  = read_queue(source)
+    rng    = random.Random(SEED)
+    sample = {tab: spread(queue[tab], SIZES[tab], rng) for tab in ("A", "B", "C")}
+    add_picklists(sample)
+    out = write_sample(sample, COLUMNS)
     print(f"Sample from {source.name}: Tab A {len(sample['A'])}, Tab B {len(sample['B'])}, "
           f"Tab C {len(sample['C'])} rows -> {out.name}")
+    return out
+
+
+def _norm(value) -> str:
+    return " ".join(str(value or "").split())
+
+
+def rereview(previous: Path, source: Path) -> Path:
+    """
+    Same rows as a filled-in sample, suggestions from a newer queue. A field
+    stays on the tab it was sampled on, so approval rates stay comparable.
+    """
+    queue = read_queue(source)
+    by_key = {}
+    for tab in ("C", "B", "A"):          # A and B win over C if a field is on both
+        for r in queue[tab]:
+            by_key[(r.get("Object"), r.get("Field_API_Name"))] = r
+
+    wb_prev = openpyxl.load_workbook(previous, read_only=True)
+    sample, changed, missing_rows = {}, 0, []
+    for tab in ("A", "B", "C"):
+        rows = []
+        for old in read_tab(find_sheet(wb_prev, f"Tab {tab}")):
+            key = (old.get("Object"), old.get("Field_API_Name"))
+            new = by_key.get(key)
+            if new is None:
+                missing_rows.append(f"{key[0]}.{key[1]}")
+                continue
+            row = {c: new.get(c, old.get(c, "")) for c in COLUMNS}
+            same = all(_norm(new.get(c)) == _norm(old.get(c)) for c in ("LLM_Suggestion", "Unverified", "Missing"))
+            row.update(Changed="no" if same else "yes",
+                       Previous_Suggestion=old.get("LLM_Suggestion"),
+                       Previous_Decision=old.get("Decision"), Previous_Note=old.get("Note"),
+                       Decision=old.get("Decision") if same else "", Note=old.get("Note") if same else "")
+            changed += not same
+            rows.append(row)
+        sample[tab] = rows
+    add_picklists(sample)
+    out = write_sample(sample, COLUMNS + REREVIEW_COLUMNS, keep_decisions=True)
+    total = sum(len(r) for r in sample.values())
+    print(f"Re-review of {previous.name} with {source.name}: {changed} of {total} rows changed "
+          f"and need a decision; {total - changed} kept their decision -> {out.name}")
+    if missing_rows:
+        print(f"Not in the new queue (left out): {', '.join(missing_rows)}")
     return out
 
 
@@ -193,19 +256,24 @@ def score(path: Path) -> int:
     return 0
 
 
+def newest_queue() -> Path:
+    queues = sorted(DATA_DIR.glob("review_queue_*.xlsx"))
+    if not queues:
+        sys.exit("No data/review_queue_*.xlsx found. Run Script 1 first.")
+    return queues[-1]
+
+
 def main() -> int:
-    if len(sys.argv) < 2 or sys.argv[1] not in ("make", "score"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("make", "score", "rereview"):
         print(__doc__)
         return 1
     if sys.argv[1] == "make":
-        if len(sys.argv) > 2:
-            source = Path(sys.argv[2])
-        else:
-            queues = sorted(DATA_DIR.glob("review_queue_*.xlsx"))
-            if not queues:
-                sys.exit("No data/review_queue_*.xlsx found. Run Script 1 first.")
-            source = queues[-1]
-        make(source)
+        make(Path(sys.argv[2]) if len(sys.argv) > 2 else newest_queue())
+        return 0
+    if sys.argv[1] == "rereview":
+        if len(sys.argv) < 3:
+            sys.exit("rereview needs the filled-in sample file")
+        rereview(Path(sys.argv[2]), Path(sys.argv[3]) if len(sys.argv) > 3 else newest_queue())
         return 0
     if len(sys.argv) < 3:
         sys.exit("score needs the filled-in sample file")

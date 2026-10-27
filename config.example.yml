@@ -142,3 +142,14 @@ options:
 
   # Keep intermediate JSON/XLSX artifacts for inspection and debugging
   save_intermediate_artifacts: true
+
+  # Send each field with up to this many other fields on the same object whose
+  # names share a word (Gear_Size_Notes__c -> Clothing_Size__c), so the LLM
+  # can tell what the field belongs with. 0 = off. Adds ~80 input tokens per field.
+  neighbour_fields: 0
+
+  # Optional org context: a short Markdown file written by the Admin (glossary
+  # of codes, scales, systems, teams, conventions). Added to the system prompt;
+  # the LLM may state its facts without listing them as assumptions.
+  # Example for the synthetic org: data/org_context_synthetic.md
+  org_context_file: null

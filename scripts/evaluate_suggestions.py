@@ -13,6 +13,8 @@ Every rewritten or shortened description is checked against the
   length       30-255 characters
   vague        no vague terms from the wiki 03 rejection list ("relevant",
                "various", "for reporting", ...)
+  remark       no question and no remark to the Admin ("The original named …",
+               "… is not specified"): the text is what gets written to Salesforce
   picklist     every picklist value is named (Picklist / MultiselectPicklist)
   shorter      R6 only: shorter than the original and at most 200 characters
   action       the action the prompt asks for (A: rewrite, B/R6: shorten,
@@ -72,13 +74,22 @@ VAGUE_TERMS = [
 ]
 USAGE_PHRASES = ["used for", "used by", "used to"]
 
+# Remarks about the input or about what is unknown, which belong in "missing"
+REMARK_PHRASES = [
+    "original description", "the input", "not specified", "unspecified",
+    "is unknown", "are unknown", "not known", "not documented", "not stated", "not given",
+    "not provided", "not defined in",
+]
+# "The original named / says / only …", but not "the original request" (a fact about the record)
+REMARK_ORIGINAL = re.compile(r"\bthe original (?:\w+ed|says|said|only|text|field)\b", re.IGNORECASE)
+
 # R5 tokens that mean "not written yet", as opposed to "retired"
 UNFINISHED_TOKENS = [
     "tbd", "to be defined", "to be confirmed", "to be agreed", "todo", "to do",
     "fixme", "n/a", "see above", "see below", "ask", "check with",
 ]
 
-CHECKS = ["reclassify", "length", "vague", "picklist", "shorter", "action"]
+CHECKS = ["reclassify", "length", "vague", "remark", "picklist", "shorter", "action"]
 NOTES  = ["used-phrase", "deprecated", "assumptions", "missing"]
 
 
@@ -135,6 +146,10 @@ def evaluate_one(f: dict, result: dict) -> tuple[dict[str, str], dict[str, str]]
     found = find_terms(suggestion, USAGE_PHRASES)
     if found:
         notes["used-phrase"] = ", ".join(found)
+    found = (find_terms(suggestion, REMARK_PHRASES) + REMARK_ORIGINAL.findall(suggestion)
+             + (["?"] if "?" in suggestion else []))
+    if found:
+        failures["remark"] = ", ".join(found)
 
     if f.get("field_type") in ("Picklist", "MultiselectPicklist") and f.get("picklist_values"):
         missing = missing_picklist_values(suggestion, f["picklist_values"])
