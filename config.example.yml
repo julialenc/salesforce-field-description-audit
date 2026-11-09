@@ -72,9 +72,13 @@ data_source:
 
 llm:
   # Supported providers:
-  # - openai        -> any OpenAI-compatible API. Default: Groq free tier —
-  #                    open-weight models, free key, no credit card, nothing
-  #                    to install. Get a key at https://console.groq.com
+  # - openai        -> any OpenAI-compatible API, e.g. a free tier for an
+  #                    open-weight model (gpt-oss-120b):
+  #                    Cerebras free trial (https://cloud.cerebras.ai): 30k tokens/min,
+  #                    1M/day; needs a verified payment method, credits expire after 30 days.
+  #                    Groq free tier (https://console.groq.com): no card, but 8k tokens
+  #                    per request, too small for the current prompts (about 7.5k tokens
+  #                    of fixed text per call, 9k+ with an org context file)
   # - azure_openai  -> Azure OpenAI (paid)
   # - bedrock, vertex_ai -> not implemented yet
   #
@@ -83,14 +87,18 @@ llm:
   provider: openai
 
   # The script appends /v1/chat/completions to this address.
+  # openai (Cerebras) -> https://api.cerebras.ai
   # openai (Groq)   -> https://api.groq.com/openai
   # openai (OpenAI) -> https://api.openai.com
   # azure_openai    -> https://YOUR-RESOURCE.openai.azure.com/
   # api_version: "2025-04-01-preview"   # azure_openai only; default supports gpt-5
   endpoint: https://api.groq.com/openai
 
-  # Groq: an open-weight model from Groq's model list, e.g.
-  #       openai/gpt-oss-120b (names change — check the list)
+  # Recommended (training set, 40-field human review, with org context):
+  #   Azure gpt-5.4-mini, reasoning_effort medium: default. Tab A 80% approvable
+  #   Azure gpt-6.1-sol, reasoning_effort medium: best quality (85%), ~3x the cost
+  #   gpt-oss-120b (Cerebras): free, same automatic pass rate as mini; no human review yet
+  # Cerebras: gpt-oss-120b. Groq: openai/gpt-oss-120b (names change — check the list)
   # Azure: your deployment name, e.g. gpt-5.4-mini. Older models (gpt-4o,
   #        gpt-4.1) are closed to new Azure subscriptions — check the
   #        Azure model retirement schedule before choosing
@@ -101,8 +109,9 @@ llm:
 
   # Optional generation controls
   # temperature: 0.2       # Groq default 0.2. Leave it out on Azure for gpt-5 models: they reject it
-  # reasoning_effort: low   # reasoning models only (gpt-oss, gpt-5 family): low | medium | high.
-  #                         # Reasoning tokens bill as output, so low keeps cost down
+  # reasoning_effort: medium # reasoning models only (gpt-oss, gpt-5 family): low | medium | high.
+  #                         # Reasoning tokens bill as output: medium doubled gpt-5.4-mini's cost
+  #                         # and was the setting that reached 80%
 
   # Optional prices per 1M tokens, used only for the cost estimate in the
   # run summary and in llm_response.json. Take them from your provider's
@@ -136,9 +145,9 @@ options:
   include_standard_fields: false
 
   # Number of fields sent per LLM request.
-  # Use 10 on Groq's free tier: a single request may not exceed 8,000 tokens (HTTP 413),
-  # and smaller batches also hit the per-minute limit (HTTP 429) less often.
-  llm_batch_size: 50
+  # 10 works on Azure and Cerebras. On a tier with a small per-request limit
+  # (Groq: 8,000 tokens, HTTP 413) lower it; the script splits a batch that is too large.
+  llm_batch_size: 10
 
   # Keep intermediate JSON/XLSX artifacts for inspection and debugging
   save_intermediate_artifacts: true

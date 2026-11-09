@@ -54,7 +54,7 @@ Salesforce Org
 [3] Merge all results — FLAGGED + UNCERTAIN + REVIEWED + SKIPPED
                             ↓
 [4] `review_queue_{timestamp}.xlsx` — three tabs, one row per field
-         Tab A — Fields that were FLAGGED (AI wrote a new description)
+         Tab A — Fields that were FLAGGED (AI wrote a new description; a retired R5 field is kept, with retirement questions)
          Tab B — UNCERTAIN fields, plus REVIEWED fields the AI proposes to rewrite
          Tab C — Reference: REVIEWED fields the AI kept, and SKIPPED fields (no action needed)
                             ↓
@@ -364,6 +364,8 @@ Example: a Picklist field with values `Tier 1`, `Tier 2`, `Tier 3` and a descrip
 The description contains placeholder language, a work-in-progress marker, or an explicit signal that it is no longer current.
 
 Examples: *"TBD"*, *"to be confirmed"*, *"ask John"*, *"deprecated"*, *"no longer used"*, *"TODO — confirm with legal"*. These may have been acceptable temporarily. In a production org read by Agentforce, they are direct misinformation — the AI will act on whatever text is present, including a statement that a field is deprecated when it is in active use.
+
+**What Prompt A does with it (Day 7).** R5 covers two different cases. A *placeholder* ("TBD", "TODO — confirm with legal") is rewritten into a proper description that keeps the pending step as a plain sentence. A *retirement note* that says what the field held ("Deprecated. Queue routing code from the pre-Salesforce helpdesk. No longer used for routing.", "Legacy reference from the 2021 migration. May no longer be in active use.") is honest and useful: rewriting it can only repeat it or weaken it. Prompt A keeps it and asks the questions that decide whether the field can go: is it still populated, does any report, flow, integration or code read it, can it be deleted or must its data be archived first. The field stays in Tab A, so the Admin sees it as a cleanup candidate rather than a text to approve.
 
 ---
 

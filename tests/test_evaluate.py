@@ -24,6 +24,7 @@ GOOD = ("Date the customer signed the current supply agreement, entered by the "
 LONG = ("Free-text field storing negotiation notes for this opportunity, including discount "
         "requests submitted, justification provided, approval decisions at each level, "
         "counter-proposals from the prospect, and final agreed terms.")
+RETIRED = "Deprecated. Order code from the old webshop. No longer synced."
 
 
 def field(rule, desc="Old text that the classifier flagged.", ftype="Date", picklist=None):
@@ -68,6 +69,20 @@ CASES = [
     ("remark about original fails",  field("R1", desc=""), answer(GOOD + " The original named three tiers."), {"remark"}, set()),
     ("'not specified' remark fails", field("R1", desc=""), answer(GOOD + " The unit is not specified."), {"remark"}, set()),
     ("'the original request' passes", field("R1", desc=""), answer(GOOD + " Holds the original request and the approval."), set(), set()),
+    ("R5 retired keep, no questions", field("R5", desc=RETIRED, ftype="Text"), answer(RETIRED, "keep"), {"action"}, {"deprecated"}),
+    ("R5 TBD kept fails",            field("R5", desc="TBD", ftype="Text"), answer("TBD", "keep"), {"reclassify", "length", "action"}, set()),
+]
+
+# (name, field, answer, counted as keep)
+KEEP_CASES = [
+    ("R5 retired keep with questions", field("R5", desc=RETIRED, ftype="Text"),
+                                       {**answer(RETIRED, "keep"), "missing": ["Can it be deleted?"]}, True),
+    ("R5 retired keep, empty missing", field("R5", desc=RETIRED, ftype="Text"), {**answer(RETIRED, "keep"), "missing": [" "]}, False),
+    ("R5 TBD keep with questions",     field("R5", desc="TBD - confirm with finance.", ftype="Text"),
+                                       {**answer("TBD - confirm with finance.", "keep"), "missing": ["Is it in use?"]}, False),
+    ("Prompt C keep",                  field(None, desc=GOOD), answer(GOOD, "keep"), True),
+    ("R6 keep is checked",             field("R6", desc=LONG, ftype="Text"), answer(LONG, "keep"), False),
+    ("Prompt A rewrite",               field("R1"), answer(GOOD), False),
 ]
 
 
@@ -81,7 +96,12 @@ def main() -> int:
         print(f"{'PASS' if ok else 'FAIL'}  {name}"
               + ("" if ok else f"\n      failures {sorted(got_fail)} (want {sorted(want_fail)}),"
                                f" notes {sorted(got_notes)} (want {sorted(want_notes)})"))
-    print(f"\n{len(CASES) - failed}/{len(CASES)} passed")
+    for name, f, result, want in KEEP_CASES:
+        ok = ev.counts_as_keep(f, result) == want
+        failed += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  keep: {name}")
+    total = len(CASES) + len(KEEP_CASES)
+    print(f"\n{total - failed}/{total} passed")
     return 1 if failed else 0
 
 

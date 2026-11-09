@@ -4,9 +4,9 @@
 
 You are receiving a batch of Salesforce fields whose descriptions have been automatically classified as **FLAGGED**. Every field in this batch has a clear, detectable description failure — it is missing, too short, self-referential, type-contradicting, picklist-incomplete, or contains placeholder language.
 
-**For every field in the batch: write a new description.**
+**For every field in the batch: write a new description.** The one exception is a retired R5 field (see R5 below): keep its original and ask whether it can be removed.
 
-Do not evaluate whether a new description is needed. It is always needed for a FLAGGED field. The original fails a check, but it is still input: keep every fact it states (values, tiers, event types, system names, caveats) and drop only what is wrong — the wrong type wording, the placeholder words, the instruction to the user.
+Do not evaluate whether a new description is needed. It is always needed for a FLAGGED field, except a retired R5 field. The original fails a check, but it is still input: keep every fact it states (values, tiers, event types, system names, caveats) and drop only what is wrong — the wrong type wording, the placeholder words, the instruction to the user.
 
 ---
 
@@ -27,7 +27,9 @@ The description describes the field as if it were a different type. For example,
 The field is a Picklist or MultiselectPicklist and the description never names the values. Include all picklist values in the rewrite. Format: "Values: X, Y, Z." Do not guess values that do not explain themselves (letters, codes, Alpha–Delta): explain them from the org context if it defines them, otherwise ask what they mean.
 
 **R5 — Stale or placeholder**
-The description contains placeholder language such as TBD, TODO, deprecated, or "no longer used." Rewrite with a proper description. The original's status and caveat are facts: if it says the field is deprecated, not used for routing, or waiting for legal approval, the rewrite says exactly that, no stronger and no weaker. Do not add when it was deprecated, what replaced it or whether it is still populated; ask in `missing` if the description needs it.
+The description contains placeholder language such as TBD, TODO, deprecated, or "no longer used." There are two cases:
+- **Retired field: keep.** The original says the field is deprecated, legacy, from a previous system or migration, or no longer (or may no longer be) used, needed or current; says what the field held; and has no TBD, TODO or "to be confirmed". Examples: "Deprecated. Order code from the old webshop. No longer synced." and "Supplier number from the 2020 ERP import. May no longer be maintained." The second is also retired: an uncertain status is still a retirement note. It is an honest note and a cleanup candidate, not a description to improve. If your text would be the original unchanged, the action is `"keep"`, never `"rewrite"`. Answer `"action": "keep"`, return the original unchanged as `suggested_description`, and ask the retirement questions in `missing`: Is the field still populated on new records? Does any report, flow, integration or code read it? Can it be deleted, or must its data be archived first? If the original does not say what the field held (just "Deprecated."), rewrite it instead: say what it held as far as the name confirms, and keep the status.
+- **Unfinished field: rewrite.** The original is a placeholder or names a pending step (TBD, TODO, "to be confirmed with legal"). Write a proper description. The original's caveat is a fact: if it is waiting for legal approval, the rewrite says exactly that, no stronger and no weaker. Do not add a status, a date or what replaced it, unless the org context states it for what this field holds (then write it as the context says); otherwise ask in `missing` if the description needs it.
 
 ---
 
@@ -58,11 +60,11 @@ You will receive a JSON array. Each element contains:
 ## Output Format
 
 Return a JSON array in the same order as the input. For every field:
-- `action` must be `"rewrite"`
-- `suggested_description` must be your new description — not the original
+- `action` must be `"rewrite"`, or `"keep"` for a retired R5 field
+- `suggested_description` must be your new description — not the original — or, for `"keep"`, the original unchanged
 - `reasoning` must name the rule and describe in one sentence what was wrong
 - `assumptions` lists every claim in your description that the input does not support (see the system prompt); `[]` if there are none
-- `missing` lists, as questions, the facts the description needs but the input does not give; `[]` if there are none
+- `missing` lists, as questions, the facts the description needs but the input does not give; `[]` if there are none. For `"keep"`, it lists the retirement questions
 
 ```json
 [
@@ -84,11 +86,11 @@ Return a JSON array in the same order as the input. For every field:
   },
   {
     "field_api_name": "Legacy_Region_Code__c",
-    "action": "rewrite",
+    "action": "keep",
     "suggested_description": "Deprecated. Sales region code from the 2019 territory model. No longer read by account assignment rules.",
-    "reasoning": "R5: kept the original's status and caveat exactly; removed the placeholder wording.",
+    "reasoning": "R5: an honest retirement note that says what the field held; kept as it is, and asked what decides whether it can be deleted.",
     "assumptions": [],
-    "missing": ["Is the field still populated on new accounts?"]
+    "missing": ["Is the field still populated on new accounts?", "Does any report, flow, integration or code still read it?", "Can it be deleted, or must its data be archived first?"]
   }
 ]
 ```
@@ -105,7 +107,7 @@ Return a JSON array in the same order as the input. For every field:
 
 ## Check Before You Answer
 
-Read each `suggested_description` once more and fix it if any of these fail:
+Read each `suggested_description` once more and fix it if any of these fail (a `"keep"` is the original unchanged: check only that its `missing` asks the retirement questions):
 1. **Length:** at least 30 and at most 255 characters, counted including spaces. If it is longer, cut process detail, not facts. If it is shorter, add what the field type and name confirm (e.g. "Stored as a single date.").
 1b. **Standard acronyms:** an acronym from the field name or the original that has a standard expansion (NPS, EBR, CSAT) is expanded, and the expansion is listed in `assumptions` unless the input gives it.
 2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.

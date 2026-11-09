@@ -20,8 +20,12 @@ Every rewritten or shortened description is checked against the
   action       the action the prompt asks for (A: rewrite, B/R6: shorten,
                B/R7-R9: rewrite); a rewrite must change the text
 
-"keep" answers (Prompt B and C) are not checked: the text is the original.
-They are counted, so the Prompt C rewrite rate is visible next to the pass rate.
+"keep" answers (Prompt B and C, and Prompt A for a retired R5 field) are not
+checked: the text is the original. They are counted, so the Prompt C rewrite
+rate is visible next to the pass rate. A retired R5 field is one whose original
+states it is deprecated or legacy without a TBD/TODO marker; its keep must ask
+the retirement questions in "missing", otherwise it fails "action". A keep for
+an unfinished R5 field (TBD, TODO) fails "action": it must be rewritten.
 
 Two findings are counted as notes, not failures:
   used-phrase  "used to / used for / used by". The system prompt allows them when
@@ -122,6 +126,20 @@ def missing_picklist_values(text: str, picklist: list) -> list[str]:
             if not re.search(r"(?<![a-z0-9])" + re.escape(v.lower()) + r"(?![a-z0-9])", lower)]
 
 
+def retired_r5(f: dict) -> bool:
+    """An R5 original that says the field is retired, with no "not written yet" marker: keep is valid."""
+    return f.get("rule_triggered") == "R5" and not find_terms(f.get("description") or "", UNFINISHED_TOKENS)
+
+
+def counts_as_keep(f: dict, result: dict) -> bool:
+    """A keep that is counted, not checked: Prompts B and C (not R6), or a retired R5 field that asks the retirement questions."""
+    if result.get("action") != "keep" or f.get("rule_triggered") == "R6":
+        return False
+    if prompt_for(f) == "A":
+        return retired_r5(f) and any(str(m).strip() for m in (result.get("missing") or []))
+    return True
+
+
 def evaluate_one(f: dict, result: dict) -> tuple[dict[str, str], dict[str, str]]:
     """Return ({check: reason} for every failed check, {note: reason}). No failures means pass."""
     suggestion = (result.get("suggested_description") or "").strip()
@@ -167,7 +185,9 @@ def evaluate_one(f: dict, result: dict) -> tuple[dict[str, str], dict[str, str]]
         failures["shorter"] = f"{len(original)} -> {len(suggestion)} chars"
 
     expected = "shorten" if rule == "R6" else "rewrite"
-    if action != expected:
+    if action == "keep" and retired_r5(f):
+        failures["action"] = "keep without retirement questions in missing"
+    elif action != expected:
         failures["action"] = f"{action}, expected {expected}"
     elif suggestion == original:
         failures["action"] = "text unchanged"
@@ -216,7 +236,7 @@ def main() -> int:
         if result.get("llm_error") or result.get("action") == "llm_error":
             errors[group] += 1
             continue
-        if result.get("action") == "keep" and prompt != "A" and f.get("rule_triggered") != "R6":
+        if counts_as_keep(f, result):
             keeps[group] += 1
             continue
         evaluated[group] += 1
