@@ -14,7 +14,7 @@ Why it matters: Agentforce, Claude and other AI agents read field descriptions t
 
 As of November 2026:
 - The pipeline runs end to end on the synthetic training set, on a free open-weight model (gpt-oss-120b on Cerebras) and on Azure OpenAI
-- Recommended model: Azure gpt-5.4-mini at reasoning effort medium (80% of FLAGGED suggestions approvable as written with an org context file); see wiki 03
+- Recommended model: Azure gpt-5.4-mini at reasoning effort medium: 80% of FLAGGED suggestions approvable as written with an org context file on the training set, 60% on the unseen test set, where the context covered fewer fields; see wiki 03
 - Classifier: 279 of 288 training fields match their labels; the 9 accepted limits are listed in wiki 03
 - Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
 - In progress: human review of a suggestion sample, model choice, the one-time test-set run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues

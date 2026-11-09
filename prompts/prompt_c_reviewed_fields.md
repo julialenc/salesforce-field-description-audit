@@ -62,7 +62,7 @@ Only add or replace what is genuinely missing or unclear.
 
 ## Do Not Invent
 
-This rule is about what you add, never about what is already there. Everything the original description states counts as confirmed input: do not remove it, and do not rewrite a description only to make it shorter or more cautious. A description that passes the "When to Keep" test is kept, even if you cannot verify its claims.
+This rule is about what you add, never about what is already there. Everything the original description states counts as confirmed input: do not remove it, and do not rewrite a description only to make it shorter or more cautious. A description that passes the "When to Keep" test is kept, even if you cannot verify its claims. This includes what the original says the field is used for: "Used to pick the shipping warehouse." or "Used for carrier cost reporting by region." is a confirmed purpose, not an unsupported claim and not a forbidden "used for" phrase, because specific content follows. A rewrite keeps every such sentence, in the original's words or shorter, and only fixes what is wrong (a wrong picklist value, a UI instruction).
 
 A rewrite may only state facts that the original description or the metadata supports: the field name, type, picklist values, formula and related object. Do not add who populates the field, which process or system reads it, or what it triggers, unless the input says so. An invented consequence reads as fact to Agentforce and to an Admin approving in bulk, and is worse than a short description.
 
@@ -122,8 +122,9 @@ Read each rewritten `suggested_description` once more and fix it if any of these
 2. **Acronyms and abbreviations:** every acronym or short form is written out on first use, e.g. "Ops" becomes "Operations". Picklist values are written exactly as given. Do not add acronyms that are not in the input.
 3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system if the input gives it; otherwise leave the clause out.
 4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given.
-5. **No invented facts:** every process, team, system or consequence named is in the original, the metadata or the org context. A likely but unconfirmed detail is asked for in `missing`, not written. The description contains no question and no remark about what is unknown; those belong in `missing`. Sentences such as "Used by …", "Read by …", "Populated by …", "Set by …", "Drives …", "Enables …" and words such as "manual" or "automatic" must come from the input; delete them otherwise.
-6. **Worth it:** the rewrite fixes a real gap. If it only rephrases a description that passes "When to Keep", or would go over 255 characters, keep the original.
+5. **No invented facts:** every process, team, system or consequence named is in the original, the metadata or the org context. A likely but unconfirmed detail is asked for in `missing`, not written. The description contains no question and no remark about what is unknown; those belong in `missing`. Sentences such as "Used by …", "Read by …", "Populated by …", "Set by …", "Drives …", "Enables …" and words such as "manual" or "automatic" must come from the input; delete them otherwise. The original description is input: its own "Determines …", "Controls …", "Used to …" sentences stay.
+6. **Nothing lost:** every sentence of the original is still there, in its words or shorter, unless it is a UI instruction or wrong for the field type. Its values, systems, formats, consequences and conditions ("Required for B2B cases") are confirmed facts. If you would have to drop one to stay within 255 characters, keep the original.
+7. **Worth it:** the rewrite fixes a real gap. If it only rephrases a description that passes "When to Keep", or would go over 255 characters, keep the original.
 
 ---
 

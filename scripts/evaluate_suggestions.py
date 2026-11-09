@@ -19,6 +19,12 @@ Every rewritten or shortened description is checked against the
   shorter      R6 only: shorter than the original and at most 200 characters
   action       the action the prompt asks for (A: rewrite, B/R6: shorten,
                B/R7-R9: rewrite); a rewrite must change the text
+  dropped      Prompt C and R6 only: no sentence of the original is lost. A
+               sentence counts as lost when fewer than half of its content words
+               (5+ letters, matched on their first 5 letters) are in the suggestion.
+               "Values: …" and UI instructions ("Enter …", "Select …") are skipped.
+               The original is input: a Prompt C rewrite adds, an R6 shortening
+               cuts wording, neither removes what the original states
 
 "keep" answers (Prompt B and C, and Prompt A for a retired R5 field) are not
 checked: the text is the original. They are counted, so the Prompt C rewrite
@@ -93,7 +99,38 @@ UNFINISHED_TOKENS = [
     "fixme", "n/a", "see above", "see below", "ask", "check with",
 ]
 
-CHECKS = ["reclassify", "length", "vague", "remark", "picklist", "shorter", "action"]
+CHECKS = ["reclassify", "length", "vague", "remark", "picklist", "shorter", "action", "dropped"]
+
+# Words that carry no fact of their own, left out when comparing sentences
+FILLER_WORDS = {
+    "field", "fields", "record", "records", "value", "values", "stores", "storing", "store",
+    "which", "where", "there", "their", "these", "those", "about", "after", "before", "being",
+    "should", "would", "could", "other", "every", "including", "contains", "containing",
+    "free-text", "description", "used", "using",
+}
+
+
+# A sentence starting with one of these is an instruction to the user, which a rewrite should drop
+UI_VERBS = {"enter", "select", "choose", "click", "pick", "type", "fill", "remember", "tick", "check"}
+
+
+def _content_words(text: str) -> set[str]:
+    words = re.findall(r"[a-z][a-z0-9-]{4,}", text.lower())
+    return {w[:5] for w in words if w not in FILLER_WORDS}
+
+
+def dropped_sentences(original: str, suggestion: str) -> list[str]:
+    """Sentences of the original whose content words are mostly missing from the suggestion."""
+    kept = _content_words(suggestion)
+    lost = []
+    for sentence in re.split(r"(?<=[.!?])\s+", original.strip()):
+        first = sentence.lower().split(" ", 1)[0]
+        if first == "values:" or first in UI_VERBS:
+            continue                                  # values: picklist check; UI instructions are meant to go
+        words = _content_words(sentence)
+        if words and len(words & kept) < len(words) / 2:
+            lost.append(sentence)
+    return lost
 NOTES  = ["used-phrase", "deprecated", "assumptions", "missing"]
 
 
@@ -180,6 +217,11 @@ def evaluate_one(f: dict, result: dict) -> tuple[dict[str, str], dict[str, str]]
     missing = [str(m).strip() for m in (result.get("missing") or []) if str(m).strip()]
     if missing:
         notes["missing"] = "; ".join(missing)
+
+    if (prompt_for(f) == "C" or rule == "R6") and original:
+        lost = dropped_sentences(original, suggestion)
+        if lost:
+            failures["dropped"] = " | ".join(s[:60] for s in lost)
 
     if rule == "R6" and not (len(suggestion) < len(original) and len(suggestion) <= R6_MAX_LEN):
         failures["shorter"] = f"{len(original)} -> {len(suggestion)} chars"

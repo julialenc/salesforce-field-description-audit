@@ -121,3 +121,7 @@ When a result is measured on 20 rows, one row is 5 points, and the same prompt a
 ## 21. A Prompt Can Cause the Failure It Is Meant to Prevent
 
 Shortened descriptions kept losing specific items ("hypotheses tested", "remediation steps applied"), with every model. The cause was the prompt's own instruction: the listed items are examples and may be summarised. The reviewer's notes said the opposite. When all models make the same mistake, read the prompt for the sentence that asks for it.
+
+## 22. Context Written for One Set Leaks Like Examples Do
+
+The org context file was written while looking at the training fields. On the training sample, 3 of 20 suggestions needed a fact the context did not give; on the unseen test set, 6 of 20. The prompts held up (86% of the rows that could be answered were approvable on both sets), but the context did not. A context file is input like any other: written by someone who has seen the fields, it covers those fields best. Test it on fields its author has not seen, and in a real org, write it for the objects being audited.

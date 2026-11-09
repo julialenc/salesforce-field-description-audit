@@ -127,9 +127,13 @@ def read_queue(source: Path) -> dict[str, list[dict]]:
 def add_picklists(sample: dict[str, list[dict]]) -> None:
     """The review queue has no picklist values; the reviewer needs them to check value names."""
     picklists = {}
-    classified = DATA_DIR / "sf_classified.json"
-    if classified.exists():
-        for f in json.loads(classified.read_text(encoding="utf-8")).get("fields", []):
+    # Both datasets: a sample of the test set must show its own values (Day 7: they were blank)
+    for name in ("sf_metadata_raw_training.json", "sf_metadata_raw_test.json", "sf_classified.json"):
+        path = DATA_DIR / name
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for f in (data.get("fields", []) if isinstance(data, dict) else data):
             picklists[(f.get("object"), f.get("field_api_name"))] = ", ".join(f.get("picklist_values") or [])
     for rows in sample.values():
         for r in rows:

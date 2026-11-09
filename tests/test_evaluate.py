@@ -71,6 +71,10 @@ CASES = [
     ("'the original request' passes", field("R1", desc=""), answer(GOOD + " Holds the original request and the approval."), set(), set()),
     ("R5 retired keep, no questions", field("R5", desc=RETIRED, ftype="Text"), answer(RETIRED, "keep"), {"action"}, {"deprecated"}),
     ("R5 TBD kept fails",            field("R5", desc="TBD", ftype="Text"), answer("TBD", "keep"), {"reclassify", "length", "action"}, set()),
+    ("Prompt C drops a sentence",    field(None, desc=GOOD), answer(GOOD.split(" Starts")[0]), {"dropped"}, set()),
+    ("Prompt C keeps every sentence", field(None, desc=GOOD), answer(GOOD + " Read by the ERP sync."), set(), set()),
+    ("Prompt C drops UI instruction", field(None, desc="Select the date from the calendar. " + GOOD), answer(GOOD + " Read by the ERP sync."), set(), set()),
+    ("R6 drops list items",          field("R6", desc=LONG, ftype="Text"), answer("Negotiation notes for this opportunity.", "shorten"), {"dropped"}, set()),
 ]
 
 # (name, field, answer, counted as keep)
