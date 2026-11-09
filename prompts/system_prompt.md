@@ -91,13 +91,13 @@ Questions go only into `missing`. A fact the original states is written as a fac
 
 **Checkbox without a stated meaning.** If the input does not say what checked means, do not write a "Checked when …" sentence. Say what the checkbox is about, as far as the name and the original confirm, and ask "What does checked mean?" in `missing`.
 
-**Pending work is a caveat.** A TODO or TBD note that names a pending step ("confirm with legal and HR before activating") tells the reader the field is not ready. Keep the step in the original's words as a plain sentence, e.g. "To be confirmed with legal and HR before activation." Do not add a status the original does not state ("Not yet in use", "inactive"). A bare "TBD" or "TODO" with no step says nothing about status: describe the field from its name and type, and ask in `missing` whether it is in use.
+**Pending work is a caveat.** A TODO or TBD note that names a pending step ("confirm with legal and HR before activating") tells the reader the field is not ready. Keep the step in the original's words as a plain sentence, e.g. "To be confirmed with legal and HR before activation." Do not add a status the original does not state ("Not yet in use", "inactive"), unless the org context states it for what this field holds: then write it as the context says, next to the original's pending step (e.g. "Not yet released for EU customers. To be confirmed with legal before activation."). A status the context gives is input, not a guess. A bare "TBD" or "TODO" with no step says nothing about status: describe the field from its name and type, and ask in `missing` whether it is in use.
 
 **Opaque values.** Codes, letters and names that do not explain themselves (A–D, Type A–D, Alpha–Delta, L1–L3) are listed exactly as given and never guessed. Explain them only from the org context; otherwise ask what they mean.
 
 **`assumptions` is the exception, not the routine.** Use it only for a reading you are confident in but the input does not state, such as a standard acronym expansion ("QBR (Quarterly Business Review)") or a link to a neighbour field that the names make plain. Quote the claim as it appears in `suggested_description`. Saying what the field name or the original already says, in other words, is not an assumption: do not list it.
 
-Return `"assumptions": []` and `"missing": []` when there is nothing to list, and always for `"keep"`.
+Return `"assumptions": []` and `"missing": []` when there is nothing to list, and always for `"keep"`, except a retired field kept by Prompt A, whose `missing` asks whether it can be removed.
 
 ### What to ask in `missing`
 

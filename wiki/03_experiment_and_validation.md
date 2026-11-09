@@ -35,7 +35,7 @@ The experiment runs the **same scripts** as production. There is no separate exp
 | Seam | Experiment Mode | Production Mode |
 |---|---|---|
 | Data input | Reads from a local JSON file (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Calls Salesforce Tooling API |
-| LLM calls | Free open-weight model on Groq, or Azure OpenAI | Company-approved provider (e.g. Azure OpenAI) |
+| LLM calls | Free open-weight model (gpt-oss-120b on Cerebras), or Azure OpenAI | Company-approved provider (e.g. Azure OpenAI) |
 | Write-back (Script 2) | Dry-run — logs decisions but does not call Metadata API | Calls Salesforce Metadata API |
 
 Everything between those seams — classification logic, routing, prompt assembly, batching, response parsing, review file generation, decision validation — runs identically in both modes.
@@ -313,8 +313,8 @@ Every run of the experiment is one cell in a matrix of four dimensions. Changing
 
 | Dimension | Values | What it isolates |
 |---|---|---|
-| **Model** | `gpt-oss-120b` on Groq (free, open-weight) · `gpt-5.4-mini` on Azure OpenAI (paid) | How much of the result depends on the model rather than the prompt |
-| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6) | The effect of instructions, with the input held constant |
+| **Model** | `gpt-oss-120b` (free, open-weight): on Groq until Day 6, on Cerebras from Day 7 · `gpt-5.4-mini` on Azure OpenAI (paid) · `gpt-5.5` and `gpt-6.1-sol` on Azure OpenAI (paid, about 7× the price of mini) · reasoning effort low, or medium where marked | How much of the result depends on the model rather than the prompt |
+| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6) · **P5** no remarks to the Admin, org context meanings for opaque codes (Day 6) · **P6** P5 + a retired R5 field is kept and asked about (Day 7) · **P7** P6 + a status the org context gives may be written (Day 7) · **P8** P7 + R6 keeps every list item and cuts the wording around it (Day 7) | The effect of instructions, with the input held constant |
 | **Context** | **C0** the field's own data only (description, name, type, picklist values, formula, related object) · **C1** + metadata sent with the field (neighbouring fields on the object; label, help text, length, decimals where present) · **C2** + org glossary only · **C3** + metadata and full org context file | Whether a weak suggestion lacked instructions or lacked information |
 | **Dataset** | Training (288 fields, iterate freely) · Test (144 fields, run once at the end) | Whether results generalise beyond the data the prompts were tuned on |
 
@@ -344,8 +344,19 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 | P4, C3 | gpt-5.4-mini | 86.5% | 79.4% | 18 | 6 / 46 | **40%** (8/20) | 0.31 CHF |
 | P5, C1 | gpt-5.4-mini | sample only | sample only | — | 2 / 13 (sample) | **35%** (7/20); 65% once Missing is answered | 0.05 CHF (40 fields) |
 | P5, C3 | gpt-5.4-mini | sample only | sample only | — | 4 / 4 (sample) | **70%** (14/20); R1–R4 88% | 0.05 CHF (40 fields) |
+| P6, C1 | gpt-5.4-mini | 88.1% (7 keep) | 79.4% | 12 | 9 / 33 | R5 rows: see Day 7 | 0.30 CHF |
+| P6, C3 | gpt-5.4-mini | 88.1% (7 keep) | 70.6% | 12 | 4 / 18 | R5 rows: see Day 7 | 0.33 CHF |
+| P6, C1 | gpt-5.5 | sample: 18/19 | sample: 7/9 | sample: 2 | 3 / 18 (sample) | — (not reviewed) | 0.33 CHF (40 fields) |
+| P6, C3 | gpt-5.5 | sample: 17/18 | sample: 7/9 | sample: 2 | 1 / 14 (sample) | **75%** (15/20) | 0.35 CHF (40 fields) |
+| P6, C1 | gpt-oss-120b (Cerebras) | 87.0% (5 keep) | 70.6% | 10 | 0 / 60 | — | free |
+| P6, C3 | gpt-oss-120b (Cerebras) | 82.6% (5 keep) | 76.5% | 7 | 0 / 52 | — | free |
+| P7, C0 | gpt-oss-120b (Cerebras) | 88.1% (7 keep) | 67.6% | 9 | 0 / 55 | — | free |
+| P7, C0 + context | gpt-oss-120b (Cerebras) | 88.7% (3 keep) | 76.5% | 11 | 0 / 47 | — | free |
+| P7, C0 + context | gpt-5.4-mini | sample: 15/18 | sample: 8/9 | sample: 3 | — | **70%** (14/20) | 0.06 CHF (40 fields) |
+| P7, C0 + context | gpt-5.4-mini, medium | sample: 17/18 | sample: 8/9 | sample: 3 | — | **80%** (16/20) | 0.11 CHF (40 fields) |
+| P7, C0 + context | gpt-6.1-sol, medium | sample: 17/18 | sample: 8/9 | sample: 3 | — | **85%** (17/20) | 0.33 CHF (40 fields)* |
 
-P5 cells were run on the 40 sample fields only (about a tenth of a full run's cost); their automatic checks cover those fields, so the pass-rate columns are left empty. A full P5 run is the first Day 7 step.
+P5 cells were run on the 40 sample fields only (about a tenth of a full run's cost); their automatic checks cover those fields, so the pass-rate columns are left empty. The gpt-5.5 cells are sample-only too; their "sample" pass rates cover the sample rows the checker evaluates. The full P6 runs replace a full P5 run: the only difference is the R5 change. "C0 + context" is the org context file without neighbour fields (Day 6 found that neighbours add guesses). *gpt-6.1-sol cost at gpt-5.5's price, to be confirmed. The first P6 mini C3 review (80%) reused Day 6 suggestions for the 16 non-R5 rows; the 70% P7 row is a single fresh run.
 
 Context column: none means C0. From P4 on, assumptions and missing are counted in Prompt A only (rows with assumptions / missing questions), the measure the Day 6 hypotheses name. The P4 pass rates are lower for a known reason, see "Day 6" below.
 
@@ -355,8 +366,6 @@ P1 is scored with the Day 4 checker, so all rows are comparable. Intermediate it
 
 | Day | Prompt | Context | Model | Question it answers |
 |---|---|---|---|---|
-| 7 | P5 | C0 and C3 | gpt-5.4-mini, full training set | Do the sample results hold on all 271 fields (automatic check, remark count)? |
-| 7 | P5 | C0 and C3 | a larger model, same 40 sample fields | Does a stronger model close the gap to 80% that prompts and context left? |
 | 7 | best | C0 and C3 | 2–3 models incl. gpt-oss-120b | Which model to recommend, with cost per 1,000 fields |
 | 7 | chosen | C0 and C3 | chosen | Test set, run once: do the training results hold on unseen fields? |
 
@@ -490,6 +499,33 @@ What remains:
 - **Single cases:** a checkbox whose meaning is still guessed (Event_Attendance, Pilot_Feedback), an R6 shortening that drops specific items (Investigation_Log, Expedition_Waiver_Notes), a Prompt C rewrite of a good description (Case_Source_Channel)
 
 **Reviewing a context run needs the context.** The first scoring of the C3 sample gave 20%: the reviewer marked five rows Edit only because the org context was not in the sample file. With the file at hand, four became Approve (40%). A reviewer of a context run must see the context the model saw.
+
+### Day 7: retired R5 fields, full mini runs, a larger model (P6)
+
+**Retired R5 fields are kept (P6).** Under forced rewrite, an honest retirement note ("Deprecated. Queue routing code from the pre-Salesforce helpdesk. No longer used for routing.") could not be approved: repeating it is no improvement and changing it loses a good text. Prompt A now answers `keep` for an R5 original that says the field is deprecated, legacy or may no longer be used, says what it held and has no TBD/TODO; `missing` asks the retirement questions (still populated? read by any report, flow, integration or code? delete or archive first?). Such a field is a cleanup candidate. Placeholder R5 fields (TBD, TODO, "confirm with legal") are still rewritten. The checker counts a retired keep as a keep only when it asks those questions. On all 15 R5 training fields, with and without context, gpt-5.4-mini kept 7/7 retired fields and rewrote 8/8 placeholder fields. It needed one prompt fix: the first version kept only the "Deprecated." originals and returned the four "May no longer be…" originals unchanged as a "rewrite"; naming an uncertain status as retired, with an example, fixed all four.
+
+**Full gpt-5.4-mini runs on P6.** Prompt A 88.1% in both cells (P4: 81–87%). Of the 8 Prompt A failures per run, 5–6 are placeholder R5 rewrites that keep the original's pending step ("To be confirmed with legal before enabling"), which the classifier re-flags as R5 and the review accepts; the rest are two R1/R2 rewrites under 30 characters (Region__c, Internal_Tag__c), a remark ("…is not specified") and, with context, a status built from a bare TBD (Certification_Body: "To be confirmed."). Prompt B 79.4% / 70.6%: R7 rewrites over 255 characters (VAT_Registration_Number, Certification_Level, Executive_Sponsor) and R6 shortenings that keep the "including" list. Missing rows in Prompt A fell to 33 without context and 18 with it (P4: 54 and 46).
+
+**Is the model the limit? (C0 + context, 40 sample fields, one change per run.)**
+
+| Run | Tab A | Tab B | Full training run (271 fields), estimate |
+|---|---|---|---|
+| gpt-5.4-mini, low (three reviewed runs, P5–P7) | 70%, 80%, 70% | 50% | 0.33 CHF (measured) |
+| gpt-5.4-mini, medium | 80% | 50% | ~0.74 CHF |
+| gpt-5.5, low | 75% | 58% | ~2.35 CHF |
+| gpt-6.1-sol, medium | **85%** | 58% | ~2.2 CHF |
+
+Mini low: Day 6 P5 (70%), P6 with the four R5 rows re-run (80%), P7 fresh run (70%). The gpt-5.5 run had neighbour fields on.
+
+The bar was set before the Sol run: with one to two rows of noise on 20, only 17/20 or better would show the model as the limit. Sol reached 17/20, and mini at medium effort 16/20. The three Tab A rows Sol misses fail in every run with every model: two checkboxes whose checked meaning is in neither the input nor the org context (Flag__c, Event_Attendance__c: "approvable once Missing is answered") and Certification_Body__c, a certification body on Account with no certification named, which is ambiguous in the synthetic data itself. That makes 17/20 the ceiling of this input. A stronger model or more reasoning removes the remaining guesses and wording drift ("calling", "with the contact directly", a status the context gives) and reaches it; a weaker one misses it by one to three rows from run to run.
+
+Tab B stays at 50–58% with every model: the misses are the same R6 shortenings that drop list items (Investigation_Log, Expedition_Waiver_Notes), Certification_Level's eligibility rule (an R7 rewrite over 255 characters) and two checkbox/deadline rows that need their Missing answered. That is prompt and input, not model.
+
+**R6 fix (P8).** The dropped list items came from Prompt B itself, which called the "including" items examples that may be summarised. P8 keeps every item with its qualifier and cuts the wording around the list ("Free-text field storing" → "Notes on"), with the list after a colon. On gpt-oss-120b all 8 R6 training fields stayed under 200 characters with every item; on gpt-5.4-mini (medium) the Tab B sample went from R6 1/3 to **3/3** approved. Tab B overall stayed at 7/12: a Prompt C rewrite of Primary_Product_Line__c lost two confirmed facts in this run (run-to-run variance), and the rest are the R7 255-character case and the two Missing-dependent rows.
+
+**Recommendation:** gpt-5.4-mini at reasoning effort medium as the default (meets the 80% Tab A target with context, about a third of Sol's cost); gpt-6.1-sol for best quality; gpt-oss-120b on Cerebras for a free run (automatic pass rates within a few points of mini; not human-reviewed).
+
+**Free open-weight model.** The P5–P7 prompts no longer fit Groq's free tier: every Groq chat model allows 8,000 tokens per minute, which also caps a single request, and a Prompt A call carries about 7,500 tokens of fixed text (system prompt, Prompt A, golden examples) before the first field; the org context adds about 1,700. With context no call fits; without, one field per call, about 28 fields a day. The same gpt-oss-120b on Cerebras' free trial (30,000 tokens per minute, 1M per day) runs the full training set in about 12 minutes per cell. The trial needs a verified payment method and its credits expire after 30 days, so it is free to run but not free to sign up for.
 
 ### Classifier changes during training
 

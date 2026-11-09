@@ -19,7 +19,7 @@ The description exceeds 200 characters. It is not wrong — it is too verbose. S
 
 - `action`: `"shorten"`
 - Do not change the meaning. Do not introduce new content.
-- At most 200 characters is required. The items of an "including a, b, c, d" list are examples of what the notes hold, not facts that must all survive: summarise them in a few words.
+- At most 200 characters is required. Keep **every item** of an "including a, b, c, d" list, each with its qualifier ("hypotheses tested", "remediation steps applied", "amendments agreed before departure", "witnessing staff"): the qualifier tells a completed step from a proposed one. Do not merge items into a broader word ("diagnostics", "waiver execution"). Make room by cutting the wording around the list instead: "Free-text field storing" → "Notes on", "for this contact" when the object is plain, "any", "the". Write the list after a colon, not after "including".
 
 **R7 — Jargon without context**
 The description contains an unexplained acronym or internal term. Expand the acronym inline on first use using the format: `ACRONYM (Full Name)`. If you do not know what the acronym stands for, do not guess — keep the term, and ask what it stands for in `missing`. A standard expansion the input does not state (e.g. QBR as Quarterly Business Review) goes into `assumptions`.
@@ -127,7 +127,7 @@ Read each `suggested_description` once more and fix it if any of these fail:
 2. **Acronyms:** every acronym is expanded in brackets on first use, e.g. "NPS (Net Promoter Score)". This includes acronyms taken from the field name (NPS, RFM, EBR). Picklist values are written exactly as given and need no expansion. If you do not know what an acronym stands for, write the idea in plain words instead. Do not add acronyms that are not in the input.
 3. **Forbidden terms:** none of "relevant", "applicable", "various", "related to", "for tracking", "for reporting", "for reference", "internal use". Name the specific report, team, rule or system instead, or leave the clause out.
 4. **Picklist values:** every value from `picklist_values` appears, spelled exactly as given, with nothing inserted inside a value.
-5. **R6 only:** at most 200 characters and shorter than the original. Do not keep the "including a, b, c, d" list form: summarise the list in a few words or keep only the items a developer needs.
+5. **R6 only:** at most 200 characters and shorter than the original. Every list item is still there with its qualifier, after a colon instead of "including"; the words around the list were cut, not the items.
 6. **R8 only:** the words that describe the impossible structure ("list of", "range", "written feedback", "multiple addresses") are gone, not just qualified.
 7. **Nothing guessed:** every person, team, process, system or consequence you added is in the input. If not, take it out and ask in `missing`; keep it only if it is a confident reading listed in `assumptions`. The description contains no question and no remark about what is unknown; those belong in `missing`. Sentences such as "Used by …", "Read by …", "Populated by …", "Set by …", "Drives …", "Enables …" and words such as "manual" or "automatic" must come from the input; delete them otherwise. A shorten never adds anything, so its list is `[]`.
-8. **Nothing lost:** every fact, consequence and "who / how" detail of the original is still there (R6 may summarise lists of examples).
+8. **Nothing lost:** every fact, consequence and "who / how" detail of the original is still there (R6 included: it cuts wording, not list items).

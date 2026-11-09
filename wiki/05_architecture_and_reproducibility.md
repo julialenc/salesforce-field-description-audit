@@ -25,7 +25,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 |---|---|---|---|
 | Purpose | Validate the pipeline safely | Prove the pipeline in a real org | Operate the same pipeline with a stronger operational shell |
 | Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live Salesforce metadata via **Tooling API** | Live Salesforce metadata via **Tooling API** |
-| LLM provider | Free hosted open-weight model (Groq free tier) or Azure OpenAI | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
+| LLM provider | Free hosted open-weight model (gpt-oss-120b on Cerebras' free trial; Groq's free tier until the prompts outgrew it) or Azure OpenAI | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
 | Write-back | Dry-run only — no live write to Salesforce | Live write-back via **Metadata API** | Live write-back via **Metadata API** |
 | Runtime interface | Manual scripts, local configuration | Manual scripts, local configuration in `config.yml` | More user-friendly operating layer, such as CLI parameters, a service wrapper, or a simple web UI |
 | Human review | Required | Required | Required |

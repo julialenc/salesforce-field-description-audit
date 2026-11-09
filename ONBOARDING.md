@@ -12,8 +12,9 @@ Why it matters: Agentforce, Claude and other AI agents read field descriptions t
 
 ## Where it stands
 
-As of late October 2026:
-- The pipeline runs end to end on the synthetic training set, on Groq's free tier and on Azure OpenAI
+As of November 2026:
+- The pipeline runs end to end on the synthetic training set, on a free open-weight model (gpt-oss-120b on Cerebras) and on Azure OpenAI
+- Recommended model: Azure gpt-5.4-mini at reasoning effort medium (80% of FLAGGED suggestions approvable as written with an org context file); see wiki 03
 - Classifier: 279 of 288 training fields match their labels; the 9 accepted limits are listed in wiki 03
 - Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
 - In progress: human review of a suggestion sample, model choice, the one-time test-set run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
@@ -35,7 +36,7 @@ The other wikis are reference: `01` problem and audience, `03` experiment method
 ## Running it
 
 Follow the README quickstart. You need Python 3.10+, Git, and an LLM API key:
-- **Groq** (free) — open-weight models, no credit card, nothing to install. For the synthetic datasets
+- **Cerebras** (free trial) — the open-weight gpt-oss-120b, large enough limits for the current prompts; needs a verified payment method. For the synthetic datasets. Groq's free tier (no card) is too small for the current prompts: 8,000 tokens per request
 - **Azure OpenAI** (paid) or another company-approved provider — for anything involving a real org's metadata
 
 For real-org use, also the Salesforce CLI and a sandbox or free Developer Edition org — never start on production.

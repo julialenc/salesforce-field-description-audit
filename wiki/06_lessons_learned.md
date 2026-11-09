@@ -55,7 +55,7 @@ After that, the remaining failures were long originals the model would not cut, 
 
 - A model can disappear between two runs. Groq retired `llama-3.3-70b-versatile` without notice (HTTP 404 `model_not_found`). Check the provider's model list at the start of each session.
 - On Azure, by October 2026 every gpt-4o and gpt-4.1 model was "Deprecated", which in Azure's terms means closed to subscriptions that never deployed them. Check the retirement schedule before naming a model in documentation.
-- Free tiers limit more than requests per minute. Groq's free tier also caps the size of a single request (8,000 tokens), which a retry can never fix: the request has to get smaller. The fix was a smaller batch and splitting a batch in half on HTTP 413.
+- Free tiers limit more than requests per minute. Groq's free tier also caps the size of a single request (8,000 tokens), which a retry can never fix: the request has to get smaller. The fix was a smaller batch and splitting a batch in half on HTTP 413. Once the fixed part of the prompt (system prompt, task prompt, examples) grew to about 7,500 tokens, no batch was small enough, and the free run moved to a provider with larger limits for the same model.
 - Reasoning models (gpt-5 family, gpt-oss) spend output tokens on hidden reasoning. A reply cut off for length is usually reasoning that used up the budget, so set `reasoning_effort: low` for a task like this. They may also reject parameters such as `temperature`.
 
 ## 8. Caching: Key on Everything That Shapes the Answer
@@ -113,3 +113,11 @@ The first score of the run with org context was 20%, lower than without it: the 
 ## 19. Synthetic Data Has Its Own Style
 
 Synthetic data is only as realistic as whoever wrote it. In the training set, the "good" descriptions were long and followed one template. That produced a length-based rule that could not separate good from bad, and the rule had to be redefined. No description used the common "Full Name (ACRONYM)" order, so the classifier never saw it until an LLM wrote one. Before trusting a rule, ask whether the data that shaped it looks like a real org.
+
+## 20. Set the Bar Before the Run
+
+When a result is measured on 20 rows, one row is 5 points, and the same prompt and model gave 70%, 80% and 70% on three runs. Before testing a hypothesis ("a stronger model closes the gap"), write down the number that would confirm it, outside the noise: here 17/20 or better. Without that bar, every run looks like a small step and invites one more run and one more review. The bar also shows when to stop: a row that fails with every model and every prompt is a fact about the input, not something to tune.
+
+## 21. A Prompt Can Cause the Failure It Is Meant to Prevent
+
+Shortened descriptions kept losing specific items ("hypotheses tested", "remediation steps applied"), with every model. The cause was the prompt's own instruction: the listed items are examples and may be summarised. The reviewer's notes said the opposite. When all models make the same mistake, read the prompt for the sentence that asks for it.
