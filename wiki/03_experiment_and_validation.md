@@ -314,7 +314,7 @@ Every run of the experiment is one cell in a matrix of four dimensions. Changing
 | Dimension | Values | What it isolates |
 |---|---|---|
 | **Model** | `gpt-oss-120b` (free, open-weight): on Groq until Day 6, on Cerebras from Day 7 · `gpt-5.4-mini` on Azure OpenAI (paid) · `gpt-5.5` and `gpt-6.1-sol` on Azure OpenAI (paid, about 7× the price of mini) · reasoning effort low, or medium where marked | How much of the result depends on the model rather than the prompt |
-| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6) · **P5** no remarks to the Admin, org context meanings for opaque codes (Day 6) · **P6** P5 + a retired R5 field is kept and asked about (Day 7) · **P7** P6 + a status the org context gives may be written (Day 7) · **P8** P7 + R6 keeps every list item and cuts the wording around it (Day 7) | The effect of instructions, with the input held constant |
+| **Prompt version** | **P1** starting prompts (Day 3) · **P2** invented examples + "Check Before You Answer" (Day 4) · **P3** "Do Not Invent", `assumptions` and `missing` (Day 5) · **P4** ask-don't-write, type-specific Missing, Salesforce knowledge (Day 6) · **P5** no remarks to the Admin, org context meanings for opaque codes (Day 6) · **P6** P5 + a retired R5 field is kept and asked about (Day 7) · **P7** P6 + a status the org context gives may be written (Day 7) · **P8** P7 + R6 keeps every list item and cuts the wording around it (Day 7) · **P9** P8 + Prompt C keeps the original's purpose sentences, "Nothing lost" check (Day 7) | The effect of instructions, with the input held constant |
 | **Context** | **C0** the field's own data only (description, name, type, picklist values, formula, related object) · **C1** + metadata sent with the field (neighbouring fields on the object; label, help text, length, decimals where present) · **C2** + org glossary only · **C3** + metadata and full org context file | Whether a weak suggestion lacked instructions or lacked information |
 | **Dataset** | Training (288 fields, iterate freely) · Test (144 fields, run once at the end) | Whether results generalise beyond the data the prompts were tuned on |
 
@@ -373,16 +373,17 @@ The Definition of Done for Tab A is checked in two cells with the same prompt an
 
 ## Training Set Results
 
-*To be completed after Phase 1 is stable.*
+Final setup, measured on the training set (Days 3–7). The full story per day is in the sections below.
 
 ```
 Training set size (total fields): 288
 Objects: Account, Contact, Opportunity, Case
 Fields per object: 72
-LLM provider used: Groq free tier for iteration; Azure OpenAI to confirm
-Model: openai/gpt-oss-120b (Groq), gpt-5.4-mini (Azure)
-Temperature setting: 0.2 on Groq; not sent to gpt-5.4-mini (reasoning models reject it), reasoning_effort low on both
-Number of iterations before Phase 1 Definition of Done was met:
+LLM provider used: Groq free tier (Days 1–6), Cerebras free trial (Day 7) and Azure OpenAI
+Models compared: gpt-oss-120b, gpt-5.4-mini, gpt-5.5, gpt-6.1-sol
+Chosen setup: gpt-5.4-mini (Azure), reasoning_effort medium, org context file, no neighbour fields, prompts P9
+Temperature: not sent to the gpt-5 family (they reject it)
+Prompt versions before the Tab A target was met with context: P1 → P8 (8 iterations, Days 3–7)
 
 Classifier accuracy (training set): 279/288 (96.9%)
   Rules 1-5 (FLAGGED): 73/78 (93.6%) correctly classified
@@ -390,17 +391,21 @@ Classifier accuracy (training set): 279/288 (96.9%)
   Near-miss fields (REVIEWED): 157/158 (99.4%) correctly not triggered
   SKIPPED fields: 17/17 (100%) correctly identified
 
-LLM output quality (training set):
-  Tab A — % approved without editing: 30% (Day 5 sample, 6/20, no org context); Day 6: 30% without context (55% once Missing is answered), 40% with full org context
-  Tab A — % edited before approving: 50% (10/20)
-  Tab A — % rejected: 20% (4/20)
-  Tab B — % where LLM correctly preserved existing description:
-  Tab B — % where LLM suggested a revision that was approved:
-  Tab B — R6 (Too Long): % where shortened description was approved without further editing:
+LLM output quality (training set, 40-field human sample, with org context):
+  Tab A — approved without editing: 80% (16/20) with the chosen setup; 85% (17/20) with gpt-6.1-sol
+          (first sample, Day 5, no context: 30%)
+  Tab A — edited before approving: 20% (4/20); 3 of the 4 need a fact that is in neither the input
+          nor the org context (what a checkbox means, which certification)
+  Tab A — rejected: 0%
+  Tab B — approved without editing: 58% (7/12); R6 shortenings 3/3 after P8
+  Tab B — Prompt C keeps agreed with: 8/8 (100%)
+  Automatic check, full set (gpt-5.4-mini, P6): Prompt A 88.1%, Prompt B 70.6–79.4%
 
-Prompt changes made during iteration: see "Prompt iteration with the automatic check" below
-Notable failure patterns observed during training: see the same section
+Prompt changes made during iteration: see "Prompt iteration with the automatic check" and Days 6–7 below
+Notable failure patterns: see "What still blocks approval" (Day 6) and "Is the model the limit?" (Day 7)
 ```
+
+**Known limits after training.** Prompt C (P9) still drops a "Used in dashboards / to route…" sentence of a good original in about 3 of 17 rewrites (automatic "dropped" check, 163 REVIEWED fields); R7 rewrites of originals already over 255 characters lose a clause until the real description limit is known (Day 8); checkboxes and dates whose meaning is in neither the input nor the org context are only approvable once the Missing question is answered.
 
 ### Prompt iteration with the automatic check
 
@@ -560,29 +565,39 @@ R3 (wrong type hint) and R8 (contradicts the configuration) overlap when a descr
 
 ## Test Set Results
 
-*To be completed after Phase 2 is run.*
+Run once on Day 7 with the setup chosen on the training set (gpt-5.4-mini, reasoning_effort medium, prompts P9, no neighbour fields), without and with the org context file; gpt-oss-120b on Cerebras for comparison. Nothing was tuned afterwards.
 
 ```
-Test set size (total fields): 144
+Test set size (total fields): 144 (136 sent to the LLM, 8 SKIPPED)
 Objects: Account, Contact, Opportunity, Case
 Fields per object: 36
 
-Classifier accuracy (test set):
-  Rules 1-5 (FLAGGED): % correctly classified
-  Rules 6-9 (UNCERTAIN): % correctly classified
-  Near-miss fields (REVIEWED): % correctly not triggered
-  SKIPPED fields: % correctly identified
+Classifier accuracy (test set): 128/144 (88.9%)   training: 279/288 (96.9%)
+  Rules 1-5 (FLAGGED): 30/32 (93.8%) correctly classified   (R3 2/4)
+  Rules 6-9 (UNCERTAIN): 15/24 (62.5%) correctly classified (R6 2/4, R7 7/8, R8 2/8, R9 4/4)
+  Near-miss fields (REVIEWED): 75/80 (93.8%) correctly not triggered
+  SKIPPED fields: 8/8 (100%) correctly identified
 
-LLM output quality (test set):
-  Tab A — % approved without editing:
-  Tab A — % edited before approving:
-  Tab A — % rejected:
-  Tab B — % where LLM correctly preserved existing description:
-  Tab B — % where LLM suggested a revision that was approved:
+Automatic check (gpt-5.4-mini medium):  no context A 86.7%, B 78.9% · with context A 86.7%, B 84.2%
+Automatic check (gpt-oss-120b, Cerebras): no context A 83.3%, B 78.9% · with context A 89.7%, B 52.6%
 
-Differences from training set results (if any):
-Assessment: experiment PASSED / FAILED Phase 2 Definition of Done
+LLM output quality (test set, 40-field human sample, gpt-5.4-mini medium with org context):
+  Tab A — approved without editing: 60% (12/20)
+  Tab A — edited before approving: 40% (8/20): 6 need a fact that is in neither the input nor the
+          org context, 2 are model errors (an invented dependency, a dropped fact)
+  Tab A — rejected: 0%
+  Tab B — approved without editing: 33% (4/12); R6 shortenings 2/2
+  Tab C — Prompt C keeps agreed with: 7/8 (87.5%)
+
+Differences from training set results: see below
+Assessment: Phase 2 Definition of Done NOT met (Tab A 60% against 80%)
 ```
+
+**What the test set shows.**
+- **The prompts transfer; the org context does not.** Setting aside the rows whose answer is in no input, 12 of 14 Tab A rows are approvable (86%), close to training's 17 of 18. But 6 of 20 test rows need such a fact, against 3 of 20 on training: three checkboxes without a stated meaning and three picklists whose value meanings ("Bi-Weekly", Low/Mid/High/VIP, market tiers) the context does not define. The org context file was written while looking at the training fields, so it covers them better. An Admin's context file has to be written for the fields being audited; on fields it does not cover, expect about 60% approvable on the first pass, with the rest answerable through the Missing questions.
+- **The classifier's Step 2 rules are the least general part.** R8 (type mismatch in Step 2) matched 2 of 8 test fields and R6 2 of 4: their keyword lists were tuned on how the training set was written. Step 1 (R1–R5) held at 94%.
+- **The free model is close on the automatic check** but left six R7 acronyms the context does not define unexpanded (ABM, TAM, SPF, MTTR, VOC), where gpt-5.4-mini expanded them and listed the expansion as unverified.
+- **A tooling bug distorted the first scoring.** The sample file took picklist values from the training set only, so every test picklist showed none and its real values looked invented (first score 35%). Fixed in `review_sample.py`; the 8 affected rows were re-judged with the values visible.
 
 ---
 
