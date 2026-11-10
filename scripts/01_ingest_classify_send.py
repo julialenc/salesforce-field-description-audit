@@ -34,6 +34,9 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sf_cli  # noqa: E402  (Salesforce CLI helpers, next to this script)
+
 import openpyxl
 import requests
 import yaml
@@ -152,13 +155,34 @@ def load_config() -> dict:
         sys.exit(1)
     with open(CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
-    required = ["mode", "llm"]
-    for key in required:
-        if key not in cfg:
-            log.error(f"config.yml is missing required key: '{key}'")
-            sys.exit(1)
-    log.info(f"Config loaded — mode: {cfg['mode']}")
+    if "llm" not in cfg:
+        log.error("config.yml is missing required key: 'llm'")
+        sys.exit(1)
+    cfg["source"] = data_source(cfg)
+    log.info(f"Config loaded — source: {cfg['source']}")
     return cfg
+
+
+def data_source(cfg: dict) -> str:
+    """'file' or 'org'. Older configs used mode: experiment | production instead of source."""
+    source = cfg.get("source") or {"production": "org"}.get(cfg.get("mode"), "file")
+    if source not in ("file", "org"):
+        log.error(f"config.yml: source must be 'file' or 'org', not '{source}'")
+        sys.exit(1)
+    return source
+
+
+# Free tiers keep or train on what they receive: real org metadata never goes there
+FREE_TIER_HOSTS = ("groq.com", "cerebras.ai", "openrouter.ai")
+
+
+def check_org_data_provider(cfg: dict) -> None:
+    endpoint = str(cfg.get("llm", {}).get("endpoint", ""))
+    if any(h in endpoint for h in FREE_TIER_HOSTS) and not cfg.get("options", {}).get("allow_free_tier_with_org"):
+        log.error(f"source: org sends org metadata to the LLM, and {endpoint} is a free tier. Use a "
+                  "company-approved provider (e.g. Azure OpenAI). For a demo org that holds only synthetic "
+                  "data, set options.allow_free_tier_with_org: true.")
+        sys.exit(1)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -166,11 +190,9 @@ def load_config() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def ingest_fields(cfg: dict) -> list[dict]:
-    mode = cfg.get("mode", "experiment")
-    if mode == "experiment":
+    if data_source(cfg) == "file":
         return _ingest_from_file(cfg)
-    else:
-        return _ingest_from_tooling_api(cfg)
+    return _ingest_from_org(cfg)
 
 
 def _ingest_from_file(cfg: dict) -> list[dict]:
@@ -189,36 +211,23 @@ def _ingest_from_file(cfg: dict) -> list[dict]:
     return fields
 
 
-def _ingest_from_tooling_api(cfg: dict) -> list[dict]:
+def _ingest_from_org(cfg: dict) -> list[dict]:
     """
-    Production ingestion via Salesforce Tooling API.
-
-    TO IMPLEMENT:
-      1. Install simple-salesforce: pip install simple-salesforce
-      2. Authenticate using cfg['salesforce'] credentials
-      3. For each object in cfg['objects'], run:
-           SELECT QualifiedApiName, Label, DataType, Description, ...
-           FROM FieldDefinition
-           WHERE EntityDefinition.QualifiedApiName = '<ObjectName>'
-      4. Map response to the internal field dict format:
-           {
-             "object":          <EntityDefinition.QualifiedApiName>,
-             "field_api_name":  <QualifiedApiName>,
-             "field_type":      <DataType>,
-             "description":     <Description> or "",
-             "picklist_values": [v["value"] for v in <PicklistValues>],
-             "formula":         <CalculatedFormula> or None,
-             "related_object":  <ReferenceTo[0]> or None,
-           }
-      5. Return the combined list across all objects.
-
-    Reference: https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/
+    Fields of the objects in cfg['objects'], read from the org through the
+    Salesforce CLI (read-only metadata retrieve; see sf_cli.py). The CLI holds
+    the login: sf org login web --alias <salesforce.target_org>.
+    Custom fields only, unless options.include_standard_fields is true.
     """
-    raise NotImplementedError(
-        "Tooling API ingestion is not yet implemented. "
-        "See the docstring of _ingest_from_tooling_api() for implementation guidance. "
-        "To run in experiment mode, set mode: experiment in config.yml."
-    )
+    check_org_data_provider(cfg)
+    org = (cfg.get("salesforce") or {}).get("target_org")
+    if not org:
+        log.error("config.yml: source: org needs salesforce.target_org (the alias used in sf org login web)")
+        sys.exit(1)
+    objects = cfg.get("objects") or ["Account", "Contact", "Opportunity", "Case"]
+    include_standard = cfg.get("options", {}).get("include_standard_fields", False)
+    fields = sf_cli.read_fields(org, objects, include_standard)
+    log.info(f"Ingested {len(fields)} fields from org '{org}' ({', '.join(objects)})")
+    return fields
 
 
 # ─────────────────────────────────────────────────────────────────────────────

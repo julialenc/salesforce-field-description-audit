@@ -17,7 +17,8 @@ As of November 2026:
 - Recommended model: Azure gpt-5.4-mini at reasoning effort medium: 80% of FLAGGED suggestions approvable as written with an org context file on the training set, 60% on the unseen test set, where the context covered fewer fields; see wiki 03
 - Classifier: 279 of 288 training fields match their labels; the 9 accepted limits are listed in wiki 03
 - Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
-- In progress: human review of a suggestion sample, model choice, the one-time test-set run, testing on a real Salesforce org, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
+- A free Developer Edition org can be seeded with the training fields (`scripts/seed_demo_org.py`), and the pipeline reads fields from an org through the Salesforce CLI (`source: org`); `scripts/check_org_parity.py` shows the org gives the same input as the file
+- Prompt and classifier tuning is closed. In progress: write-back to the org, a setup check, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
 
 ## Read in this order
 

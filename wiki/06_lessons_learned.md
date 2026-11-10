@@ -125,3 +125,11 @@ Shortened descriptions kept losing specific items ("hypotheses tested", "remedia
 ## 22. Context Written for One Set Leaks Like Examples Do
 
 The org context file was written while looking at the training fields. On the training sample, 3 of 20 suggestions needed a fact the context did not give; on the unseen test set, 6 of 20. The prompts held up (86% of the rows that could be answered were approvable on both sets), but the context did not. A context file is input like any other: written by someone who has seen the fields, it covers those fields best. Test it on fields its author has not seen, and in a real org, write it for the objects being audited.
+
+## 23. Read Metadata the Way an Auditor Would
+
+The first attempt to read the new fields from the org used a describe call and found 5 custom fields on Opportunity instead of 57. Describe answers "what can this user see", and nobody had been given field-level access to fields that had just been created. A metadata retrieve answers "what exists". An audit tool needs the second. When an API returns fewer records than expected, ask which question it answers before you debug the count.
+
+## 24. Check the Platform's Limits Yourself
+
+For seven months the docs said a field description holds at most 255 characters. One check-only deploy in a free Developer Edition org showed 1,000 (1,000 passed, 1,001 failed), with nothing saved. A limit you can test in a minute is worth testing before it shapes the design.

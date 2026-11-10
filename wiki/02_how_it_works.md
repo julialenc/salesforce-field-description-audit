@@ -7,7 +7,7 @@
 <pre>
 Salesforce Org
       ↓
-[1] Extract field metadata — Tooling API
+[1] Extract field metadata — from a file, or from the org through the Salesforce CLI
       ↓
 [2] Classify the description of every field — 9 rule-based checks (described at the end of this file)
       ↓                          ↓                        ↓                        ↓
@@ -80,24 +80,29 @@ Script 1 begins by reading `config.yml` to determine the runtime setup for the c
 
 The repository provides `config.example.yml` as a safe, shareable template. It shows the full configuration structure, including the values each user needs to supply and the object list to scan.
 
-Once the object list is confirmed, the script connects to Salesforce using the **Tooling API** and pulls field metadata for every field on those objects. For each field, it retrieves:
+With `source: org`, the script reads the org named in `salesforce.target_org` through the **Salesforce CLI** (`sf`), which holds the login: you sign in once in the browser with `sf org login web --alias <alias>`, so `config.yml` never contains a username, password or token. It runs a read-only metadata retrieve of each object (`CustomObject`) and parses every field from it. A retrieve is used rather than a describe call because describe hides fields the running user has no field-level access to, which is common for fields an Admin has just created. For each field, it retrieves:
 
 * **Field label**
 * **Field API name**
 * **Field type**
 * **Picklist values** *(if applicable)*
 * **Existing description**
+* **Formula**, **lookup target**, **help text**, **length** and **decimal places** *(where the field has them)*
 
 By default, the tool processes **custom fields only** — those ending in `__c`. **Standard fields can be included per object** by enabling an option in `config.yml`. A small subset of standard fields is read-only in Salesforce and cannot be updated regardless of this setting — these are logged as **SKIPPED** and never touched.
 
 The raw metadata is saved locally as `sf_metadata_raw.json` before any processing begins. This file is kept for traceability — it represents exactly what Salesforce returned at the time of the scan.
 
-In **experiment mode**, the Tooling API call is replaced by reading from a local JSON file. Two versions of this file exist for experiment purposes:
+With `source: file` (the default), the org is replaced by a local JSON file. Two versions of this file exist for experiment purposes:
 
 * `data/sf_metadata_raw_training.json` — the **training set**, used during classifier development and prompt iteration
 * `data/sf_metadata_raw_test.json` — the **test set**, used only for final validation once classifier and prompts are considered stable
 
 Which file is active is controlled by `data_source.experiment_file` in `config.yml`. See wiki `03_experiment_and_validation.md` for the full experiment methodology.
+
+With `source: org`, the field metadata goes to the LLM. Free tiers (Groq, Cerebras, OpenRouter) are refused for that: real org metadata only goes to a company-approved provider such as Azure OpenAI. A demo org that holds only synthetic data can allow it with `options.allow_free_tier_with_org: true`.
+
+`scripts/check_org_parity.py` confirms both paths give the pipeline the same input: for a Developer Edition org seeded with the training fields (`scripts/seed_demo_org.py`), all 231 seeded fields have the same description, type, picklist values, formula and lookup target as the file, and the classifier gives each the same status and rule.
 
 > **This step is entirely read-only. Nothing is written to Salesforce.**
 
