@@ -49,7 +49,7 @@ DATA_DIR    = ROOT / "data"
 # ── constants ─────────────────────────────────────────────────────────────────
 
 VALID_DECISIONS   = {"Approve", "Edit", "Reject"}
-MAX_DESC_LENGTH   = 255    # Salesforce hard limit
+MAX_DESC_LENGTH   = 1000   # Salesforce limit for a field description (checked in a Developer Edition org)
 
 # Column names expected in Tab A and Tab B of the review file
 COL_OBJECT        = "Object"

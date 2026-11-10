@@ -289,7 +289,7 @@ Script 2 begins with a validation pass before writing anything. It checks that:
 
 * Every row in Tab A and Tab B has a value in the **Approve / Edit / Reject** column
 * Every row marked **Edit** has a non-empty value in the **Admin Version** column
-* No approved or edited description exceeds 255 characters — the Salesforce field limit
+* No approved or edited description exceeds 1,000 characters — the Salesforce limit for a field description
 
 If any of these checks fail, the script stops and reports the problem. Nothing is written to Salesforce until the file passes validation in full.
 
@@ -379,7 +379,7 @@ Length alone is not a quality problem. A description of 250 characters that says
 
 A description that fires R6 is not necessarily wrong. It may be accurate, specific, and complete. However, Agentforce reads field descriptions at runtime as part of its context window. Shorter descriptions reduce token consumption and keep the metadata layer lean. The LLM is asked to evaluate whether the description can be meaningfully shortened without losing accuracy — not to replace it unconditionally.
 
-Note: Salesforce enforces a hard limit of 255 characters for any field description. A description between 200 and 255 characters is technically valid but is a candidate for review under this rule.
+Note: Salesforce allows up to 1,000 characters in a field description (checked in a Developer Edition org). The prompts aim for at most 255, a length an agent reads cheaply; a description between 200 and 255 characters is valid but is a candidate for review under this rule.
 
 ---
 
