@@ -47,7 +47,7 @@
 # =========================================================
 
 source: file        # file | org
-write_back: "off"   # off | export | deploy (quoted: YAML reads a bare off as false)
+write_back: export  # off | export | deploy (quote "off": YAML reads a bare off as false)
 
 data_source:
   # Used in experiment mode only. Ignored in production mode,

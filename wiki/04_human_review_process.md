@@ -241,7 +241,11 @@ Deployment must reflect the Admin’s reviewed decisions, not the raw AI output.
 
 ### How the Admin does it
 
-Run Script 2 from the terminal after the spreadsheet is complete.
+Run Script 2 from the terminal after the spreadsheet is complete:
+
+`python scripts/02_deploy_approved.py` (uses the newest review file), or pass the file: `python scripts/02_deploy_approved.py data/review_queue_<timestamp>.xlsx`
+
+With `write_back: export` (the default) it writes `data/approved_descriptions_{timestamp}.csv` and changes nothing in Salesforce. With `write_back: deploy` it writes to the org after you type the org alias. Each row ends with one status in the write log: SUCCESS, EXPORTED, DRY_RUN, UNCHANGED (same text as now), SKIPPED (rejected) or FAILED (with the reason).
 
 ---
 

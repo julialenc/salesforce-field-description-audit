@@ -18,7 +18,8 @@ As of November 2026:
 - Classifier: 279 of 288 training fields match their labels; the 9 accepted limits are listed in wiki 03
 - Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
 - A free Developer Edition org can be seeded with the training fields (`scripts/seed_demo_org.py`), and the pipeline reads fields from an org through the Salesforce CLI (`source: org`); `scripts/check_org_parity.py` shows the org gives the same input as the file
-- Prompt and classifier tuning is closed. In progress: write-back to the org, a setup check, and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
+- Script 2 exports approved descriptions to a CSV by default, or writes them to the org (`write_back: deploy`); tested on the demo org, with `seed_demo_org.py reset` to start over
+- Prompt and classifier tuning is closed. In progress: a setup check and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
 
 ## Read in this order
 

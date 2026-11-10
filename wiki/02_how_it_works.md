@@ -65,7 +65,7 @@ Salesforce Org
 [6] Admin saves the completed file and triggers Script 2
                             ↓
 [7] Script 2 reads decisions and writes approved descriptions
-    back to Salesforce — Metadata API
+    back to Salesforce — CSV export (default) or deploy through the Salesforce CLI
                             ↓
                     `write_log_{timestamp}.xlsx`
                     (record of every change made)
@@ -306,7 +306,19 @@ Once validation passes, the script processes each row according to the Admin's d
 |**Edit**|Writes the value from the **Admin Version** column to Salesforce|
 |**Reject**|Skips the field — no change is made|
 
-Write-back is performed using the **Metadata API** via `02\_deploy_approved.py`. Each field is updated individually. If a single field update fails — for example due to a permissions issue or a locked field — the script logs the failure and continues processing the remaining fields. A partial failure does not stop the run.
+A row whose new text is the same as the current description (for example a retired field the LLM chose to keep, and the Admin approved) is logged as **UNCHANGED** and not written.
+
+Where the approved descriptions go is set by `write_back` in `config.yml`:
+
+|`write_back`|What happens|
+|-|-|
+|`"off"`|Dry run: decisions are validated and logged, nothing is written|
+|`export` (default)|Approved descriptions go to `data/approved_descriptions_{timestamp}.csv`, which the Admin applies by hand (Setup or a deployment tool)|
+|`deploy` (opt-in)|Written to `salesforce.target_org` through the Salesforce CLI. Script 2 asks you to type the org alias first|
+
+With `deploy`, Script 2 retrieves the metadata of the approved fields, changes only their `<description>`, and deploys them back in one non-atomic deploy. A field that fails (for example one deleted or renamed since Script 1 ran) is logged as **FAILED** with the reason; the others are still written. A partial failure does not stop the run. Tested on a Developer Edition org: 5 descriptions written, 1 non-existent field logged as failed, the type, picklist values and formula of every field unchanged.
+
+To run the demo again, `python scripts/seed_demo_org.py reset` puts the original descriptions back.
 
 Every field processed in this step is recorded in:
 

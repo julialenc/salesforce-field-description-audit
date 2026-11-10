@@ -36,7 +36,7 @@ The experiment runs the **same scripts** as production. There is no separate exp
 |---|---|---|
 | Data input | Reads from a local JSON file (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Reads the org through the Salesforce CLI (`source: org`) |
 | LLM calls | Free open-weight model (gpt-oss-120b on Cerebras), or Azure OpenAI | Company-approved provider (e.g. Azure OpenAI) |
-| Write-back (Script 2) | Dry-run — logs decisions but does not call Metadata API | Calls Salesforce Metadata API |
+| Write-back (Script 2) | `write_back: "off"` (dry run) or `export` (CSV) | `export` (CSV), or `deploy` through the Salesforce CLI |
 
 Everything between those seams — classification logic, routing, prompt assembly, batching, response parsing, review file generation, decision validation — runs identically in both modes.
 

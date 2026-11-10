@@ -10,19 +10,33 @@ Script 2 of the Salesforce Field Description Automation pipeline.
 Workflow:
   1. Read config.yml
   2. Find the most recent review_queue_{timestamp}.xlsx in data/
+     (or use the file given as argument)
   3. Read Admin decisions from Tab A and Tab B
   4. Validate the review file — stop if any row is incomplete or invalid
-  5. Deploy approved changes:
-       - Experiment mode: dry-run — log decisions, write nothing to Salesforce
-       - Production mode: write via Salesforce Metadata API
+  5. Apply approved changes, as set by write_back in config.yml:
+       - off:    dry run — log decisions, write nothing
+       - export: write approved descriptions to approved_descriptions_{timestamp}.csv
+                 for the Admin to apply by hand (default)
+       - deploy: write them to salesforce.target_org through the Salesforce CLI:
+                 retrieve each field's metadata, change only its description,
+                 deploy. Asks for the org alias to be typed first. A field that
+                 fails (e.g. no longer exists) is logged and the rest go through
+     A row whose new description equals the current one is logged as
+     UNCHANGED and not written (e.g. a retired field the LLM kept)
   6. Write write_log_{timestamp}.xlsx
+
+Usage:
+  python scripts/02_deploy_approved.py [data/review_queue_<timestamp>.xlsx]
 
 See wiki/02_how_it_works.md for full pipeline documentation.
 """
 
+import csv
 import json
 import logging
 import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,6 +44,9 @@ import openpyxl
 import yaml
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sf_cli  # noqa: E402  (Salesforce CLI helpers, next to this script)
 
 # ── logging ───────────────────────────────────────────────────────────────────
 
@@ -70,8 +87,22 @@ def load_config() -> dict:
         sys.exit(1)
     with open(CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
-    log.info(f"Config loaded — mode: {cfg.get('mode', 'experiment')}")
+    cfg["write_back"] = write_back_mode(cfg)
+    log.info(f"Config loaded — write_back: {cfg['write_back']}")
     return cfg
+
+
+def write_back_mode(cfg: dict) -> str:
+    """off | export | deploy. YAML reads a bare off as false; old configs used mode: experiment | production."""
+    value = cfg.get("write_back")
+    if value is False:
+        return "off"
+    if value is None:
+        return {"experiment": "off", "production": "deploy"}.get(cfg.get("mode"), "export")
+    if value not in ("off", "export", "deploy"):
+        log.error(f"config.yml: write_back must be off, export or deploy, not '{value}'")
+        sys.exit(1)
+    return value
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +110,17 @@ def load_config() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def find_review_file() -> Path:
-    """Find the most recent review_queue_{timestamp}.xlsx in data/."""
+    """The review file given as argument, or the most recent review_queue_{timestamp}.xlsx in data/."""
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if args:
+        chosen = Path(args[0])
+        if not chosen.is_absolute():
+            chosen = ROOT / chosen
+        if not chosen.exists():
+            log.error(f"Review file not found: {chosen}")
+            sys.exit(1)
+        log.info(f"Review file: {chosen.name}")
+        return chosen
     candidates = sorted(
         DATA_DIR.glob("review_queue_*.xlsx"),
         key=lambda p: p.stat().st_mtime,
@@ -226,48 +267,130 @@ def validate_decisions(rows: list[dict]) -> list[str]:
 
 def deploy(rows: list[dict], cfg: dict) -> list[dict]:
     """
-    Process decisions and write to Salesforce (or dry-run in experiment mode).
+    Apply the decisions as set by write_back (off | export | deploy).
     Returns list of write log records.
     """
-    mode = cfg.get("mode", "experiment")
-    log_records = []
-
-    if mode == "experiment":
-        log.info("Experiment mode — dry-run: no changes will be written to Salesforce")
+    mode = cfg.get("write_back", "export")
+    log_records, to_write = [], []
 
     for row in rows:
-        decision   = row["decision"]
-        name       = row["field_api_name"]
-        obj        = row["object"]
-
-        if decision == "Reject":
+        if row["decision"] == "Reject":
             log_records.append(_log_record(row, "SKIPPED", "Decision: Reject — no change written."))
             continue
+        new_desc = row["admin_version"].strip() if row["decision"] == "Edit" else row["llm_suggestion"].strip()
+        if new_desc == row.get("current_desc", "").strip():
+            log_records.append(_log_record(row, "UNCHANGED", "Same as the current description — nothing to write.", new_desc))
+            continue
+        to_write.append((row, new_desc))
 
-        new_desc = (
-            row["admin_version"].strip()
-            if decision == "Edit"
-            else row["llm_suggestion"].strip()
-        )
-
-        if mode == "experiment":
-            log_records.append(_log_record(row, "DRY_RUN", f"Would write: {new_desc[:80]}...", new_desc))
-        else:
-            result = _write_to_salesforce(obj, name, new_desc, cfg)
-            status = "SUCCESS" if result["ok"] else "FAILED"
-            log_records.append(_log_record(row, status, result.get("message", ""), new_desc))
-
-    success = sum(1 for r in log_records if r["write_status"] == "SUCCESS")
-    dry_run = sum(1 for r in log_records if r["write_status"] == "DRY_RUN")
-    skipped = sum(1 for r in log_records if r["write_status"] == "SKIPPED")
-    failed  = sum(1 for r in log_records if r["write_status"] == "FAILED")
-
-    if mode == "experiment":
-        log.info(f"Dry-run complete — {dry_run} would be written, {skipped} rejected")
+    if mode == "off":
+        log.info("write_back: off — dry run, nothing is written")
+        log_records += [_log_record(r, "DRY_RUN", f"Would write: {d[:80]}...", d) for r, d in to_write]
+    elif mode == "export":
+        path = export_csv(to_write)
+        log_records += [_log_record(r, "EXPORTED", f"In {path.name}", d) for r, d in to_write]
     else:
-        log.info(f"Deployment complete — {success} written, {skipped} rejected, {failed} failed")
+        log_records += deploy_to_org(to_write, cfg)
 
+    counts = {s: sum(1 for r in log_records if r["write_status"] == s)
+              for s in ("SUCCESS", "EXPORTED", "DRY_RUN", "UNCHANGED", "SKIPPED", "FAILED")}
+    log.info("Done — " + ", ".join(f"{n} {s.lower()}" for s, n in counts.items() if n))
     return log_records
+
+
+def export_csv(to_write: list[tuple[dict, str]]) -> Path:
+    """Approved descriptions as a CSV the Admin can apply by hand (Setup or a deployment tool)."""
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    path = DATA_DIR / f"approved_descriptions_{timestamp}.csv"
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:      # utf-8-sig: Excel opens it correctly
+        w = csv.writer(f)
+        w.writerow(["Object", "Field_API_Name", "Decision", "Old_Description", "New_Description"])
+        for row, new_desc in to_write:
+            w.writerow([row["object"], row["field_api_name"], row["decision"], row.get("current_desc", ""), new_desc])
+    log.info(f"Exported {len(to_write)} approved descriptions to {path.name}")
+    return path
+
+
+def deploy_to_org(to_write: list[tuple[dict, str]], cfg: dict) -> list[dict]:
+    """
+    Write descriptions to the org through the Salesforce CLI: retrieve the
+    fields' metadata, change only <description>, deploy. Fields that fail are
+    logged as FAILED; the others are saved (the deploy is not all-or-nothing).
+    """
+    org = (cfg.get("salesforce") or {}).get("target_org")
+    if not org:
+        log.error("config.yml: write_back: deploy needs salesforce.target_org (the alias used in sf org login web)")
+        sys.exit(1)
+    if not to_write:
+        return []
+    log.info(f"About to write {len(to_write)} field descriptions to the org '{org}'.")
+    if input(f"Type the org alias ({org}) to continue: ").strip() != org:
+        log.error("Cancelled. Nothing was written.")
+        sys.exit(1)
+
+    records = []
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:    # Windows: the CLI may still hold the folder
+        names = [f"CustomField:{r['object']}.{r['field_api_name']}" for r, _ in to_write]
+        sf_cli.run(["project", "retrieve", "start", "--target-org", org, "--target-metadata-dir", tmp,
+                    "--unzip", "--wait", "30", "--metadata", *names], check=False)
+        package = next(Path(tmp).rglob("package.xml"), None)
+        found = _set_descriptions(package.parent, to_write) if package else set()
+
+        for row, new_desc in to_write:
+            if (row["object"], row["field_api_name"]) not in found:
+                records.append(_log_record(row, "FAILED", "Field not found in the org.", new_desc))
+        if not found:
+            return records
+        _write_package(package, found)            # the retrieve's package.xml also names the missing fields
+
+        result  = sf_cli.run(["project", "deploy", "start", "--target-org", org, "--metadata-dir",
+                              str(package.parent), "--ignore-errors", "--wait", "30"], check=False)
+        details = (result.get("result") or {}).get("details") or {}
+        fails   = details.get("componentFailures") or []
+        fails   = [fails] if isinstance(fails, dict) else fails
+        failed  = {f.get("fullName"): f.get("problem", "") for f in fails}
+        if not result.get("result"):
+            failed = {f"{o}.{n}": result.get("message", "deploy failed") for o, n in found}
+        for row, new_desc in to_write:
+            key = (row["object"], row["field_api_name"])
+            if key not in found:
+                continue
+            problem = failed.get(f"{key[0]}.{key[1]}")
+            records.append(_log_record(row, "FAILED" if problem is not None else "SUCCESS",
+                                       problem or "Written to the org.", new_desc))
+    return records
+
+
+def _write_package(package: Path, fields: set[tuple[str, str]]) -> None:
+    """package.xml naming exactly the fields to deploy."""
+    members = "\n".join(f"        <members>{o}.{n}</members>" for o, n in sorted(fields))
+    package.write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
+                       '<Package xmlns="http://soap.sforce.com/2006/04/metadata">\n'
+                       f'    <types>\n{members}\n        <name>CustomField</name>\n    </types>\n'
+                       f'    <version>{sf_cli.API_VERSION}</version>\n</Package>\n', encoding="utf-8")
+
+
+def _set_descriptions(mdapi_dir: Path, to_write: list[tuple[dict, str]]) -> set[tuple[str, str]]:
+    """Change only <description> in the retrieved metadata. Returns the (object, field) pairs found."""
+    ns = sf_cli.NS["m"]
+    ET.register_namespace("", ns)
+    wanted = {(r["object"], r["field_api_name"]): d for r, d in to_write}
+    found = set()
+    for path in mdapi_dir.rglob("*.object"):
+        obj  = path.stem
+        tree = ET.parse(path)
+        for el in tree.getroot().findall(f"{{{ns}}}fields"):
+            name = el.findtext(f"{{{ns}}}fullName")
+            if (obj, name) not in wanted:
+                continue
+            desc = el.find(f"{{{ns}}}description")
+            if desc is None:                      # description goes right after fullName
+                desc = ET.Element(f"{{{ns}}}description")
+                el.insert(1, desc)
+            desc.text = wanted[(obj, name)]
+            found.add((obj, name))
+        tree.write(path, encoding="UTF-8", xml_declaration=True)
+    return found
 
 
 def _log_record(row: dict, status: str, message: str, new_desc: str = "") -> dict:
@@ -281,44 +404,6 @@ def _log_record(row: dict, status: str, message: str, new_desc: str = "") -> dic
         "message":         message,
         "timestamp":       datetime.now(timezone.utc).isoformat(),
     }
-
-
-def _write_to_salesforce(obj: str, field_api_name: str, new_desc: str, cfg: dict) -> dict:
-    """
-    Write a single field description to Salesforce via the Metadata API.
-
-    TO IMPLEMENT:
-      1. Install simple-salesforce: pip install simple-salesforce
-      2. Authenticate using cfg['salesforce'] credentials:
-             from simple_salesforce import Salesforce
-             sf = Salesforce(
-                 username=cfg['salesforce']['username'],
-                 password=cfg['salesforce']['password'],
-                 security_token=cfg['salesforce']['security_token'],
-                 domain=cfg['salesforce'].get('domain', 'login'),
-             )
-      3. Use the Metadata API to update the field description:
-             result = sf.mdapi.CustomField.update(
-                 metadata={
-                     'fullName': f'{obj}.{field_api_name}',
-                     'description': new_desc,
-                 }
-             )
-      4. Return {"ok": True, "message": "Written successfully"} on success
-         or    {"ok": False, "message": str(error)} on failure.
-
-    Note: The Metadata API can only update custom fields (__c). Standard fields
-    are not updatable via this API. SKIPPED fields in Script 1 should already
-    exclude non-writable fields before they reach this point.
-
-    Reference: https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/
-               https://pypi.org/project/simple-salesforce/
-    """
-    raise NotImplementedError(
-        "Salesforce Metadata API write-back is not yet implemented. "
-        "See the docstring of _write_to_salesforce() for implementation guidance. "
-        "To run in experiment mode (dry-run), set mode: experiment in config.yml."
-    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -340,6 +425,8 @@ THIN_BORDER = Border(
 STATUS_FILL = {
     "SUCCESS": PatternFill("solid", fgColor="D7F0D7"),
     "DRY_RUN": PatternFill("solid", fgColor="D7EEFF"),
+    "EXPORTED": PatternFill("solid", fgColor="D7EEFF"),
+    "UNCHANGED": PatternFill("solid", fgColor="E8E8E8"),
     "SKIPPED": PatternFill("solid", fgColor="E8E8E8"),
     "FAILED":  PatternFill("solid", fgColor="FFD7D7"),
 }
@@ -405,6 +492,8 @@ def write_log(log_records: list[dict]) -> Path:
         ("Total rows processed", len(log_records)),
         ("Written (SUCCESS)",   status_counts.get("SUCCESS", 0)),
         ("Dry-run (DRY_RUN)",   status_counts.get("DRY_RUN", 0)),
+        ("Exported to CSV (EXPORTED)", status_counts.get("EXPORTED", 0)),
+        ("Unchanged (UNCHANGED)", status_counts.get("UNCHANGED", 0)),
         ("Rejected (SKIPPED)",  status_counts.get("SKIPPED", 0)),
         ("Failed (FAILED)",     status_counts.get("FAILED",  0)),
     ]

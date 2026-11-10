@@ -133,3 +133,7 @@ The first attempt to read the new fields from the org used a describe call and f
 ## 24. Check the Platform's Limits Yourself
 
 For seven months the docs said a field description holds at most 255 characters. One check-only deploy in a free Developer Edition org showed 1,000 (1,000 passed, 1,001 failed), with nothing saved. A limit you can test in a minute is worth testing before it shapes the design.
+
+## 25. Test the Failure You Promise to Handle
+
+The design said "a field that fails is logged and the rest go through". The first deploy with one non-existent field wrote nothing at all: the field was still named in the deployment package, so Salesforce rejected the whole deploy, and a Windows file lock then crashed the script before the log was written. Only a test with a deliberately broken row found it. If the docs promise a failure behaviour, put one failing case in the test.
