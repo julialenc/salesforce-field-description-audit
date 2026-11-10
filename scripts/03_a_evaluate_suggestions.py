@@ -3,7 +3,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-evaluate_suggestions.py
+03_a_evaluate_suggestions.py
 
 Automatic quality check for the LLM suggestions written by Script 1.
 Every rewritten or shortened description is checked against the
@@ -46,9 +46,9 @@ Two findings are counted as notes, not failures:
                as "Missing" in the review file). The Admin adds them
 
 Usage:
-  python scripts/evaluate_suggestions.py
+  python scripts/03_a_evaluate_suggestions.py
       Reads data/sf_classified.json and data/llm_response.json.
-  python scripts/evaluate_suggestions.py data/llm_response_groq_gpt-oss-120b_20261024.json
+  python scripts/03_a_evaluate_suggestions.py data/llm_response_groq_gpt-oss-120b_20261024.json
       Evaluates another saved LLM response file against data/sf_classified.json.
   Add --failures to list every failed suggestion with its reasons.
   Add --assumptions to list every suggestion with assumptions or missing

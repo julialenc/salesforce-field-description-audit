@@ -102,7 +102,7 @@ Which file is active is controlled by `data_source.experiment_file` in `config.y
 
 With `source: org`, the field metadata goes to the LLM. Free tiers (Groq, Cerebras, OpenRouter) are refused for that: real org metadata only goes to a company-approved provider such as Azure OpenAI. A demo org that holds only synthetic data can allow it with `options.allow_free_tier_with_org: true`.
 
-`scripts/check_org_parity.py` confirms both paths give the pipeline the same input: for a Developer Edition org seeded with the training fields (`scripts/seed_demo_org.py`), all 231 seeded fields have the same description, type, picklist values, formula and lookup target as the file, and the classifier gives each the same status and rule.
+`scripts/00_b_check_org_parity.py` confirms both paths give the pipeline the same input: for a Developer Edition org seeded with the training fields (`scripts/00_a_seed_demo_org.py`), all 231 seeded fields have the same description, type, picklist values, formula and lookup target as the file, and the classifier gives each the same status and rule.
 
 > **This step is entirely read-only. Nothing is written to Salesforce.**
 
@@ -209,7 +209,7 @@ Before any fields are sent to the LLM, Script 1 assembles a reusable instruction
 * `system_prompt.md` — the universal definition of a good field description, including the expected tone, length, format, and quality criteria
 * `golden_examples.json` — a curated set of high-quality field descriptions used for few-shot grounding. The examples are invented fields that appear in neither synthetic dataset, so the model can never copy the answer for a field it is processing
 
-* **Org context** (optional, `options.org_context_file`) — a short Markdown file the Admin writes once: a glossary of codes, grades and scales, the systems and teams, and the org's conventions. The model may state its facts without listing them as assumptions. `data/org_context_synthetic.md` is an example for the synthetic org (and `org_context_synthetic_glossary.md` the glossary part only)
+* **Org context** (optional, `options.org_context_file`) — a short Markdown file the Admin writes once: a glossary of codes, grades and scales, the systems and teams, and the org's conventions. The model may state its facts without listing them as assumptions. `data/org_context_synthetic.md` is an example for the synthetic org
 
 This shared context is injected once per session. For each batch, the script then adds the relevant task instruction — `prompt_a_flagged_fields.md`, `prompt_b_uncertain_fields.md` or `prompt_c_reviewed_fields.md` — together with the field data for that batch.
 
@@ -318,7 +318,7 @@ Where the approved descriptions go is set by `write_back` in `config.yml`:
 
 With `deploy`, Script 2 retrieves the metadata of the approved fields, changes only their `<description>`, and deploys them back in one non-atomic deploy. A field that fails (for example one deleted or renamed since Script 1 ran) is logged as **FAILED** with the reason; the others are still written. A partial failure does not stop the run. Tested on a Developer Edition org: 5 descriptions written, 1 non-existent field logged as failed, the type, picklist values and formula of every field unchanged.
 
-To run the demo again, `python scripts/seed_demo_org.py reset` puts the original descriptions back.
+To run the demo again, `python scripts/00_a_seed_demo_org.py reset` puts the original descriptions back.
 
 Every field processed in this step is recorded in:
 

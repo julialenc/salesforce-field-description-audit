@@ -3,10 +3,10 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-review_sample.py
+03_b_review_sample.py
 
 Human review sample: measures how many LLM suggestions an Admin would
-approve as they stand. The automatic check (evaluate_suggestions.py) can only
+approve as they stand. The automatic check (03_a_evaluate_suggestions.py) can only
 test what a rule can see; whether a suggestion is true, useful and worth
 approving needs a person. Reviewing every row is the real workflow; this
 script picks a smaller, stratified sample so the approval rate can be
@@ -35,11 +35,11 @@ The sample file is named review_sample_*, so Script 2 never picks it up as a
 review queue. The same seed always gives the same sample.
 
 Usage:
-  python scripts/review_sample.py make
+  python scripts/03_b_review_sample.py make
       Samples the newest data/review_queue_*.xlsx.
-  python scripts/review_sample.py make data/review_queue_20261025_135129.xlsx
-  python scripts/review_sample.py score data/review_sample_20261025_190000.xlsx
-  python scripts/review_sample.py rereview review_sample_20261025_202746_checked.xlsx
+  python scripts/03_b_review_sample.py make data/review_queue_20261025_135129.xlsx
+  python scripts/03_b_review_sample.py score data/review_sample_20261025_190000.xlsx
+  python scripts/03_b_review_sample.py rereview review_sample_20261025_202746_checked.xlsx
       Same rows, suggestions from the newest data/review_queue_*.xlsx
       (or pass the queue as a third argument).
 """

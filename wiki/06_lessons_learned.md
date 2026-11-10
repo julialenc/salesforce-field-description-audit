@@ -12,7 +12,7 @@ The chapter grows as the project moves forward.
 
 ## 1. Measure Before You Tune
 
-**Write the check before changing anything.** The first classifier run matched only 119 of 288 labelled training fields (41%). Without a script that lists every mismatch (`validate_classifier.py`), it would have been tempting to tweak rules by feel. With the list, the mismatches fell into a few groups, and each fix could be checked in seconds: 119 → 136 → 248 → 259 → 270 → 279.
+**Write the check before changing anything.** The first classifier run matched only 119 of 288 labelled training fields (41%). Without a script that lists every mismatch (`03_c_validate_classifier.py`), it would have been tempting to tweak rules by feel. With the list, the mismatches fell into a few groups, and each fix could be checked in seconds: 119 → 136 → 248 → 259 → 270 → 279.
 
 **Group failures before fixing them.** 128 of the first 169 mismatches came from a single cause (Rule 6 firing on length alone). Fixing the biggest group first is far cheaper than fixing failures one by one.
 
@@ -34,7 +34,7 @@ All examples were replaced with invented fields that appear in neither dataset, 
 
 ## 5. Build a Checker for LLM Output, and Treat It as a Proxy
 
-LLM output cannot be unit-tested like code, but much of "good" can be checked mechanically. `evaluate_suggestions.py` runs every suggestion back through the classifier: a good rewrite should pass the same rules the original failed. It also checks length, banned vague terms, picklist values and the action each prompt asks for.
+LLM output cannot be unit-tested like code, but much of "good" can be checked mechanically. `03_a_evaluate_suggestions.py` runs every suggestion back through the classifier: a good rewrite should pass the same rules the original failed. It also checks length, banned vague terms, picklist values and the action each prompt asks for.
 
 Lessons from building it:
 - **A checker built on your classifier also tests the classifier.** The first "failures" included clearly good suggestions such as "Customer Satisfaction (CSAT) score". The rule only accepted the order "CSAT (Customer Satisfaction)", so the classifier was too strict. This is the real-world order too, and it was fixed.

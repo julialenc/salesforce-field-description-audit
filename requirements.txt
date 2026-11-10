@@ -9,7 +9,7 @@
 #   separately: https://developer.salesforce.com/tools/salesforcecli
 #   No Salesforce Python package is needed and no password is stored.
 #
-# Check your setup with: python scripts/check_setup.py
+# Check your setup with: python scripts/00_check_setup.py
 
 # Config file parsing (config.yml)
 PyYAML>=6.0

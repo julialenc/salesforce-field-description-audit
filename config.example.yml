@@ -4,7 +4,7 @@
 #
 # 1. Copy this file to config.yml   (CMD: copy config.example.yml config.yml)
 # 2. Fill in PART 1. Everything in PART 2 has a working default.
-# 3. Check your setup:               python scripts/check_setup.py
+# 3. Check your setup:               python scripts/00_check_setup.py
 #
 # config.yml holds your API key: keep it local, never commit it.
 # Salesforce passwords are never stored here: the Salesforce CLI holds the login.

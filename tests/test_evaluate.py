@@ -3,7 +3,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-Unit tests for scripts/evaluate_suggestions.py (the automatic suggestion check).
+Unit tests for scripts/03_a_evaluate_suggestions.py (the automatic suggestion check).
 
 Run with plain Python (no pytest needed):
   python tests/test_evaluate.py
@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-spec = importlib.util.spec_from_file_location("evaluate", ROOT / "scripts" / "evaluate_suggestions.py")
+spec = importlib.util.spec_from_file_location("evaluate", ROOT / "scripts" / "03_a_evaluate_suggestions.py")
 ev   = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ev)
 

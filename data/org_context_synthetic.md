@@ -1,6 +1,6 @@
 # Org context — Summit Gear AG (synthetic org)
 
-Written by the Admin. Facts about this org that field metadata does not show: codes, scales, systems, teams and conventions. Synthetic: invented for the Day 6 experiment, matching the synthetic training set. The partial version (glossary only) is org_context_synthetic_glossary.md.
+Written by the Admin. Facts about this org that field metadata does not show: codes, scales, systems, teams and conventions. Synthetic: invented for the Day 6 experiment, matching the synthetic training set.
 
 ## Codes and grades
 

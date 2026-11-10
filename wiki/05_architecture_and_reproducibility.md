@@ -188,7 +188,7 @@ R1-R5 trigger   R6-R9 trigger       fired)         not writable)
 | Experiment input | `data/sf_metadata_raw_training.json` (288 fields), `data/sf_metadata_raw_test.json` (144 fields) | Synthetic metadata for a fictional outdoor-equipment retailer |
 | LLM providers | Any **OpenAI-compatible API** (Cerebras, OpenAI, …) and **Azure OpenAI**. Amazon Bedrock and Google Vertex AI are not implemented | Suggestions, with Unverified and Missing lists |
 | Prompt assets | **Markdown + JSON** (`prompts/`) | Quality rules, examples, one task prompt per status |
-| Checks | `tests/`, `scripts/check_setup.py`, `scripts/validate_classifier.py`, `scripts/evaluate_suggestions.py`, `scripts/check_org_parity.py` | Setup, classifier, suggestion and org-input checks; only the setup check calls an LLM (one tiny request) |
+| Checks | `tests/`, `scripts/00_check_setup.py`, `scripts/03_c_validate_classifier.py`, `scripts/03_a_evaluate_suggestions.py`, `scripts/00_b_check_org_parity.py` | Setup, classifier, suggestion and org-input checks; only the setup check calls an LLM (one tiny request) |
 
 ---
 
@@ -397,15 +397,15 @@ This makes prompt behavior visible and reviewable rather than implicit. Every ex
 ### Automated Checks
 
 Three checks make each change measurable, and none needs an LLM call:
-- `scripts/validate_classifier.py` compares the classifier with the labels in a dataset and lists every mismatch
+- `scripts/03_c_validate_classifier.py` compares the classifier with the labels in a dataset and lists every mismatch
 - `tests/` holds plain-Python unit tests for the classifier rules, the cache key, the per-field context (neighbour fields, metadata, org context) and the suggestion checker (`python tests/test_classifier.py`, no test framework needed)
-- `scripts/evaluate_suggestions.py` scores the latest LLM answers: each rewrite is run back through the classifier and checked for length, vague terms, picklist coverage and the action its prompt asks for, with a pass rate per prompt and rule
+- `scripts/03_a_evaluate_suggestions.py` scores the latest LLM answers: each rewrite is run back through the classifier and checked for length, vague terms, picklist coverage and the action its prompt asks for, with a pass rate per prompt and rule
 
 The suggestion checker is built on the classifier, so it also tests the classifier: suggestions that are clearly good but fail the check point to a rule that is too strict.
 
 Every LLM answer also returns two lists: `assumptions` (claims in the suggestion the input does not support) and `missing` (facts the description needs that the input does not give, as questions). Script 1 shows them in the review file as the "Unverified" and "Missing" columns; the checker counts them as notes and lists them with `--assumptions`. They make guessing measurable without a human.
 
-What no automatic check can judge (whether a suggestion is true and worth approving) is measured with `scripts/review_sample.py`: `make` draws a fixed, stratified 40-field sample from a review file, a person decides on each row, and `score` prints the approval rate per tab and rule. After a prompt change, `rereview` puts the same rows next to the new suggestions: a row whose suggestion, Unverified and Missing are unchanged keeps its decision, so only the changed rows need a person again. The sample file is named `review_sample_*`, so Script 2 never mistakes it for a review queue.
+What no automatic check can judge (whether a suggestion is true and worth approving) is measured with `scripts/03_b_review_sample.py`: `make` draws a fixed, stratified 40-field sample from a review file, a person decides on each row, and `score` prints the approval rate per tab and rule. After a prompt change, `rereview` puts the same rows next to the new suggestions: a row whose suggestion, Unverified and Missing are unchanged keeps its decision, so only the changed rows need a person again. The sample file is named `review_sample_*`, so Script 2 never mistakes it for a review queue.
 
 ### Synthetic Datasets for Experiment Mode
 
@@ -428,7 +428,7 @@ The main persisted artifacts are:
 - `write_log_{timestamp}.xlsx`
 - `description_cache.json` (reused answers, see the Prompt and LLM Layer)
 
-Each run overwrites `llm_response.json`. To compare models or prompt versions, copy it under a descriptive name first (for example `llm_response_groq_gpt-oss-120b_20261025.json`); `evaluate_suggestions.py` accepts such a file as an argument.
+Each run overwrites `llm_response.json`. To compare models or prompt versions, copy it under a descriptive name first (for example `llm_response_groq_gpt-oss-120b_20261025.json`); `03_a_evaluate_suggestions.py` accepts such a file as an argument.
 
 Together, these files make the system inspectable from raw input to classification, generation, review, and deployment outcome.
 

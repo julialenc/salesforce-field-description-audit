@@ -163,7 +163,7 @@ The table below reflects the updated rule numbering. Rules 1–5 produce FLAGGED
   - Cerebras (free trial, open-weight gpt-oss-120b): create a key at https://cloud.cerebras.ai
   - Azure OpenAI (paid): endpoint, deployment name and key
 - `config.yml` created by copying `config.example.yml` and filling in its PART 1 (the LLM settings)
-- `python scripts/check_setup.py` passes: it checks Python, packages, config.yml, the input file and the LLM connection (one request of a few tokens), and says how to fix each failure
+- `python scripts/00_check_setup.py` passes: it checks Python, packages, config.yml, the input file and the LLM connection (one request of a few tokens), and says how to fix each failure
 
 ### Phase 1 — Training (iterate until stable)
 
@@ -214,7 +214,7 @@ If a rule misfires — either missing a case it should catch or firing on a case
 
 Once the classifier is confirmed correct on the training set, evaluate the LLM suggestions in the review queue against the criteria below. If output quality is consistently poor for a given rule or category, revise the relevant prompt file and re-run Phase 1.
 
-The mechanical part of these criteria is checked automatically by `python scripts/evaluate_suggestions.py` (add `--failures` to list each failed suggestion). It runs every rewritten or shortened description back through the classifier (a good suggestion comes out `REVIEWED`) and checks length, vague terms, picklist coverage, R6 shortening and the action each prompt asks for. It reports a pass rate per prompt and per rule. "Used to / for / by" is counted as a note, not a failure, because it is acceptable when specific content follows. Specificity and accuracy still need a human reviewer.
+The mechanical part of these criteria is checked automatically by `python scripts/03_a_evaluate_suggestions.py` (add `--failures` to list each failed suggestion). It runs every rewritten or shortened description back through the classifier (a good suggestion comes out `REVIEWED`) and checks length, vague terms, picklist coverage, R6 shortening and the action each prompt asks for. It reports a pass rate per prompt and per rule. "Used to / for / by" is counted as a note, not a failure, because it is acceptable when specific content follows. Specificity and accuracy still need a human reviewer.
 
 The prompt files and golden examples use invented fields that appear in neither dataset, so a suggestion can never be copied from an example of the same field.
 
@@ -324,10 +324,10 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 
 ### Measures recorded per cell
 
-- **Automatic pass rate** per prompt (`evaluate_suggestions.py`): rule violations only
+- **Automatic pass rate** per prompt (`03_a_evaluate_suggestions.py`): rule violations only
 - **Prompt C rewrites** out of 163 REVIEWED fields: how conservative the model is
-- **Assumptions** and **missing** counts (`evaluate_suggestions.py --assumptions`): how much the model guesses and how much it cannot know
-- **Approval rate** on the 40-field review sample (`review_sample.py`), reviewed against the rubric with an AI assistant: the Definition of Done measure. Expensive in reviewer time, so only for cells that decide something
+- **Assumptions** and **missing** counts (`03_a_evaluate_suggestions.py --assumptions`): how much the model guesses and how much it cannot know
+- **Approval rate** on the 40-field review sample (`03_b_review_sample.py`), reviewed against the rubric with an AI assistant: the Definition of Done measure. Expensive in reviewer time, so only for cells that decide something
 - **Cost** per 1,000 fields sent, and run time
 
 ### Cells run so far (training set)
@@ -342,7 +342,7 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 | P3 | gpt-5.4-mini | 98.6% | 88.2% | 16 | 46 / 50 | **30%** (6/20) | 0.22 CHF |
 | P4, C0 | gpt-5.4-mini | 83.8% | 70.6% | 24 | 7 / 48 | — | 0.37 CHF (two runs) |
 | P4, C1 | gpt-5.4-mini | 81.1% | 70.6% | 14 | 7 / 54 | **30%** (6/20); 55% once Missing is answered | 0.28 CHF |
-| P4, C1 + glossary | gpt-5.4-mini | 82.4% | 70.6% | 13 | 3 / 72 | — | 0.30 CHF |
+| P4, C1 + glossary* | gpt-5.4-mini | 82.4% | 70.6% | 13 | 3 / 72 | — | 0.30 CHF |
 | P4, C3 | gpt-5.4-mini | 86.5% | 79.4% | 18 | 6 / 46 | **40%** (8/20) | 0.31 CHF |
 | P5, C1 | gpt-5.4-mini | sample only | sample only | — | 2 / 13 (sample) | **35%** (7/20); 65% once Missing is answered | 0.05 CHF (40 fields) |
 | P5, C3 | gpt-5.4-mini | sample only | sample only | — | 4 / 4 (sample) | **70%** (14/20); R1–R4 88% | 0.05 CHF (40 fields) |
@@ -360,7 +360,7 @@ Prompt routing (A for FLAGGED, B for UNCERTAIN, C for REVIEWED) is the same in e
 
 P5 cells were run on the 40 sample fields only (about a tenth of a full run's cost); their automatic checks cover those fields, so the pass-rate columns are left empty. The gpt-5.5 cells are sample-only too; their "sample" pass rates cover the sample rows the checker evaluates. The full P6 runs replace a full P5 run: the only difference is the R5 change. "C0 + context" is the org context file without neighbour fields (Day 6 found that neighbours add guesses). *gpt-6.1-sol cost at gpt-5.5's price, to be confirmed. The first P6 mini C3 review (80%) reused Day 6 suggestions for the 16 non-R5 rows; the 70% P7 row is a single fresh run.
 
-Context column: none means C0. From P4 on, assumptions and missing are counted in Prompt A only (rows with assumptions / missing questions), the measure the Day 6 hypotheses name. The P4 pass rates are lower for a known reason, see "Day 6" below.
+*The glossary-only context file (the "Codes and grades", "Scores and scales" and "Abbreviations" sections of `data/org_context_synthetic.md`) was removed from the repository at release; cut those sections out of the full file to rerun this cell. Context column: none means C0. From P4 on, assumptions and missing are counted in Prompt A only (rows with assumptions / missing questions), the measure the Day 6 hypotheses name. The P4 pass rates are lower for a known reason, see "Day 6" below.
 
 P1 is scored with the Day 4 checker, so all rows are comparable. Intermediate iterations are listed under "Prompt iteration with the automatic check" below. Both models chose the same action (rewrite, shorten or keep) for 267–271 of 271 fields in every prompt version: the model changes the wording, not the decisions.
 
@@ -411,7 +411,7 @@ Notable failure patterns: see "What still blocks approval" (Day 6) and "Is the m
 
 ### Prompt iteration with the automatic check
 
-`scripts/evaluate_suggestions.py` pass rates on the training set. "Checked" means rewritten or shortened suggestions; Prompt C keeps are counted but not checked. All rows are scored with the same checker, including the earliest run.
+`scripts/03_a_evaluate_suggestions.py` pass rates on the training set. "Checked" means rewritten or shortened suggestions; Prompt C keeps are counted but not checked. All rows are scored with the same checker, including the earliest run.
 
 | Run | Model | Prompt A (74) | Prompt B (34) | Prompt C rewrites |
 |---|---|---|---|---|
@@ -452,9 +452,11 @@ The two models read the same rule differently. gpt-5.4-mini mostly leaves an unc
 
 ### Review sample
 
-`python scripts/review_sample.py make` draws a fixed, stratified sample from a review queue: 20 Tab A rows (4 per rule), 12 Tab B rows (R6–R9 and Prompt C rewrites) and 8 kept fields. The reviewer decides on the suggestion text only (Approve / Edit / Reject; Agree / Disagree for kept fields) and may add a note.
+`python scripts/03_b_review_sample.py make` draws a fixed, stratified sample from a review queue: 20 Tab A rows (4 per rule), 12 Tab B rows (R6–R9 and Prompt C rewrites) and 8 kept fields. The reviewer decides on the suggestion text only (Approve / Edit / Reject; Agree / Disagree for kept fields) and may add a note.
 
-**Who reviewed.** All samples in this document were reviewed against the project owner's written rubric with an AI assistant, and checked by the project owner; they are not decisions of an independent Salesforce Admin. Approve means the description would be written exactly as supplied; Edit means right direction but a correction or an essential answer is needed first; Reject means wrong or no improvement over the current description. `python scripts/review_sample.py score <file>` prints the rates per tab and rule.
+**The workbooks.** The four samples behind the headline numbers (first sample, final setup, gpt-6.1-sol, test set) are in `data/review_evidence/`, with a note on every row.
+
+**Who reviewed.** All samples in this document were reviewed against the project owner's written rubric with an AI assistant, and checked by the project owner; they are not decisions of an independent Salesforce Admin. Approve means the description would be written exactly as supplied; Edit means right direction but a correction or an essential answer is needed first; Reject means wrong or no improvement over the current description. `python scripts/03_b_review_sample.py score <file>` prints the rates per tab and rule.
 
 First sample (gpt-5.4-mini, iteration 6 prompts, Day 5):
 
@@ -472,7 +474,7 @@ The reviewer's notes pointed to information the model never receives: the field'
 
 ### Day 6: prompt fixes and context (P4, C0–C3)
 
-Five hypotheses came out of the Day 5 review notes. Each run changed one thing, on gpt-5.4-mini with the same 271 fields; the human review used the same 40 rows as Day 5 (`review_sample.py rereview`: unchanged rows keep their decision).
+Five hypotheses came out of the Day 5 review notes. Each run changed one thing, on gpt-5.4-mini with the same 271 fields; the human review used the same 40 rows as Day 5 (`03_b_review_sample.py rereview`: unchanged rows keep their decision).
 
 | Hypothesis | Run | Deciding number | Result | Verdict |
 |---|---|---|---|---|
@@ -601,7 +603,7 @@ Assessment: Phase 2 Definition of Done NOT met (Tab A 60% against 80%)
 - **The prompts transfer; the org context does not.** Setting aside the rows whose answer is in no input, 12 of 14 Tab A rows are approvable (86%), close to training's 17 of 18. But 6 of 20 test rows need such a fact, against 3 of 20 on training: three checkboxes without a stated meaning and three picklists whose value meanings ("Bi-Weekly", Low/Mid/High/VIP, market tiers) the context does not define. The org context file was written while looking at the training fields, so it covers them better. An Admin's context file has to be written for the fields being audited; on fields it does not cover, expect about 60% approvable on the first pass, with the rest answerable through the Missing questions.
 - **The classifier's Step 2 rules are the least general part.** R8 (type mismatch in Step 2) matched 2 of 8 test fields and R6 2 of 4: their keyword lists were tuned on how the training set was written. Step 1 (R1–R5) held at 94%.
 - **The free model is close on the automatic check** but left six R7 acronyms the context does not define unexpanded (ABM, TAM, SPF, MTTR, VOC), where gpt-5.4-mini expanded them and listed the expansion as unverified.
-- **A tooling bug distorted the first scoring.** The sample file took picklist values from the training set only, so every test picklist showed none and its real values looked invented (first score 35%). Fixed in `review_sample.py`; the 8 affected rows were re-judged with the values visible.
+- **A tooling bug distorted the first scoring.** The sample file took picklist values from the training set only, so every test picklist showed none and its real values looked invented (first score 35%). Fixed in `03_b_review_sample.py`; the 8 affected rows were re-judged with the values visible.
 
 ---
 

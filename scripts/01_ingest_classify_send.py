@@ -1076,7 +1076,7 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
             if hint and not transient:                 # a config problem: every further batch would fail the same way
                 log.error(hint)
                 log.error("Stopped before sending more batches. Nothing was saved. Fix config.yml and run again "
-                          "(python scripts/check_setup.py tests the connection).")
+                          "(python scripts/00_check_setup.py tests the connection).")
                 sys.exit(1)
             log.warning(f"Batch {i} LLM call failed: {e} — fields marked as llm_error")
             for f in batch["fields"]:

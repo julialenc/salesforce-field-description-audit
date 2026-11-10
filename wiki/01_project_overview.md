@@ -84,7 +84,8 @@ Intended users:
 ├── data/
 │   ├── sf_metadata_raw_training.json  # Synthetic training set — 288 fields across 4 objects, used during classifier development and prompt iteration
 │   ├── sf_metadata_raw_test.json      # Synthetic test set — 144 fields across 4 objects, held out for final validation only
-│   ├── org_context_synthetic.md       # Example org context file for the synthetic org (glossary, systems, teams, conventions); _glossary.md is the glossary part only
+│   ├── org_context_synthetic.md       # Example org context file for the synthetic org (glossary, systems, teams, conventions)
+│   ├── review_evidence/               # The four reviewed 40-field samples behind the reported approval rates, with a README
 │   └── sample/                        # Outputs of one real run, for reference (249 fields read from a Developer Edition org, Azure gpt-5.4-mini)
 │       ├── sf_classified_sample.json  # Classifier output — each field labelled FLAGGED, UNCERTAIN, REVIEWED, or SKIPPED
 │       ├── llm_response_sample.json   # LLM suggestions with Unverified and Missing, before review
@@ -98,16 +99,16 @@ Intended users:
 │   ├── prompt_a_flagged_fields.md     # Task instruction for FLAGGED fields — clear quality failures (Rules 1–5)
 │   ├── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–9)
 │   └── prompt_c_reviewed_fields.md    # Task instruction for REVIEWED fields — passed all rules; LLM keeps unless clearly inadequate
-├── scripts/
-│   ├── 01_ingest_classify_send.py     # Read fields (synthetic file or org), classify, call the LLM, produce the review file
-│   ├── 02_deploy_approved.py          # Validate the Admin's decisions; dry run, CSV export or deploy to the org
-│   ├── check_setup.py                 # Check Python, packages, config, LLM connection and Salesforce CLI login, with a fix per failure
-│   ├── sf_cli.py                      # Salesforce CLI helpers: read-only metadata retrieve, CLI calls
-│   ├── seed_demo_org.py               # Create the training set's custom fields in a Developer Edition org; reset them
-│   ├── check_org_parity.py            # Check that reading from the org gives the same input as the training file
-│   ├── validate_classifier.py         # Compare classifier output with the dataset labels; list every mismatch
-│   ├── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
-│   └── review_sample.py               # Draw a 40-field review sample from a review file, re-review it after a change, and score it
+├── scripts/                           # numbered in run order: 00 prepare → 01–02 process → 03 check
+│   ├── 00_check_setup.py              # Prepare: check Python, packages, config, LLM connection and Salesforce CLI login, with a fix per failure
+│   ├── 00_a_seed_demo_org.py          # Prepare (demo org only): create the training set's custom fields in a Developer Edition org; reset them
+│   ├── 00_b_check_org_parity.py       # Prepare (demo org only): check that reading from the org gives the same input as the training file
+│   ├── 01_ingest_classify_send.py     # Process: read fields (synthetic file or org), classify, call the LLM, produce the review file
+│   ├── 02_deploy_approved.py          # Process: validate the Admin's decisions; dry run, CSV export or deploy to the org
+│   ├── 03_a_evaluate_suggestions.py   # Check (optional): automatic quality check of LLM suggestions, pass rate per prompt and rule
+│   ├── 03_b_review_sample.py          # Check (optional): draw a 40-field review sample from a review file, re-review it after a change, score it
+│   ├── 03_c_validate_classifier.py    # Check (optional): compare classifier output with the dataset labels; list every mismatch
+│   └── sf_cli.py                      # Helper imported by the scripts (Salesforce CLI calls, read-only metadata retrieve); not run on its own
 ├── tests/
 │   ├── test_classifier.py             # Unit tests for the R1–R9 rules and the known classifier fixes
 │   ├── test_cache.py                  # Unit tests for the cache key
@@ -121,10 +122,9 @@ Intended users:
 │   ├── 05_architecture_and_reproducibility.md
 │   └── 06_lessons_learned.md          # What building and testing the pipeline taught, for anyone building a similar system
 ├── .gitignore
-├── CONTRIBUTING.md
+├── CONTRIBUTING.md                    # How to change the code safely and check a change
 ├── LICENSE
 ├── NOTICE
-├── ONBOARDING.md                      # Guide for a new maintainer
 ├── README.md
 ├── ROADMAP.md                         # What is left, most important first
 ├── config.example.yml                 # Copy to config.yml and fill in PART 1 (the LLM settings)

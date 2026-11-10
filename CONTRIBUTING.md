@@ -16,6 +16,40 @@ Understanding the design intent will save you time and make your contribution ea
 
 ---
 
+## Before You Change the Code
+
+Run order of the scripts: `00_` prepare (setup check; seeding and parity check for a demo org), `01_` and `02_` process (Script 1, the Admin's review in Excel, Script 2), `03_` optional checks. `sf_cli.py` is a helper module the scripts import.
+
+### What is safe to change
+
+- **Free to tune:** prompt wording, classifier patterns, batch size, model choice. After any change, run the checks below. Prompt and classifier tuning for v0.1 is closed; a change should come with its measurement (see `ROADMAP.md` for the open questions)
+- **Prompt examples** must be invented fields that appear in no dataset, or results stop meaning anything
+- **Discuss before changing:** the four statuses, the R1–R9 rule set, the three-prompt routing — they are deliberate design decisions, explained in wiki 02 and 05
+
+### Checking a change
+
+None of these call an LLM:
+```
+python tests/test_classifier.py
+python tests/test_cache.py
+python tests/test_context.py
+python tests/test_evaluate.py
+python scripts/03_c_validate_classifier.py data/sf_metadata_raw_training.json
+python scripts/03_a_evaluate_suggestions.py
+```
+The last one scores the most recent Script 1 run; add `--failures` to see each failed suggestion, or `--assumptions` to see what the model guessed or could not know.
+
+The automatic check cannot tell whether a suggestion is true. For that, draw a review sample from the latest review file, fill in the decisions in Excel, and score it:
+```
+python scripts/03_b_review_sample.py make
+python scripts/03_b_review_sample.py score data/review_sample_<timestamp>.xlsx
+```
+After a prompt change, `python scripts/03_b_review_sample.py rereview <filled-in sample>` puts the same rows next to the newest review file and keeps the decisions of rows that did not change, so only the changed rows need a person again. If the run used an org context file, review with that file at hand.
+
+Two optional inputs in `config.yml` give the model more to work from: `options.neighbour_fields` (other fields on the same object with a shared name word) and `options.org_context_file` (a short glossary the Admin writes once; `data/org_context_synthetic.md` is the example for the synthetic org). Both are off by default; wiki 03, "Day 6", has what they changed.
+
+---
+
 ## What Contributions Are Welcome
 
 **Most welcome:**
@@ -55,13 +89,13 @@ providers/implement-bedrock
 Keep changes focused. One logical change per pull request.
 
 If you change the classifier, validate it against the training set (no LLM needed):
-- `python scripts/validate_classifier.py data/sf_metadata_raw_training.json` — no new mismatches compared with the accepted limits listed in wiki 03
+- `python scripts/03_c_validate_classifier.py data/sf_metadata_raw_training.json` — no new mismatches compared with the accepted limits listed in wiki 03
 - `python tests/test_classifier.py` — all tests pass; add a test for the case you fixed
 
 If you change a prompt:
-- Run Script 1 on the training set, then `python scripts/evaluate_suggestions.py` and report the pass rate per prompt before and after your change. A free Cerebras key is enough (Groq's free tier is too small for the current prompts); the cache re-sends only the fields your prompt handles
+- Run Script 1 on the training set, then `python scripts/03_a_evaluate_suggestions.py` and report the pass rate per prompt before and after your change. A free Cerebras key is enough (Groq's free tier is too small for the current prompts); the cache re-sends only the fields your prompt handles
 - Use invented fields for any new example. Never copy a field or description from `data/`, or the training results stop meaning anything
-- The automatic check is a proxy. Read a sample of the suggestions against the criteria in `wiki/03_experiment_and_validation.md`, or score a human sample with `python scripts/review_sample.py`
+- The automatic check is a proxy. Read a sample of the suggestions against the criteria in `wiki/03_experiment_and_validation.md`, or score a human sample with `python scripts/03_b_review_sample.py`
 - Keep the `assumptions` and `missing` lists in every prompt's output format. An example in a prompt must not state anything its input does not support: the model follows an example more closely than a rule
 - When you add a prohibition ("do not invent"), state its boundary too ("this is about what you add, not about removing what the original says"). Without it, the model overshoots
 
