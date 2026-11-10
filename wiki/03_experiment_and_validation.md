@@ -21,7 +21,7 @@ The experiment is not about achieving a perfect score. It is about building enou
 ## What the Experiment Does NOT Test
 
 - Real Salesforce connectivity (Tooling API or Metadata API)
-- Enterprise LLM infrastructure (Azure OpenAI, AWS Bedrock, Google Vertex AI)
+- Enterprise LLM infrastructure beyond Azure OpenAI (AWS Bedrock and Google Vertex AI are not implemented)
 - Write-back to a live org
 
 These are intentionally excluded. The experiment uses synthetic data and a free hosted open-weight model (Groq free tier), so anyone can run and re-run the pipeline without Salesforce credentials, without cost, without special hardware, and without risk to any org. Azure OpenAI is used alongside it to compare models and measure cost.
@@ -157,12 +157,13 @@ The table below reflects the updated rule numbering. Rules 1–5 produce FLAGGED
 
 ### Prerequisites
 
-- Python 3.x installed
-- Dependencies installed: `pip install -r requirements.txt`
+- Python 3.10 or newer
+- Dependencies installed: `pip install -r requirements.txt` (three packages: PyYAML, requests, openpyxl)
 - An LLM API key, either:
-  - Groq (free): create a key at https://console.groq.com
+  - Cerebras (free trial, open-weight gpt-oss-120b): create a key at https://cloud.cerebras.ai
   - Azure OpenAI (paid): endpoint, deployment name and key
-- `config.yml` created by copying and editing `config.example.yml`
+- `config.yml` created by copying `config.example.yml` and filling in its PART 1 (the LLM settings)
+- `python scripts/check_setup.py` passes: it checks Python, packages, config.yml, the input file and the LLM connection (one request of a few tokens), and says how to fix each failure
 
 ### Phase 1 — Training (iterate until stable)
 

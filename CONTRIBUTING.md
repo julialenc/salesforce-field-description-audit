@@ -21,7 +21,7 @@ Understanding the design intent will save you time and make your contribution ea
 **Most welcome:**
 - Improvements to classifier rules (R1–R9) — better precision, fewer false positives
 - Improvements to prompt quality (Prompt A, B, C) — higher Admin approval rate
-- Additional LLM provider implementations (Bedrock, Vertex AI stubs are ready for completion)
+- Additional LLM provider implementations (Bedrock and Vertex AI: stubs with guidance are in Script 1; until then the scripts refuse these providers with a clear message)
 - Testing on a real org's metadata (sandbox), with Azure OpenAI or another company-approved provider: the pipeline has only been measured on synthetic data
 - Bug fixes
 - Documentation improvements

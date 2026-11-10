@@ -137,3 +137,7 @@ For seven months the docs said a field description holds at most 255 characters.
 ## 25. Test the Failure You Promise to Handle
 
 The design said "a field that fails is logged and the rest go through". The first deploy with one non-existent field wrote nothing at all: the field was still named in the deployment package, so Salesforce rejected the whole deploy, and a Windows file lock then crashed the script before the log was written. Only a test with a deliberately broken row found it. If the docs promise a failure behaviour, put one failing case in the test.
+
+## 26. An Error Message Is Part of the Interface
+
+A wrong API key used to produce 27 identical warnings, one per batch, each with a raw HTTP error, and an output file full of failed fields. Now the first such error stops the run and says which line of `config.yml` to fix. Errors that the next attempt can fix (a rate limit, a dropped connection mid-run) are still retried; errors that every attempt will repeat (wrong key, wrong model, wrong endpoint) stop at once. Sort errors by whether waiting helps.

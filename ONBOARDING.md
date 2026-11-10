@@ -19,7 +19,8 @@ As of November 2026:
 - Prompts: an automatic check scores every LLM suggestion; current pass rates are in wiki 03
 - A free Developer Edition org can be seeded with the training fields (`scripts/seed_demo_org.py`), and the pipeline reads fields from an org through the Salesforce CLI (`source: org`); `scripts/check_org_parity.py` shows the org gives the same input as the file
 - Script 2 exports approved descriptions to a CSV by default, or writes them to the org (`write_back: deploy`); tested on the demo org, with `seed_demo_org.py reset` to start over
-- Prompt and classifier tuning is closed. In progress: a setup check and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
+- `python scripts/check_setup.py` checks a new setup (Python, packages, config, LLM connection, Salesforce CLI login) and says how to fix each failure; common config mistakes (wrong key, model or endpoint, broken YAML) stop Script 1 with a plain-English message instead of a traceback
+- Prompt and classifier tuning is closed. In progress: docs and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
 
 ## Read in this order
 
