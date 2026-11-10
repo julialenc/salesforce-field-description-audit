@@ -1,168 +1,110 @@
 # =========================================================
-# Salesforce Field Description Automation
-# config.example.yml
+# Salesforce Field Description Automation — config.example.yml
 # =========================================================
 #
-# WHO THIS FILE IS FOR
+# 1. Copy this file to config.yml   (CMD: copy config.example.yml config.yml)
+# 2. Fill in PART 1. Everything in PART 2 has a working default.
+# 3. Check your setup:               python scripts/check_setup.py
 #
-# We assume three main user groups:
-#
-# 1. Developers and Architects evaluating the repo
-#    - They discover the project on GitHub
-#    - They want to understand the setup quickly
-#    - They usually start in experiment mode
-#
-# 2. Learners, contributors, and experimenters
-#    - They want to test the classifier, prompts, and workflow
-#    - They may not have Salesforce credentials
-#    - They use experiment mode with synthetic data
-#
-# 3. Real implementers testing on a Salesforce org
-#    - They often start in experiment mode first
-#    - Then they switch to live metadata ingestion and real LLM calls
-#    - They use this file as the bridge from experiment to MVP
-#
-# HOW TO USE THIS FILE
-#
-# 1. Copy this file to a new local file named: config.yml
-# 2. Fill in your own values
-# 3. Keep config.yml local only
-# 4. Never commit config.yml to GitHub
-#
-# The scripts always read from config.yml, not from config.example.yml.
-#
-# WHERE THE FIELDS COME FROM, WHERE APPROVED CHANGES GO
-#
-# source:
-#   file  reads a local metadata file (see data_source below): the synthetic
-#         training and test sets. Nothing touches Salesforce.
-#   org   reads the fields of the objects listed under "objects" from a
-#         Salesforce org through the Salesforce CLI (salesforce.target_org).
-#
-# write_back (Script 2):
-#   off     logs decisions only (dry run)
-#   export  writes approved descriptions to a CSV the Admin applies by hand
-#   deploy  writes them to the org through the Salesforce CLI (opt-in)
+# config.yml holds your API key: keep it local, never commit it.
+# Salesforce passwords are never stored here: the Salesforce CLI holds the login.
 #
 # =========================================================
-
-source: file        # file | org
-write_back: export  # off | export | deploy (quote "off": YAML reads a bare off as false)
-
-data_source:
-  # Used in experiment mode only. Ignored in production mode,
-  # where data is pulled from Salesforce via the Tooling API.
-  #
-  # TWO SYNTHETIC FILES ARE PROVIDED FOR EXPERIMENT MODE:
-  #
-  # data/sf_metadata_raw_training.json  — 288 fields across 4 objects
-  #   Use this file during classifier development and prompt iteration.
-  #   This is the correct starting point for anyone running the
-  #   experiment for the first time.
-  #
-  # data/sf_metadata_raw_test.json      — 144 fields across 4 objects
-  #   Use this file only once, after the classifier and prompts are
-  #   stable on the training set. This is the held-out validation set.
-  #   Do not use it to tune the classifier or prompts — doing so
-  #   defeats the purpose of the separation.
-  #
-  # See wiki/03_experiment_and_validation.md for the full two-phase
-  # experiment methodology.
-  #
-  experiment_file: data/sf_metadata_raw_training.json
+# PART 1 — FILL IN
+# =========================================================
 
 llm:
-  # Supported providers:
-  # - openai        -> any OpenAI-compatible API, e.g. a free tier for an
-  #                    open-weight model (gpt-oss-120b):
-  #                    Cerebras free trial (https://cloud.cerebras.ai): 30k tokens/min,
-  #                    1M/day; needs a verified payment method, credits expire after 30 days.
-  #                    Groq free tier (https://console.groq.com): no card, but 8k tokens
-  #                    per request, too small for the current prompts (about 7.5k tokens
-  #                    of fixed text per call, 9k+ with an org context file)
-  # - azure_openai  -> Azure OpenAI (paid)
-  # - bedrock, vertex_ai -> not implemented yet
-  #
-  # Free tiers are for synthetic data only. Send real org metadata only to a
-  # company-approved provider such as Azure OpenAI.
+  # provider: openai        any OpenAI-compatible API
+  #           azure_openai  Azure OpenAI (paid; the recommended provider for real org data)
+  #           (bedrock and vertex_ai are not implemented yet)
   provider: openai
 
   # The script appends /v1/chat/completions to this address.
-  # openai (Cerebras) -> https://api.cerebras.ai
-  # openai (Groq)   -> https://api.groq.com/openai
-  # openai (OpenAI) -> https://api.openai.com
-  # azure_openai    -> https://YOUR-RESOURCE.openai.azure.com/
-  # api_version: "2025-04-01-preview"   # azure_openai only; default supports gpt-5
-  endpoint: https://api.groq.com/openai
+  #   Cerebras (free trial, open-weight gpt-oss-120b): https://api.cerebras.ai
+  #     Key at https://cloud.cerebras.ai. 30k tokens/min, 1M/day. Needs a verified
+  #     payment method; the free credits expire after 30 days.
+  #   Groq (free, no card): https://api.groq.com/openai
+  #     Too small for the current prompts: 8,000 tokens per request, and one call
+  #     carries about 7,500 tokens of instructions before the first field.
+  #   OpenAI: https://api.openai.com
+  #   Azure OpenAI: https://YOUR-RESOURCE.openai.azure.com/
+  endpoint: https://api.cerebras.ai
 
-  # Recommended (training set, 40-field human review, with org context):
-  #   Azure gpt-5.4-mini, reasoning_effort medium: default. Tab A 80% approvable
-  #   Azure gpt-6.1-sol, reasoning_effort medium: best quality (85%), ~3x the cost
-  #   gpt-oss-120b (Cerebras): free, same automatic pass rate as mini; no human review yet
-  # Cerebras: gpt-oss-120b. Groq: openai/gpt-oss-120b (names change — check the list)
-  # Azure: your deployment name, e.g. gpt-5.4-mini. Older models (gpt-4o,
-  #        gpt-4.1) are closed to new Azure subscriptions — check the
-  #        Azure model retirement schedule before choosing
-  model: openai/gpt-oss-120b
+  # Cerebras: gpt-oss-120b. Azure: your deployment name, e.g. gpt-5.4-mini.
+  # Measured (wiki 03): Azure gpt-5.4-mini with reasoning_effort medium is the
+  # recommended default; gpt-6.1-sol gives the best quality at ~3x the cost;
+  # gpt-oss-120b is free with similar automatic pass rates (not human-reviewed).
+  model: gpt-oss-120b
 
-  # Keep local in config.yml only — never commit
   api_key: YOUR_API_KEY_HERE
 
-  # Optional generation controls
-  # temperature: 0.2       # Groq default 0.2. Leave it out on Azure for gpt-5 models: they reject it
-  # reasoning_effort: medium # reasoning models only (gpt-oss, gpt-5 family): low | medium | high.
-  #                         # Reasoning tokens bill as output: medium doubled gpt-5.4-mini's cost
-  #                         # and was the setting that reached 80%
+  # Reasoning models (gpt-oss, gpt-5 family): low | medium | high.
+  # Reasoning tokens are billed as output; medium about doubles gpt-5.4-mini's cost.
+  reasoning_effort: medium
 
-  # Optional prices per 1M tokens, used only for the cost estimate in the
-  # run summary and in llm_response.json. Take them from your provider's
-  # price list. Leave them out (or 0 for a free tier) to skip the estimate.
-  # price_input_per_1m: 0.15
-  # price_output_per_1m: 0.60
+  # Optional, Azure only: api_version: "2025-04-01-preview" (the default supports gpt-5)
+  # Optional: temperature: 0.2. Leave it out for gpt-5 models on Azure: they reject it.
+  # Optional prices per 1M tokens, only for the cost estimate in the run summary:
+  # price_input_per_1m: 0.6241
+  # price_output_per_1m: 3.7444
   # price_currency: CHF
 
+# Where the fields come from:
+#   file  a local metadata file (data_source below). Nothing touches Salesforce.
+#   org   the objects listed below, read from salesforce.target_org through the
+#         Salesforce CLI. Your org's metadata then goes to the LLM: use a
+#         company-approved provider such as Azure OpenAI, never a free tier.
+source: file
+
+# Where Script 2 puts approved descriptions:
+#   "off"   dry run, decisions are only logged (keep the quotes: YAML reads a bare off as false)
+#   export  a CSV the Admin applies by hand (data/approved_descriptions_<timestamp>.csv)
+#   deploy  written to salesforce.target_org through the Salesforce CLI (asks you to type the alias)
+write_back: export
+
 salesforce:
-  # Used when source: org (and write_back: deploy).
-  # The Salesforce CLI holds the login, so no username, password or token
-  # is stored here. Log in once in the browser:
+  # Needed for source: org and write_back: deploy. Log in once in the browser:
   #   sf org login web --alias sfdesc-dev
-  # then put that alias here. Start with a sandbox or a free Developer
-  # Edition org, never production.
+  # and put the alias here. Start with a sandbox or a free Developer Edition
+  # org, never production.
   target_org: sfdesc-dev
 
+# =========================================================
+# PART 2 — OPTIONAL (the defaults work)
+# =========================================================
+
+data_source:
+  # Used with source: file. Two synthetic sets are provided:
+  #   data/sf_metadata_raw_training.json  288 fields — start here
+  #   data/sf_metadata_raw_test.json      144 fields — held out: run it once at the end,
+  #                                       never tune on it (wiki 03)
+  experiment_file: data/sf_metadata_raw_training.json
+
 objects:
-  # Salesforce objects to scan
-  # Start small for first runs
+  # Objects read with source: org
   - Account
   - Contact
   - Opportunity
   - Case
 
 options:
-  # By default, only custom fields are processed.
-  # If true, standard fields may also be included where writable.
+  # Only custom fields (__c) unless true
   include_standard_fields: false
 
-  # source: org sends your org's metadata to the LLM. Free tiers (Groq,
-  # Cerebras, OpenRouter) are refused for that unless this is true, which is
-  # only for a demo org that holds synthetic data
-  allow_free_tier_with_org: false
-
-  # Number of fields sent per LLM request.
-  # 10 works on Azure and Cerebras. On a tier with a small per-request limit
-  # (Groq: 8,000 tokens, HTTP 413) lower it; the script splits a batch that is too large.
+  # Fields sent per LLM request. 10 works on Azure and Cerebras; a batch that
+  # is too large for the provider (HTTP 413) is split automatically.
   llm_batch_size: 10
 
-  # Keep intermediate JSON/XLSX artifacts for inspection and debugging
-  save_intermediate_artifacts: true
-
-  # Send each field with up to this many other fields on the same object whose
-  # names share a word (Gear_Size_Notes__c -> Clothing_Size__c), so the LLM
-  # can tell what the field belongs with. 0 = off. Adds ~80 input tokens per field.
-  neighbour_fields: 0
-
-  # Optional org context: a short Markdown file written by the Admin (glossary
-  # of codes, scales, systems, teams, conventions). Added to the system prompt;
-  # the LLM may state its facts without listing them as assumptions.
+  # Optional org context: a short Markdown file the Admin writes once (codes,
+  # scales, systems, teams, conventions). It made the largest difference in the
+  # experiment: write it for the objects you audit (wiki 03, Day 6–7).
   # Example for the synthetic org: data/org_context_synthetic.md
   org_context_file: null
+
+  # Send each field with up to this many same-object fields whose names share a
+  # word. 0 = off: it added guesses and no measurable gain (wiki 03, H3).
+  neighbour_fields: 0
+
+  # For a demo org that holds only synthetic data: allow a free-tier LLM with source: org
+  allow_free_tier_with_org: false
+

@@ -153,12 +153,27 @@ def load_config() -> dict:
     if not CONFIG_PATH.exists():
         log.error("config.yml not found. Copy config.example.yml to config.yml and fill in your values.")
         sys.exit(1)
-    with open(CONFIG_PATH) as f:
-        cfg = yaml.safe_load(f)
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+    except yaml.YAMLError as e:
+        mark = getattr(e, "problem_mark", None)
+        where = f" near line {mark.line + 1}" if mark else ""
+        log.error(f"config.yml is not valid YAML{where}. A common cause is a missing '#' or a wrong "
+                  "indent after editing. Compare the lines with config.example.yml.")
+        sys.exit(1)
     if "llm" not in cfg:
         log.error("config.yml is missing required key: 'llm'")
         sys.exit(1)
     cfg["source"] = data_source(cfg)
+    provider = cfg["llm"].get("provider", "openai")
+    if provider in ("bedrock", "vertex_ai"):
+        log.error(f"llm.provider: {provider} is not implemented yet. Use openai (any OpenAI-compatible API) "
+                  "or azure_openai; see CONTRIBUTING.md if you want to add it.")
+        sys.exit(1)
+    if provider not in ("openai", "azure_openai"):
+        log.error(f"llm.provider: '{provider}' is not known. Use openai or azure_openai.")
+        sys.exit(1)
     log.info(f"Config loaded — source: {cfg['source']}")
     return cfg
 
@@ -1036,7 +1051,7 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
     Process all fields through the LLM.
     Returns dict: field_key (object.field_api_name) → llm_result dict.
     """
-    batch_size = cfg.get("options", {}).get("llm_batch_size", 50)
+    batch_size = cfg.get("options", {}).get("llm_batch_size", 10)
     batches    = build_batches(fields_needing_llm, batch_size)
     all_results: dict[str, dict] = {}
 
@@ -1055,6 +1070,17 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
 
         try:
             all_results.update(_run_batch(batch, prompts, cfg))
+        except (requests.HTTPError, requests.ConnectionError, requests.Timeout) as e:
+            hint = llm_error_hint(e, cfg)
+            transient = isinstance(e, (requests.ConnectionError, requests.Timeout)) and all_results
+            if hint and not transient:                 # a config problem: every further batch would fail the same way
+                log.error(hint)
+                log.error("Stopped before sending more batches. Nothing was saved. Fix config.yml and run again "
+                          "(python scripts/check_setup.py tests the connection).")
+                sys.exit(1)
+            log.warning(f"Batch {i} LLM call failed: {e} — fields marked as llm_error")
+            for f in batch["fields"]:
+                all_results[field_key(f)] = _llm_error(f, str(e)[:200])
         except Exception as e:
             log.warning(f"Batch {i} LLM call failed: {e} — fields marked as llm_error")
             for f in batch["fields"]:
@@ -1065,6 +1091,25 @@ def run_llm(fields_needing_llm: list[dict], prompts: dict, cfg: dict) -> dict:
 
     log.info(f"LLM processing complete — {len(all_results)} results")
     return all_results
+
+
+def llm_error_hint(e: Exception, cfg: dict) -> str | None:
+    """A plain-English fix for LLM errors caused by config.yml, or None for errors worth retrying later."""
+    llm = cfg.get("llm", {})
+    endpoint, model = llm.get("endpoint", ""), llm.get("model", "")
+    if isinstance(e, (requests.ConnectionError, requests.Timeout)):
+        return f"Cannot reach the LLM at {endpoint}. Check llm.endpoint in config.yml and your internet connection."
+    code = e.response.status_code if getattr(e, "response", None) is not None else None
+    if code in (401, 403):
+        return "The LLM rejected the API key (HTTP %s). Check llm.api_key in config.yml." % code
+    if code == 404:
+        if llm.get("provider") == "azure_openai":
+            return (f"Azure has no deployment named '{model}' at {endpoint} (HTTP 404). llm.model must be the "
+                    "deployment name shown in Azure AI Foundry.")
+        return f"The model '{model}' was not found (HTTP 404). Check llm.model against the provider's model list."
+    if code == 400 and "temperature" in (e.response.text or ""):
+        return "The model rejects 'temperature' (HTTP 400). Remove llm.temperature from config.yml."
+    return None
 
 
 def _run_batch(batch: dict, prompts: dict, cfg: dict) -> dict[str, dict]:

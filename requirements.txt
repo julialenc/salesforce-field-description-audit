@@ -1,53 +1,25 @@
 # Salesforce Field Description Automation
-# Python: 3.10+ recommended
+# Python: 3.10+
 #
-# This file covers:
-# 1) Experiment mode — the only packages needed to run the pipeline end-to-end
-#    against synthetic data with a free hosted LLM (Groq) or Azure OpenAI
-# 2) MVP / production — additional packages needed when connecting to a live
-#    Salesforce org and an enterprise LLM provider
+# These three packages are all the pipeline needs, for synthetic data and
+# for a real org alike:
+# - LLM calls go over HTTP (requests): any OpenAI-compatible API (e.g.
+#   Cerebras, Groq) and Azure OpenAI. No LLM SDK is needed.
+# - Salesforce is reached through the Salesforce CLI (sf), installed
+#   separately: https://developer.salesforce.com/tools/salesforcecli
+#   No Salesforce Python package is needed and no password is stored.
 #
-# Notes:
-# - No LLM SDK is needed: Groq, other OpenAI-compatible APIs and Azure OpenAI
-#   are called over HTTP with requests.
-# - Real production secret handling and enterprise auth may later move outside this file.
-
-# =========================================================
-# Experiment mode — minimum required to run both scripts
-# =========================================================
+# Check your setup with: python scripts/check_setup.py
 
 # Config file parsing (config.yml)
 PyYAML>=6.0
 
-# HTTP client — used for all LLM calls (Groq and other OpenAI-compatible APIs, Azure OpenAI)
+# HTTP client for all LLM calls
 requests>=2.31.0
 
-# Excel generation — review queue and write log
+# Excel files: review queue and write log
 openpyxl>=3.1.0
 
-# =========================================================
-# MVP / Production — Salesforce connectivity
-# =========================================================
-
-# Tooling API (metadata ingestion) and Metadata API (write-back)
-# See _ingest_from_tooling_api() and _write_to_salesforce() in the scripts
-# for implementation guidance
-simple-salesforce>=1.12.0
-
-# =========================================================
-# MVP / Production — LLM provider clients
-# =========================================================
-
-# Optional: openai Python SDK as an alternative to raw requests for
-# Azure OpenAI and OpenAI-compatible providers.
-# The current scripts use requests directly — install this only if you
-# refactor the LLM call layer to use the SDK.
-openai>=1.30.0
-
-# Required for Amazon Bedrock provider
-# See _call_bedrock() in 01_ingest_classify_send.py for implementation guidance
-boto3>=1.34.0
-
-# Required for Google Vertex AI provider
-# See _call_vertex_ai() in 01_ingest_classify_send.py for implementation guidance
-google-cloud-aiplatform>=1.49.0
+# Not implemented yet (see CONTRIBUTING.md). Whoever adds them will need:
+#   Amazon Bedrock:   boto3>=1.34.0
+#   Google Vertex AI: google-cloud-aiplatform>=1.49.0
