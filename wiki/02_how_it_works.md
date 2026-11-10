@@ -91,7 +91,7 @@ With `source: org`, the script reads the org named in `salesforce.target_org` th
 
 By default, the tool processes **custom fields only** — those ending in `__c`. **Standard fields can be included per object** by enabling an option in `config.yml`. A small subset of standard fields is read-only in Salesforce and cannot be updated regardless of this setting — these are logged as **SKIPPED** and never touched.
 
-The raw metadata is saved locally as `sf_metadata_raw.json` before any processing begins. This file is kept for traceability — it represents exactly what Salesforce returned at the time of the scan.
+The classified fields are saved as `data/sf_classified.json` before any LLM call. This file is kept for traceability — it shows exactly what the pipeline read, and how it classified each field, at the time of the scan.
 
 With `source: file` (the default), the org is replaced by a local JSON file. Two versions of this file exist for experiment purposes:
 
@@ -228,7 +228,7 @@ Routing logic:
 |**REVIEWED**|Sent to the LLM with `prompt_c_reviewed_fields.md` — the LLM keeps the description unless it is clearly inadequate, in which case it proposes a rewrite|
 |**SKIPPED**|Not sent to the LLM — logged for visibility only and carried forward without change|
 
-Fields are sent in batches (default 50 per API call, set by `options.llm_batch_size`). Free tiers need smaller batches: on Groq's free tier a single request may not exceed 8,000 tokens, so 10 fields per batch is the practical size. Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
+Fields are sent in batches (default 10 per API call, set by `options.llm_batch_size`). A batch that is too large for the provider's per-request limit (HTTP 413) is split in half automatically. Raw responses are written to `data/llm_response.json` before any further processing. This ensures that if anything fails downstream, the LLM output is not lost.
 
 **Cache.** Answers are stored in `data/description_cache.json` and reused on the next run when nothing that shapes the answer has changed: the description, the status and rule (which decide the prompt), the field's neighbour fields and further metadata, the system prompt, the golden examples, the org context, the field's own task prompt, and the provider, model and `reasoning_effort`. Editing Prompt B therefore re-sends only the UNCERTAIN fields; editing the system prompt or the examples re-sends everything. Failed calls are never cached. Temperature is deliberately not part of the key: it changes sampling, not the question asked.
 
@@ -282,7 +282,7 @@ The Admin opens `data/review_queue_{timestamp}.xlsx` and works through **Tab A**
 
 Once all rows have a decision, the Admin saves the file. The filename must not be changed — Script 2 identifies the correct file by its name and timestamp.
 
-> \*\*Nothing in this step touches Salesforce. The review file is a proposal, not an action.\*\*
+> **Nothing in this step touches Salesforce. The review file is a proposal, not an action.**
 
 ---
 

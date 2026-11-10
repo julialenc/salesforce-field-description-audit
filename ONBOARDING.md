@@ -20,7 +20,7 @@ As of November 2026:
 - A free Developer Edition org can be seeded with the training fields (`scripts/seed_demo_org.py`), and the pipeline reads fields from an org through the Salesforce CLI (`source: org`); `scripts/check_org_parity.py` shows the org gives the same input as the file
 - Script 2 exports approved descriptions to a CSV by default, or writes them to the org (`write_back: deploy`); tested on the demo org, with `seed_demo_org.py reset` to start over
 - `python scripts/check_setup.py` checks a new setup (Python, packages, config, LLM connection, Salesforce CLI login) and says how to fix each failure; common config mistakes (wrong key, model or endpoint, broken YAML) stop Script 1 with a plain-English message instead of a traceback
-- Prompt and classifier tuning is closed. In progress: docs and a first release. Remaining work will be listed in `ROADMAP.md` and as GitHub issues
+- Prompt and classifier tuning is closed (v0.1). What is left, in order, is in `ROADMAP.md`. The planned third stage, a pilot with a real organization (e.g. an NGO or a small business), was not done; it is ROADMAP item 1, written for whoever takes the project on: a Salesforce Admin or Architect working with an NGO or a small business
 
 ## Read in this order
 
@@ -63,7 +63,7 @@ python scripts/evaluate_suggestions.py
 ```
 The last one scores the most recent Script 1 run; add `--failures` to see each failed suggestion, or `--assumptions` to see what the model guessed or could not know.
 
-The automatic check cannot tell whether a suggestion is true. For that, draw a human review sample from the latest review file, fill in the decisions in Excel, and score it:
+The automatic check cannot tell whether a suggestion is true. For that, draw a review sample from the latest review file, fill in the decisions in Excel, and score it:
 ```
 python scripts/review_sample.py make
 python scripts/review_sample.py score data/review_sample_<timestamp>.xlsx

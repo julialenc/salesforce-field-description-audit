@@ -1,0 +1,2393 @@
+{
+  "generated_at": "2026-11-10T07:57:10.662552+00:00",
+  "total": 249,
+  "usage": {
+    "calls": 27,
+    "prompt_tokens": 249140,
+    "completion_tokens": 110913,
+    "reasoning_tokens": 83526,
+    "fields_sent": 249,
+    "provider": "azure_openai",
+    "model": "gpt-5.4-mini",
+    "estimated_cost": 0.5708,
+    "cost_per_1000_fields": 2.2923,
+    "currency": "CHF"
+  },
+  "results": [
+    {
+      "field_api_name": "Compliance_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Compliance flag on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal type-aligned description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Expedition_Sponsor__c",
+      "action": "rewrite",
+      "suggested_description": "Whether this account is supported by an expedition sponsorship agreement.",
+      "reasoning": "R3: the description treated a checkbox as a text field, so I rewrote it as a boolean description and kept the sponsorship condition.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Ambassador_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Ambassador flag on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a type-aligned description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Event_Attendance__c",
+      "action": "rewrite",
+      "suggested_description": "Event attendance flag for this contact, covering trade shows, demo days and guided taster sessions.",
+      "reasoning": "R3: the description described a checkbox as a list field, so I rewrote it as a boolean description and kept the event examples.",
+      "assumptions": [],
+      "missing": [
+        "How does this differ from Campaign Member attendance?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Flag__c",
+      "action": "rewrite",
+      "suggested_description": "General flag for this record.",
+      "reasoning": "R2: the original was too short and placeholder-like, so I replaced it with a minimal type-aligned description.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Health_Disclosure__c",
+      "action": "rewrite",
+      "suggested_description": "Health disclosure flag for guided expeditions. Not yet approved for storage in Salesforce. To be confirmed with legal and HR before activation.",
+      "reasoning": "R5: the original was a placeholder note, so I rewrote it as a proper checkbox description and kept the legal/HR caveat.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Upsell_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Upsell opportunity flag for this record.",
+      "reasoning": "R1: the description was blank, so I wrote a type-aligned description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "ARR_Impact__c",
+      "action": "rewrite",
+      "suggested_description": "Estimated impact on annual recurring revenue (ARR), stored as a currency amount in CHF.",
+      "reasoning": "R1: the description was blank, so I wrote a currency description from the field name and org currency convention.",
+      "assumptions": [],
+      "missing": [
+        "What does the amount represent: net, lost, or gained annual recurring revenue (ARR)?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "TCV__c",
+      "action": "rewrite",
+      "suggested_description": "Total contract value (TCV) of the deal, stored as a currency amount in CHF.",
+      "reasoning": "R1: the description was blank, so I wrote a currency description from the field name and org currency convention.",
+      "assumptions": [],
+      "missing": [
+        "Does total contract value (TCV) include one-time fees, recurring fees, or both?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "SLAExpirationDate__c",
+      "action": "rewrite",
+      "suggested_description": "Date on which this case's service level agreement (SLA) expires, calculated by a flow when the case is created.",
+      "reasoning": "R1: the description was blank, so I wrote a date description from the field name and org SLA convention.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "First_Response_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date and time of the first response on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal description from the field name and DateTime type and asked which response event it records.",
+      "assumptions": [],
+      "missing": [
+        "Which response event does this timestamp record?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Churn_Risk_Score__c",
+      "action": "rewrite",
+      "suggested_description": "Churn risk score from the finance analytics model, on a 0-100 scale. Higher scores mean a greater chance the customer will stop buying.",
+      "reasoning": "R1: the description was blank, so I used the org context to define the score, scale, calculation source and direction.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Discount_Rate__c",
+      "action": "rewrite",
+      "suggested_description": "Discount rate as a percentage number; 15 means 15%. Values: Standard 0, Silver 5, Gold 10, Platinum 15.",
+      "reasoning": "R3: a Number field was described like a dropdown, so I rewrote it as a numeric percentage and kept the tier mapping from the org context.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "NumberofLocations__c",
+      "action": "rewrite",
+      "suggested_description": "Count of locations on this record, stored as a whole number.",
+      "reasoning": "R1: the description was blank, so I wrote a concise Number-field description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What kind of locations does this count?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Breach_Count__c",
+      "action": "rewrite",
+      "suggested_description": "Number of service level agreement (SLA) breaches on this record. Categories: Once, Twice, Three or more times.",
+      "reasoning": "R3: a Number field was described like a dropdown, so I rewrote it as a numeric count and preserved the original breach labels.",
+      "assumptions": [],
+      "missing": [
+        "What number should be stored for Once, Twice and Three or more times?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "SLA_Target_Hours__c",
+      "action": "rewrite",
+      "suggested_description": "Resolution target in business hours (Monday-Friday, 08:00-18:00 Zurich time) for the account's support tier. Values: Basic 48, Standard 24, Premium 8, Enterprise 4 hours.",
+      "reasoning": "R3: a Number field was described like a dropdown, so I rewrote it as a numeric SLA target using the org's support-tier mapping.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Engagement_Score__c",
+      "action": "rewrite",
+      "suggested_description": "Engagement score from the marketing automation platform, on a 0-100 scale. Higher scores mean stronger engagement from email clicks, webshop visits and event attendance.",
+      "reasoning": "R2: the description was too short, so I replaced it with the org-defined score meaning, scale and calculation source.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Loyalty_Points_Balance__c",
+      "action": "rewrite",
+      "suggested_description": "Current loyalty points balance for the contact, stored as a number. Manually adjusted by the loyalty team.",
+      "reasoning": "R3: a Number field was described like a checkbox, so I rewrote it as a numeric balance and preserved the manual-adjustment note.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Renewal_Term_Months__c",
+      "action": "rewrite",
+      "suggested_description": "Length of the renewal term in months, stored as a number once the customer has agreed it.",
+      "reasoning": "R3: a Number field was described like a checkbox, so I rewrote it as a numeric renewal-term length and kept the agreement caveat.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Active__c",
+      "action": "rewrite",
+      "suggested_description": "Whether this record is active. Values: No, Yes.",
+      "reasoning": "R1: the description was blank, so I wrote a picklist description that names the available values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "CustomerPriority__c",
+      "action": "rewrite",
+      "suggested_description": "Priority band for this record. Values: High, Low, Medium.",
+      "reasoning": "R1: description was blank, so I wrote a concise definition from the field name and picklist values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Customer_Grade__c",
+      "action": "rewrite",
+      "suggested_description": "Customer grade band based on last 12 months' net revenue and engagement score, recalculated quarterly. Values: A (top 10%), B (next 20%), C (next 40%), D (rest and new customers). A is best.",
+      "reasoning": "R4: the original named the purpose but omitted the picklist values, so I added all values and the org-defined grade meanings.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Data_Residency__c",
+      "action": "rewrite",
+      "suggested_description": "Data centre region where the customer's personal data must be stored. Values: EU, US, APAC. To be confirmed with legal before enabling.",
+      "reasoning": "R5: placeholder text with a legal caveat, so I rewrote it as a proper field description and kept the caveat.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "EBR_Cycle__c",
+      "action": "rewrite",
+      "suggested_description": "Quarter of the executive business review (EBR) cycle for Tier 1 account scheduling. Values: Q1, Q2, Q3, Q4.",
+      "reasoning": "R4: the original used placeholder text and did not name the quarter values, so I listed all values and expanded EBR.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "NPS_Segment__c",
+      "action": "rewrite",
+      "suggested_description": "Net Promoter Score (NPS) segment from the quarterly survey. Values: Detractor (0-6), Passive (7-8), Promoter (9-10).",
+      "reasoning": "R4: the original omitted the segment values, so I added all NPS segments and their score bands.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Ops_Queue__c",
+      "action": "rewrite",
+      "suggested_description": "Operations team queue for this record. Values: Alpha (order exceptions: stock, pricing, address), Beta (returns and repairs), Gamma (gear loans and rentals), Delta (data quality fixes).",
+      "reasoning": "R2: the description was too short, so I expanded it with the org-defined queue values and meanings.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Preferred_Contact_Method__c",
+      "action": "rewrite",
+      "suggested_description": "Customer's preferred contact method. Values: Email, Phone, SMS, Post.",
+      "reasoning": "R4: the original was UI instruction text and did not name the picklist values, so I rewrote it as a field description.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Priority_Tier__c",
+      "action": "rewrite",
+      "suggested_description": "Priority tier for this record. Values: Tier 1 (strategic accounts with a named account manager), Tier 2 (managed by the inside sales team), Tier 3 (webshop only).",
+      "reasoning": "R2: the description was too short, so I added the org-defined tier meanings.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Review_Status__c",
+      "action": "rewrite",
+      "suggested_description": "Status of the review for this record. Values: Pending, In Review, Approved, Rejected.",
+      "reasoning": "R4: the original omitted the review-status values, so I listed all statuses.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "SLA__c",
+      "action": "rewrite",
+      "suggested_description": "Service level agreement (SLA) band for this record. Values: Gold, Silver, Platinum, Bronze.",
+      "reasoning": "R1: description was blank, so I wrote a concise definition from the field name and picklist values.",
+      "assumptions": [],
+      "missing": [
+        "What do Gold, Silver, Platinum and Bronze mean in this SLA field?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Sales_Channel__c",
+      "action": "rewrite",
+      "suggested_description": "Sales channel for this account. Values: Direct, Distributor, Online, Marketplace, Agent.",
+      "reasoning": "R4: the description never named the picklist values, so I rewrote it to include all values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Sponsorship_Level__c",
+      "action": "rewrite",
+      "suggested_description": "Level of sponsorship agreement on this account. Values: None, Bronze, Silver, Gold, Athlete Partner. Bronze = product discount, Silver = discount and website logo, Gold = co-branded gear, Athlete Partner = individual athletes with a contract.",
+      "reasoning": "R4: the description did not name the picklist values, so I added all values and the org-defined sponsorship meanings.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "UpsellOpportunity__c",
+      "action": "rewrite",
+      "suggested_description": "Upsell opportunity status. Values: Maybe, No, Yes.",
+      "reasoning": "R1: the description was blank, so I wrote a concise description from the field name and picklist values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Case_Classifier__c",
+      "action": "rewrite",
+      "suggested_description": "Case classification. Values: Type A (product defect), Type B (delivery or logistics problem), Type C (order or invoice question), Type D (product advice or usage question).",
+      "reasoning": "R4: the description omitted the picklist values, so I rewrote it with the org-defined meanings.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Case_Priority_Override__c",
+      "action": "rewrite",
+      "suggested_description": "Manual priority override when the assigned case priority does not reflect business impact. Values: Low, Medium, High, Critical.",
+      "reasoning": "R4: the description did not include the picklist values, so I rewrote it with the full value set.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Case_Source__c",
+      "action": "rewrite",
+      "suggested_description": "Case intake channel beyond standard Case Origin. Values: Email, Phone, Chat, Portal.",
+      "reasoning": "R2: the description was too short, so I expanded it and kept the channel values.",
+      "assumptions": [],
+      "missing": [
+        "How does this differ from the standard Case Origin field?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Compliance_Category__c",
+      "action": "rewrite",
+      "suggested_description": "Compliance category. Values: Regulatory, Safety, Data, Commercial. Pending review by the legal and compliance team.",
+      "reasoning": "R5: the description contained placeholder language, so I rewrote it as a proper picklist description and kept the pending review note.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Dispatch_Queue__c",
+      "action": "rewrite",
+      "suggested_description": "Case routing queue for handling. Values: Hardware, Apparel, Returns, Warranty, General.",
+      "reasoning": "R4: the description did not name the picklist values, so I rewrote it with the full set.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Escalation_Level__c",
+      "action": "rewrite",
+      "suggested_description": "Escalation level. Values: L1 (first-line customer service), L2 (product specialists), L3 (engineering at the supplier), Executive.",
+      "reasoning": "R2: the description was too short, so I expanded it with the defined support-level meanings and listed all values.",
+      "assumptions": [],
+      "missing": [
+        "What does Executive mean in this scale?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Internal_Routing_Code__c",
+      "action": "rewrite",
+      "suggested_description": "Routing code for case assignment. Values: L1 (first-line customer service), L2 (product specialists), L3 (engineering at the supplier), Specialist (named expert outside L1-L3).",
+      "reasoning": "R1: the description was blank, so I wrote a description from the field name and org-defined routing levels.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "PotentialLiability__c",
+      "action": "rewrite",
+      "suggested_description": "Potential liability status for this record. Values: No, Yes.",
+      "reasoning": "R1: the description was blank, so I wrote a type-correct summary and included the picklist values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Product__c",
+      "action": "rewrite",
+      "suggested_description": "Product code for this record. Values: GC1040, GC1060, GC3020, GC3040, GC3060, GC5020, GC5040, GC5060, GC1020.",
+      "reasoning": "R1: the description was blank, so I described the stored code and listed every picklist value.",
+      "assumptions": [],
+      "missing": [
+        "What do GC1040, GC1060, GC3020, GC3040, GC3060, GC5020, GC5040, GC5060 and GC1020 represent?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Re_Assign_Queue__c",
+      "action": "rewrite",
+      "suggested_description": "Queue this case is reassigned to when the current team cannot resolve it. Values: Hardware, Apparel, Returns, Warranty, Tier 2, Escalations.",
+      "reasoning": "R4: the description was instruction text and omitted the picklist values, so I rewrote it as a field description with the full value set.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "SLAViolation__c",
+      "action": "rewrite",
+      "suggested_description": "Service level agreement violation status for this record. Values: No, Yes.",
+      "reasoning": "R1: the description was blank, so I wrote a type-correct summary and expanded SLA from the org context.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Tier2_Routing_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Routing flag for Tier 2 cases. Values: Alpha (order exceptions), Beta (returns and repairs), Gamma (gear loans and rentals). Routing logic to be defined with the support ops team.",
+      "reasoning": "R5: the description was a TODO placeholder, so I replaced it with a proper field description and kept the pending routing step.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Tier_Code__c",
+      "action": "rewrite",
+      "suggested_description": "Tier code for this record. Values: Gold, Silver, Bronze, Standard.",
+      "reasoning": "R2: the description was too short and uninformative, so I expanded it and included the picklist values.",
+      "assumptions": [],
+      "missing": [
+        "What does this tier code classify?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Buying_Frequency__c",
+      "action": "rewrite",
+      "suggested_description": "How frequently this contact makes purchases. Values: Weekly, Monthly, Quarterly, Annually, Occasional.",
+      "reasoning": "R4: the description omitted the picklist values, so I kept the purpose and added the full value set.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "CLV_Band__c",
+      "action": "rewrite",
+      "suggested_description": "Customer lifetime value (CLV) band assigned during the quarterly customer valuation run. Values: Low, Medium, High, VIP.",
+      "reasoning": "R4: the description omitted the picklist values, so I kept the original timing and expanded CLV from the org context.",
+      "assumptions": [],
+      "missing": [
+        "What do Low, Medium, High and VIP mean?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contact_Grade__c",
+      "action": "rewrite",
+      "suggested_description": "Current contact grade from the last 12 months' net revenue and engagement score, recalculated quarterly. Values: A (top 10%), B (next 20%), C (next 40%), D (rest and new customers).",
+      "reasoning": "R4: the description omitted the picklist values, so I added the org-defined grade meanings and preserved the quarterly recalculation.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contact_Type__c",
+      "action": "rewrite",
+      "suggested_description": "Classification of the contact record. Values: Individual, Corporate, Guide, Athlete.",
+      "reasoning": "R2: the description was too short and the picklist values were missing, so I rewrote it with the full value set.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "DNC_Reason__c",
+      "action": "rewrite",
+      "suggested_description": "Reason this contact was added to the do not call (DNC) list. Values: Opt-Out, Legal Request, Deceased, Uncontactable.",
+      "reasoning": "R4: the description omitted the picklist values and used UI wording; rewrote it with all values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Data_Residency_Region__c",
+      "action": "rewrite",
+      "suggested_description": "Data centre region where this customer's personal data must be stored. Values: EU, CH, US, APAC.",
+      "reasoning": "R1: description was blank; wrote from the field name and org context values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Level__c",
+      "action": "rewrite",
+      "suggested_description": "Level classification for this record. Values: Secondary, Tertiary, Primary.",
+      "reasoning": "R1: description was blank; wrote from the field name and values, and asked what the opaque levels mean.",
+      "assumptions": [],
+      "missing": [
+        "What do Secondary, Tertiary and Primary mean?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "RFM_Segment__c",
+      "action": "rewrite",
+      "suggested_description": "RFM (recency, frequency, monetary value) segment assigned to this contact after the latest scoring cycle. Values: Champions, Loyal, At Risk, Lost, New.",
+      "reasoning": "R4: the description lacked the picklist values; rewrote it with all values and the org-defined RFM expansion.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Regulatory_Segment__c",
+      "action": "rewrite",
+      "suggested_description": "Regulatory segment classification. Values: Consumer, Professional, Institutional. Pending compliance review.",
+      "reasoning": "R5: placeholder text with a pending compliance step; rewrote it as a real description and kept the caveat.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Risk_Level__c",
+      "action": "rewrite",
+      "suggested_description": "Risk level for this record. Values: Low, Medium, High, Critical.",
+      "reasoning": "R2: too short and generic; rewrote it as a picklist description with all values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Support_Tier_Override__c",
+      "action": "rewrite",
+      "suggested_description": "Support tier for this contact when it differs from the account tier. Values: Basic, Standard, Premium, Enterprise.",
+      "reasoning": "R4: picklist description omitted the values; rewrote it with the support-tier values and preserved the account/contact distinction.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Deal_Source__c",
+      "action": "rewrite",
+      "suggested_description": "Source of this deal. Values: Inbound, Outbound, Partner, Event.",
+      "reasoning": "R2: too short; rewrote it as a picklist description with all values and asked how it differs from the standard Lead Source field.",
+      "assumptions": [],
+      "missing": [
+        "How does this differ from the standard Lead Source field?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Deal_Status__c",
+      "action": "rewrite",
+      "suggested_description": "Current status of this deal. Values: Active, On Hold, Stalled, Closed.",
+      "reasoning": "R4: the description omitted the picklist values; rewrote it with all values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "DeliveryInstallationStatus__c",
+      "action": "rewrite",
+      "suggested_description": "Status of the delivery or installation work. Values: In progress, Yet to begin, Completed.",
+      "reasoning": "R1: description was blank; wrote from the field name and all values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Pricing_Model__c",
+      "action": "rewrite",
+      "suggested_description": "Pricing model taxonomy to confirm with finance before activation. Values: Per Unit, Volume Band, Subscription, Custom.",
+      "reasoning": "R5: the original is a placeholder with a pending approval step, so I rewrote it as a real picklist description and kept the caveat.",
+      "assumptions": [],
+      "missing": [
+        "What do Volume Band and Custom mean in this pricing model taxonomy?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Revenue_Type__c",
+      "action": "rewrite",
+      "suggested_description": "Revenue type for this deal's commercial arrangement. Values: Product Sale, Service Fee, Rental, Consignment.",
+      "reasoning": "R3: the field was described as free text, but it is a picklist, so I rewrote it with the full value list.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Risk_Category__c",
+      "action": "rewrite",
+      "suggested_description": "Risk level associated with this opportunity, assessed by the deal desk. Values: Low, Medium, High, Critical.",
+      "reasoning": "R4: the description omitted the picklist values, so I added the full set and kept the original meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Sales_Motion__c",
+      "action": "rewrite",
+      "suggested_description": "Sales motion for this record. Values: Land, Expand, Retain, Partner-Led.",
+      "reasoning": "R4: the description did not name the picklist values, so I rewrote it with the full value list.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Segment_Code__c",
+      "action": "rewrite",
+      "suggested_description": "Segment for this record. Values: SMB (small and medium business), Mid-Market, Enterprise, Strategic.",
+      "reasoning": "R2: the original was too short, so I rewrote it with the full picklist list and expanded the acronym.",
+      "assumptions": [
+        "SMB = small and medium business"
+      ],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Stage_Override__c",
+      "action": "rewrite",
+      "suggested_description": "Manual override of the stage when automation has not updated it correctly. Values: Prospecting, Qualification, Needs Analysis, Proposal, Negotiation, Closed Won, Closed Lost.",
+      "reasoning": "R4: the description was instruction-like and omitted the picklist values, so I rewrote it as stand-alone metadata.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Certification_Body__c",
+      "action": "rewrite",
+      "suggested_description": "Name of the organization that issued this certification.",
+      "reasoning": "R5: the original was a placeholder, so I replaced it with a concise description based on the field name.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Internal_Ref__c",
+      "action": "rewrite",
+      "suggested_description": "Internal reference code for this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal field description from the metadata.",
+      "assumptions": [],
+      "missing": [
+        "What format does the internal reference code use?",
+        "Which system or process supplies it?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Migration_Source__c",
+      "action": "keep",
+      "suggested_description": "Legacy reference field from the 2021 data migration. May no longer be in active use.",
+      "reasoning": "R5: this is an honest retirement note that says what the field held, so it should be kept unchanged.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Reference_Code__c",
+      "action": "rewrite",
+      "suggested_description": "Reference code for this record.",
+      "reasoning": "R2: the original was too short and self-referential, so I rewrote it as a usable field description.",
+      "assumptions": [],
+      "missing": [
+        "What format does the reference code use?",
+        "Which system or process supplies it?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Region__c",
+      "action": "rewrite",
+      "suggested_description": "Region value stored on this record.",
+      "reasoning": "R2: the description was just the field name, so I rewrote it from the metadata and asked for the missing meaning and format.",
+      "assumptions": [],
+      "missing": [
+        "What region does this field identify?",
+        "What format or allowed values does it use?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "SLASerialNumber__c",
+      "action": "rewrite",
+      "suggested_description": "Service level agreement (SLA) serial number, stored as text up to 10 characters.",
+      "reasoning": "R1: the description was blank, so I wrote a type-aligned description from the field name and length.",
+      "assumptions": [],
+      "missing": [
+        "What format does the serial number follow, and which system issues it?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Defect_Reference__c",
+      "action": "rewrite",
+      "suggested_description": "Jira defect reference for a product quality issue, in the format PQ-1234.",
+      "reasoning": "R1: the description was blank, so I wrote a specific text reference description using the org's Jira defect format.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "EngineeringReqNumber__c",
+      "action": "rewrite",
+      "suggested_description": "Engineering requirement number stored on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a short text-code description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What format does the engineering requirement number follow, and which team or system issues it?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Legacy_Queue_Code__c",
+      "action": "keep",
+      "suggested_description": "Deprecated. Queue routing code from the pre-Salesforce helpdesk. No longer used for routing.",
+      "reasoning": "R5: this is a retirement note that already says what the field held, so it should be kept unchanged.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Old_Queue_Reference__c",
+      "action": "keep",
+      "suggested_description": "Queue reference from the legacy helpdesk. May no longer be relevant following the 2023 platform migration.",
+      "reasoning": "R5: this is a legacy field note that already says what the field held, so it should be kept unchanged.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Ops_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Operations flag value stored on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal type-aligned description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "What does the operations flag indicate?",
+        "What values or format can it take?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Gear_Size_Notes__c",
+      "action": "rewrite",
+      "suggested_description": "Notes about gear size stored on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a concise free-text description from the field name.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Internal_Tag__c",
+      "action": "rewrite",
+      "suggested_description": "Short keyword tag added by account managers to group contacts in list views and campaigns. Examples: trade-fair-2025, beta-tester. No fixed list.",
+      "reasoning": "R1: the description was blank, so I used the org's internal-tag convention to write a specific text description.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Languages__c",
+      "action": "rewrite",
+      "suggested_description": "Language name or code stored on this record.",
+      "reasoning": "R1: the description was blank, so I wrote a type-aligned description from the field name.",
+      "assumptions": [],
+      "missing": [
+        "Which single language does this field store, and what format or code does it use?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Legacy_Segment_Code__c",
+      "action": "keep",
+      "suggested_description": "Deprecated. This field was used for segment classification before the 2021 migration and should no longer be populated.",
+      "reasoning": "R5: legacy retirement note that already says what the field held and that it should no longer be populated.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Old_Portal_Id__c",
+      "action": "keep",
+      "suggested_description": "Reference ID from the previous customer portal. May no longer be needed following the 2023 platform migration.",
+      "reasoning": "R5: legacy migration note that already states what the field stores and that it may no longer be needed.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Preferred_Contact_Time__c",
+      "action": "rewrite",
+      "suggested_description": "Preferred time window when this contact can be called: Morning, Afternoon, or Evening.",
+      "reasoning": "R3: a Text field was described as a UI selection; rewrote it as stored text and kept the stated time-window values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Close_Quarter__c",
+      "action": "rewrite",
+      "suggested_description": "Quarter when this record was closed.",
+      "reasoning": "R2: the description was too short and vague, so I rewrote it from the field name into a clear stored value.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "CurrentGenerators__c",
+      "action": "rewrite",
+      "suggested_description": "Current generator(s) for this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal description from the field label and type.",
+      "assumptions": [],
+      "missing": [
+        "What do the generator(s) refer to?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Custom_Pricing_Ref__c",
+      "action": "rewrite",
+      "suggested_description": "Reference to the enterprise resource planning price agreement for this record. Format: PA-YYYY-NNNN.",
+      "reasoning": "R1: the description was blank, so I used the org context to describe the stored ERP price-agreement reference.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Integration_Scope__c",
+      "action": "rewrite",
+      "suggested_description": "Scope of the integration, to be defined with the solutions team before go-live.",
+      "reasoning": "R5: placeholder text with a pending definition was rewritten into a clean description while preserving the stated caveat.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Legacy_Forecast_Category__c",
+      "action": "keep",
+      "suggested_description": "Deprecated. Forecast category field from the pre-2021 process. No longer populated or used in reporting.",
+      "reasoning": "R5: legacy retirement note that already says what the field held and that it is no longer populated or used in reporting.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "MainCompetitors__c",
+      "action": "rewrite",
+      "suggested_description": "Names of the main competitors for this record.",
+      "reasoning": "R1: the description was blank, so I wrote a minimal description from the field label and type.",
+      "assumptions": [],
+      "missing": [
+        "Does this text store one competitor or several, and in what format?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Old_CRM_Stage__c",
+      "action": "keep",
+      "suggested_description": "Stage value from the legacy CRM. May no longer reflect current usage since the 2022 migration.",
+      "reasoning": "R5: legacy migration note that already says what the field stores and that it may no longer reflect current usage.",
+      "assumptions": [],
+      "missing": [
+        "Is the field still populated on new records?",
+        "Does any report, flow, integration or code still read it?",
+        "Can it be deleted, or must its data be archived first?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "OrderNumber__c",
+      "action": "rewrite",
+      "suggested_description": "Order number for this record, stored as text up to 8 characters.",
+      "reasoning": "R1: description was blank, so I wrote a description from the field name, type, label, and length.",
+      "assumptions": [],
+      "missing": [
+        "Which system issues the order number, and what format does it follow?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "TrackingNumber__c",
+      "action": "rewrite",
+      "suggested_description": "Tracking number for this record, stored as text up to 12 characters.",
+      "reasoning": "R1: description was blank, so I wrote a description from the field name, type, label, and length.",
+      "assumptions": [],
+      "missing": [
+        "Which system issues the tracking number, and what format does it follow?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "ICP_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Checked if the account matches ICP (ideal customer profile) criteria as assessed during the QBR (quarterly business review).",
+      "reasoning": "R7: expanded the unexplained ICP and QBR acronyms inline while preserving the original meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Newsletter_Opt_In__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when the customer has given explicit written consent to receive the monthly newsletter and promotional emails.",
+      "reasoning": "R9: rewritten as a third-person metadata description rather than an instruction to the user.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "NPS_Followup_Sent__c",
+      "action": "rewrite",
+      "suggested_description": "Checked once the NPS (Net Promoter Score) follow-up survey has been sent to the customer via the survey platform.",
+      "reasoning": "R7: expanded NPS inline and kept the survey-platform detail.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "TTR_Target_Met__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when the TTR (time to resolution) for this case was within the threshold for its support tier.",
+      "reasoning": "R7: expanded TTR inline and preserved the support-tier threshold condition.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Size_Confirmed__c",
+      "action": "rewrite",
+      "suggested_description": "Checked after the contact's clothing and footwear sizes have been confirmed directly during the fitting call.",
+      "reasoning": "R9: rewritten from an instruction to a neutral description of what the checkbox records.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Deal_Review_Submitted__c",
+      "action": "rewrite",
+      "suggested_description": "Checked once the deal review form has been submitted to the manager for sign-off before the forecast call.",
+      "reasoning": "R9: rewritten in third person while preserving the submission and sign-off sequence.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Pilot_Feedback__c",
+      "action": "rewrite",
+      "suggested_description": "Boolean flag for the prospect's end-of-pilot feedback after the equipment pilot.",
+      "reasoning": "R8: rewrote the impossible free-text storage claim into a checkbox description.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "QBR_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Checked to include this opportunity in the QBR (quarterly business review) deck before forecast submission.",
+      "reasoning": "R7: expanded QBR inline and preserved the forecast-related workflow detail.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "ACV__c",
+      "action": "rewrite",
+      "suggested_description": "ACV (annual contract value) for this opportunity, calculated from the Amount and Contract_Term_Months__c fields.",
+      "reasoning": "R7: expanded ACV inline and kept the original calculation inputs.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Expected_Units__c",
+      "action": "rewrite",
+      "suggested_description": "Estimated order value for the product units expected in this order, as set by the sales rep during scoping.",
+      "reasoning": "R8: removed the impossible unit-count wording from a Currency field while preserving the scoping estimate concept.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Avalanche_Course_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date of the avalanche safety course attended by the account's staff. Format: YYYY-MM-DD.",
+      "reasoning": "R8: rewrote the range into a single Date field description and removed the impossible multi-date structure.",
+      "assumptions": [],
+      "missing": [
+        "Which single date does this store: course date, attendance date, or completion date?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Resolution_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date this case was resolved. Format: YYYY-MM-DD.",
+      "reasoning": "R8: rewrote the description to store one date instead of a date range and summary text.",
+      "assumptions": [],
+      "missing": [
+        "Which resolution event does this date record?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "SLA_Deadline__c",
+      "action": "rewrite",
+      "suggested_description": "Deadline for one SLA commitment on this case. Format: YYYY-MM-DD.",
+      "reasoning": "R8: a Date field can store only one deadline, so the list of deadlines and commitments was removed.",
+      "assumptions": [],
+      "missing": [
+        "Which SLA commitment does this date store: first response, resolution, or interim update?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Last_Purchase_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date of the most recent purchase associated with this contact, updated by the e-commerce integration when an order is confirmed. Calculates recency in the RFM (Recency, Frequency, Monetary value) scoring model and triggers re-engagement email sequences.",
+      "reasoning": "R7: expanded RFM inline and preserved the integration, scoring, and re-engagement details.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Technical_Evaluation_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date of the technical evaluation for this opportunity. Format: YYYY-MM-DD.",
+      "reasoning": "R8: rewrote the field to a single date value and removed the impossible boolean/recommendation structure.",
+      "assumptions": [],
+      "missing": [
+        "Which date does this record: evaluation start, completion, or recommendation date?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Primary_Contact_Email__c",
+      "action": "rewrite",
+      "suggested_description": "Single email address for the primary contact at this account.",
+      "reasoning": "R8: an Email field can store only one address, so the comma-separated list was rewritten as a single address.",
+      "assumptions": [],
+      "missing": [
+        "Which primary contact does this single address represent when there are several?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "CC_Recipients__c",
+      "action": "rewrite",
+      "suggested_description": "Single email address copied on correspondence for this case.",
+      "reasoning": "R8: an Email field cannot store multiple recipients, so the semicolon-separated list was rewritten as one address.",
+      "assumptions": [],
+      "missing": [
+        "Which recipient does this single address represent when multiple CC recipients exist?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Executive_Sponsor__c",
+      "action": "rewrite",
+      "suggested_description": "Reference to the User record of the executive sponsor assigned to this opportunity. Required for all deals above CHF 100,000. Does not override the OwnerId field. Drives executive engagement tasks and populates the EBR (Executive Business Review) invitation list.",
+      "reasoning": "R7: expanded EBR inline and kept the lookup target, threshold, OwnerId note, and downstream uses.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "CSAT_Score__c",
+      "action": "rewrite",
+      "suggested_description": "CSAT (customer satisfaction) score submitted by the customer following case resolution, on a scale of 1 to 5.",
+      "reasoning": "R7: expanded CSAT inline and preserved the score scale and timing.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Chest_Measurement__c",
+      "action": "rewrite",
+      "suggested_description": "Chest measurement of this contact for custom kit orders, in cm.",
+      "reasoning": "R8: rewrote the range into a single numeric measurement and removed the impossible multi-value structure.",
+      "assumptions": [],
+      "missing": [
+        "Does this field store chest size only, or a chest/waist combination?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "MEDDIC_Score__c",
+      "action": "rewrite",
+      "suggested_description": "MEDDIC (Metrics, Economic buyer, Decision criteria, Decision process, Identify pain, Champion) qualification score for this opportunity, assigned by the account executive during discovery.",
+      "reasoning": "R7: MEDDIC was unexplained; expanded the acronym inline and preserved the original meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Certification_Level__c",
+      "action": "rewrite",
+      "suggested_description": "Outdoor certification for this contact. Values: None, Mountain Leader, Alpine Guide Trainee, IFMGA Guide, Avalanche Level 1, Avalanche Level 2. Determines eligibility for technical gear purchase without compliance sign-off. IFMGA: International Federation of Mountain Guides Associations.",
+      "reasoning": "R7: IFMGA was unexplained; expanded it after the value list and kept the existing values and consequence.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Preferred_Language__c",
+      "action": "shorten",
+      "suggested_description": "Preferred language for order confirmations, newsletters, and support correspondence. Values: English, French, German, Italian, Spanish, Dutch. Selects the email template locale in the marketing platform.",
+      "reasoning": "R6: shortened the description while preserving the values and the marketing-platform locale detail.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Gear_Loan_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Notes on gear loans for this account: original request, approval decision, expected return date, extensions granted, and damage assessments charged back after return inspection.",
+      "reasoning": "R6: condensed the text while preserving every listed item.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "VAT_Registration_Number__c",
+      "action": "rewrite",
+      "suggested_description": "EU VAT registration number, required for B2B tax-exempt invoicing. Format: country code followed by numeric identifier (e.g. CHE-123.456.789). Validated against VIES (VAT Information Exchange System of the EU) before the first zero-rated invoice is issued.",
+      "reasoning": "R7: VIES was unexplained; expanded the acronym and tightened wording to stay within length limits.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Affected_Units__c",
+      "action": "rewrite",
+      "suggested_description": "Text field storing the customer's estimated count of product units affected by the issue reported in this case at intake.",
+      "reasoning": "R8: rewrote the contradiction so a Text field stores the affected-unit count as text.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Agent_Notes__c",
+      "action": "rewrite",
+      "suggested_description": "Steps already tried on this case before escalation, recorded so the next agent does not repeat them.",
+      "reasoning": "R9: rewritten from a user instruction into a metadata description in third person.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Escalation_Timeline_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Escalation history for this case: date and time of each event, initiating person, reason given, receiving team's response time, and commitments made for resolution.",
+      "reasoning": "R6: shortened the description while preserving all timeline details.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Investigation_Log__c",
+      "action": "shorten",
+      "suggested_description": "Investigation log for this case: diagnostic steps taken, tools and queries used, intermediate findings, hypotheses tested, root cause conclusion, and remediation steps applied.",
+      "reasoning": "R6: shortened the description while preserving every investigation item.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Expedition_Waiver_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Expedition waiver records for this contact: waiver version, signature method, witnessing staff, amendments agreed prior to departure, and follow-up actions from the legal review process.",
+      "reasoning": "R6: condensed the wording while keeping all waiver record items.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Fitting_Session_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Notes from equipment fitting sessions for this contact: items tried, fit assessments, biomechanical observations, final recommendations, purchase outcome, and re-fitting appointments scheduled.",
+      "reasoning": "R6: shortened the description under 200 characters without removing any listed content.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Referral_Source__c",
+      "action": "rewrite",
+      "suggested_description": "Name of the person or organisation that referred this contact. Blank if not referred.",
+      "reasoning": "R9: rewritten as a metadata description in third person instead of a user instruction.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Negotiation_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Notes from negotiation on this opportunity: discount requests submitted, justification provided, approval decisions at each level, counter-proposals from the prospect, and final agreed commercial terms.",
+      "reasoning": "R6: condensed the wording while preserving every listed negotiation detail.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Stakeholder_Map_Notes__c",
+      "action": "shorten",
+      "suggested_description": "Notes on the stakeholder map for this opportunity: buyer roles identified, level of support, internal dynamics observed, and engagement strategy agreed between the AE (Account Executive) and manager.",
+      "reasoning": "R6: shortened the description while keeping all stakeholder-map details and the AE abbreviation expanded.",
+      "assumptions": [
+        "\"AE\" means Account Executive."
+      ],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "B2B_Portal_Access__c",
+      "action": "keep",
+      "suggested_description": "Checked when this account has been granted login credentials for the wholesale B2B ordering portal. False indicates the account places orders through the sales team only. Controls visibility of the portal credential management section on the account layout.",
+      "reasoning": "Description clearly states the checked meaning, the false state, and the operational effect.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Catalogue_Opt_Out__c",
+      "action": "keep",
+      "suggested_description": "Checked when this account has requested to be excluded from all printed and digital catalogue mailings. Set by the account manager based on the account's communication preferences. Suppresses the account from the seasonal catalogue dispatch list in the marketing automation platform.",
+      "reasoning": "Description is specific, defines the checked state, and explains the downstream suppression clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Flag_Field__c",
+      "action": "rewrite",
+      "suggested_description": "Checkbox flag for this record.",
+      "reasoning": "Original was generic and gave no meaningful field purpose beyond tracking language, so I rewrote it to state only what the metadata confirms.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?",
+        "Which process or team reads or acts on this flag?"
+      ],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "ISPO_Membership__c",
+      "action": "keep",
+      "suggested_description": "Checked when this account holds a current ISPO (International Sports and Outdoor Exposition) membership, confirming their standing as a verified trade buyer eligible for wholesale-only product lines and advance ordering windows.",
+      "reasoning": "Description expands the acronym, states the membership condition, and explains the eligibility effect clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Loyalty_Programme_Member__c",
+      "action": "keep",
+      "suggested_description": "Checked when this account is an active member of the Summit Rewards loyalty programme. Drives eligibility for member-only pricing, early product releases, and expedition sponsorship applications.",
+      "reasoning": "Description is specific and explains the membership condition plus the resulting eligibility effects.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Returns_Policy_Accepted__c",
+      "action": "keep",
+      "suggested_description": "Checked when the account has accepted the current version of the returns and warranty policy (version 3.2, effective 2024-01-01). Required before the first order can be processed. Updated by the onboarding automation when the acceptance is recorded.",
+      "reasoning": "Description gives the exact policy version, effective date, and business rule, so it is sufficiently specific.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Shipping_Restriction__c",
+      "action": "keep",
+      "suggested_description": "Checked when this account's shipping address is subject to carrier restrictions that limit delivery of oversized or hazardous items such as gas canisters, pyrotechnic avalanche charges, or large tent structures. Triggers a manual review step in the fulfilment workflow before dispatch.",
+      "reasoning": "Description is concrete about the restriction, examples, and the workflow effect.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Auto_Close_Eligible__c",
+      "action": "keep",
+      "suggested_description": "Checked when this case meets the criteria for automatic closure after 14 days of inactivity in Awaiting Customer status. Does not close the case immediately \u2014 the auto-close workflow evaluates this flag nightly before triggering closure.",
+      "reasoning": "Description states the eligibility criteria, timing, and workflow behavior clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "CE_Mark_Issue__c",
+      "action": "keep",
+      "suggested_description": "Checked when this case involves a product compliance concern related to CE (Conformit\u00e9 Europ\u00e9enne) marking requirements. Triggers mandatory notification to the quality and regulatory team within 24 hours of the case being raised.",
+      "reasoning": "Description clearly identifies the compliance issue, expands CE, and states the notification rule.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Case_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Checkbox flag for this case.",
+      "reasoning": "Original was too generic and only mentioned tracking, so I reduced it to the confirmed field type and scope.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?",
+        "Which process or team reads or acts on this flag?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Customer_Confirmed_Resolved__c",
+      "action": "keep",
+      "suggested_description": "Checked when the customer has explicitly confirmed that the reported issue is resolved to their satisfaction. Required before the case status can be set to Closed. Populated by the agent after receiving written or verbal confirmation.",
+      "reasoning": "The description is specific, clear for a checkbox field, and includes the business condition and process detail needed by admins and integrations.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Escalated_To_Engineering__c",
+      "action": "keep",
+      "suggested_description": "Checked when this case has been formally escalated to the product engineering team for investigation. Triggers an engineering task creation and links the case to the internal bug tracking system for progress tracking.",
+      "reasoning": "The description clearly states the condition and the downstream integration behavior, so it is useful as written.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Expedition_Related__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when this case relates to equipment used or purchased for a guided expedition or organised mountaineering event.",
+      "reasoning": "The original included unsupported routing and record-access claims, so I kept only the confirmed checkbox meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Post_Resolution_Survey_Sent__c",
+      "action": "keep",
+      "suggested_description": "Checked when the post-resolution satisfaction survey has been dispatched to the customer contact via the survey platform integration. Set automatically when the case status changes to Closed and Customer_Confirmed_Resolved__c is true.",
+      "reasoning": "The description is specific and ties the field to a clear automated event and related field.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Regression_Confirmed__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when the engineering team has confirmed that the reported issue is a regression from a previous product release.",
+      "reasoning": "The original added unsupported reporting and notification behavior, so I retained only the confirmed regression meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Replacement_Dispatched__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when a replacement product has been dispatched to the customer as the agreed resolution for this case.",
+      "reasoning": "The original included unsupported fulfillment-team and notification claims, so I kept the dispatch condition only.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "SLA_Breached__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when this case has exceeded its SLA target for either first response or resolution time.",
+      "reasoning": "The original added unsupported workflow, notification, and reason-field behavior, so I kept the breach condition only.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Warranty_Claim__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when this case involves a formal warranty claim under the product's standard or extended warranty terms.",
+      "reasoning": "The original included an unsupported team-routing claim, so I kept the warranty-claim meaning only.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Workaround_Provided__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when a temporary workaround has been communicated to the customer while a permanent resolution is being developed.",
+      "reasoning": "The original added unsupported SLA and acknowledgement behavior, so I kept the workaround condition only.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Account_Billing_Proxy__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when this contact is authorised to receive and approve invoices on behalf of the parent account.",
+      "reasoning": "The original included an unsupported Account access claim and contract-setup detail, so I kept the billing-authority meaning only.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Athlete_Sponsored__c",
+      "action": "keep",
+      "suggested_description": "Checked when this contact is an active sponsored athlete under a current athlete partnership agreement. Drives eligibility for the sponsored athlete product allocation workflow and suppresses standard retail pricing for this contact.",
+      "reasoning": "Description clearly states the checkbox meaning and downstream effect and needs no correction.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Consent_Withdrawn__c",
+      "action": "keep",
+      "suggested_description": "Checked when this contact has actively withdrawn previously given marketing consent. Set by the unsubscribe automation or by the admin when a formal withdrawal request is received. Triggers suppression across all active campaign memberships.",
+      "reasoning": "Description is specific about the consent event, source, and effect, so it is adequate as written.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Do_Not_Call__c",
+      "action": "rewrite",
+      "suggested_description": "Excludes this contact from outbound phone contact, including sales calls and customer service follow-up calls. Enforced by the telephony integration, which suppresses the contact from outbound call lists.",
+      "reasoning": "The behavior is clear, but the field may overlap the standard Do Not Call field, so the custom-field difference should be confirmed.",
+      "assumptions": [],
+      "missing": [
+        "How does this field differ from the standard Do Not Call field?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "IFMGA_Member__c",
+      "action": "keep",
+      "suggested_description": "Checked when this contact holds active membership of the IFMGA (International Federation of Mountain Guides Associations), confirming professional guide status eligible for the guide programme wholesale pricing tier.",
+      "reasoning": "The description identifies the membership, expands the acronym, and states the commercial effect, so it is sufficiently specific.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Marketing_Opt_Out__c",
+      "action": "keep",
+      "suggested_description": "Checked when this contact has opted out of all marketing communications, including email, SMS, and direct mail. Overrides all campaign membership inclusions. Populated via the unsubscribe workflow or by the account manager on request.",
+      "reasoning": "The description explains what the checkbox means and how it affects campaign inclusion, so no improvement is needed.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Newsletter_Subscribed__c",
+      "action": "keep",
+      "suggested_description": "Checked when this contact has opted in to receive the monthly Summit Adventures newsletter. Drives inclusion in the newsletter distribution list in the marketing automation platform. Must be true before any newsletter content is sent.",
+      "reasoning": "The description clearly defines the subscription state and downstream processing, so it is adequate.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Onboarding_Complete__c",
+      "action": "keep",
+      "suggested_description": "Checked when all mandatory onboarding steps for this contact have been completed: portal activation, GDPR consent recorded, preferred language set, and first order placed or demo booking confirmed. Drives suppression of onboarding reminder sequences.",
+      "reasoning": "The description gives a concrete completion definition and the resulting automation behavior, so it is strong enough to keep.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Decision_Maker_Identified__c",
+      "action": "keep",
+      "suggested_description": "Checked when the economic decision maker has been identified and engaged in the buying process. Required qualification criterion for opportunities above CHF 50,000. Logged by the account executive when the decision maker attends a discovery or demo call.",
+      "reasoning": "The description is specific about the buying-stage meaning, threshold, and logging event, so it is adequate.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Discount_Approved__c",
+      "action": "rewrite",
+      "suggested_description": "Checked when the requested discount has been approved through the deal desk approval workflow. Populated automatically when the approval record reaches Approved status.",
+      "reasoning": "I removed the quote-specific consequence because Salesforce Quotes are not used in this org, while keeping the approval workflow and auto-population detail.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Expedition_Kit_Deal__c",
+      "action": "keep",
+      "suggested_description": "Checked when this opportunity involves a fully configured expedition kit package for a guided tour operator or corporate mountaineering programme. Triggers the expedition kit workflow and assigns an equipment specialist.",
+      "reasoning": "The description is specific about the deal type and workflow impact, so no rewrite is needed.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Handoff_Complete__c",
+      "action": "keep",
+      "suggested_description": "Checked when the post-sale handoff from the sales team to the customer success team has been completed and logged in the handoff tracker. Set by the automated handoff workflow when all mandatory handoff tasks reach Completed status.",
+      "reasoning": "The description is specific, states what checked means, and explains the workflow behavior clearly enough for admins and integrations.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Internal_Flag__c",
+      "action": "rewrite",
+      "suggested_description": "Internal flag for this record.",
+      "reasoning": "The original was too vague and only said it is for internal tracking; the rewrite keeps the confirmed internal-flag meaning without inventing behavior.",
+      "assumptions": [],
+      "missing": [
+        "What does checked mean?",
+        "What action does this flag trigger or block?",
+        "Which process or team reads this flag?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Legal_Review_Required__c",
+      "action": "keep",
+      "suggested_description": "Checked when the prospect has requested changes to the standard supply agreement terms that require review by the legal team. Triggers a legal review task and pauses quote finalisation until the legal team records their decision.",
+      "reasoning": "The description is specific and clearly states the condition, downstream task, and pause behavior.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Partner_Sourced__c",
+      "action": "keep",
+      "suggested_description": "Checked when this opportunity was sourced by a registered channel partner. Triggers the partner commission calculation workflow and requires Partner_Name__c to be populated before the opportunity can advance past the Qualification stage.",
+      "reasoning": "The description is specific and names both the sourcing condition and the process dependency on Partner_Name__c.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Technical_Win__c",
+      "action": "keep",
+      "suggested_description": "Checked when the prospect technical team has confirmed the solution meets their requirements. Typically set after a product demonstration or equipment trial. Required before the opportunity advances to Negotiation stage.",
+      "reasoning": "The description clearly defines the approval condition and the stage gate, so it is useful as-is.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "UIAA_Certified_Products__c",
+      "action": "keep",
+      "suggested_description": "Checked when all climbing hardware included in this opportunity is certified to UIAA (Union Internationale des Associations d'Alpinisme) safety standards. Required for opportunities supplying certified guide services or public sector climbing facilities.",
+      "reasoning": "The description states exactly what checked means and preserves the UIAA expansion and business constraint.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Annual_Order_Value__c",
+      "action": "keep",
+      "suggested_description": "Stores the total value of orders for the year.",
+      "reasoning": "The description is concise and sufficiently indicates the currency field stores an annual order total.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Credit_Limit__c",
+      "action": "keep",
+      "suggested_description": "Maximum outstanding invoice balance approved for this account by the finance team. Enforced by the order management integration to block new shipments when the balance exceeds this threshold. Updated annually during credit review.",
+      "reasoning": "The description is specific, names the approving team and the integration behavior, and clearly states the threshold rule.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Total_Lifetime_Revenue__c",
+      "action": "keep",
+      "suggested_description": "Roll-up sum of the net invoice value of all confirmed orders placed by this account, aggregated from child Order records. Denominated in the org's corporate currency. Used to determine loyalty tier thresholds and key account classification.",
+      "reasoning": "The description explains the roll-up source, currency, and downstream classification use clearly enough.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Lifetime_Spend__c",
+      "action": "keep",
+      "suggested_description": "Cumulative net spend by this contact across all confirmed orders, in the org's corporate currency. Updated by the order management integration when each order is invoiced. Used to determine loyalty tier eligibility and personalised discount thresholds.",
+      "reasoning": "The description is specific, identifies the source process, and explains the business thresholds it affects.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Expected_Margin__c",
+      "action": "keep",
+      "suggested_description": "Expected gross margin on this opportunity in the org's default currency, calculated by the sales rep based on the agreed pricing and estimated cost of goods. Used in profitability reporting alongside the Amount field.",
+      "reasoning": "The description clearly states what the currency stores, its basis, and how it is used; no improvement is needed.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Contract_End_Date__c",
+      "action": "keep",
+      "suggested_description": "Expiry date of the current supply or wholesale agreement with this account. Populated from the signed contract by the account manager. Triggers a renewal opportunity creation task 90 days before this date.",
+      "reasoning": "The description is specific, type-aligned, and explains the downstream timing rule clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Contract_Start_Date__c",
+      "action": "keep",
+      "suggested_description": "Date on which the current wholesale or corporate supply agreement with this account became effective. Populated by the account manager from the signed contract. Used to calculate contract age and trigger annual renewal workflows.",
+      "reasoning": "The description clearly defines the single date and its business meaning without UI wording.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Last_Order_Date__c",
+      "action": "keep",
+      "suggested_description": "Date of the most recent confirmed purchase order placed by this account. Updated automatically by the order management integration when a new order reaches Confirmed status. Used in churn risk calculation and re-engagement campaign triggers.",
+      "reasoning": "The description is precise, type-consistent, and identifies the source event and downstream uses.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Certification_Expiry__c",
+      "action": "rewrite",
+      "suggested_description": "Expiry date of this certification. Format: YYYY-MM-DD.",
+      "reasoning": "The original mixed a date field with a certification body name and an entry instruction, so I reduced it to the date the field can actually store.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "GDPR_Consent_Date__c",
+      "action": "keep",
+      "suggested_description": "Date on which this contact provided explicit GDPR marketing consent, as recorded in the consent management system. Required before any EU-regulated marketing communication is sent. Populated automatically when the consent form is submitted.",
+      "reasoning": "The description is specific, stands alone, and clearly states the consent event and system of record.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contract_Signed_Date__c",
+      "action": "rewrite",
+      "suggested_description": "Date the contract was countersigned by the customer's legal representative.",
+      "reasoning": "The original included a non-date instruction and a contract reference number that a Date field cannot store, so I kept only the date meaning.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Pilot_Start_Date__c",
+      "action": "keep",
+      "suggested_description": "Date on which the equipment pilot or gear trial programme was started with this prospect. Populated by the sales engineer when trial items are dispatched. Used to calculate trial duration and trigger follow-up task creation.",
+      "reasoning": "The description clearly defines the single date, the trial context, and the downstream follow-up timing.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Account_Manager__c",
+      "action": "keep",
+      "suggested_description": "Reference to the User record of the dedicated account manager responsible for day-to-day relationship management for this account. Separate from OwnerId, which reflects the sales owner. Used to filter activity views and trigger manager-specific notification workflows.",
+      "reasoning": "The lookup target and its role are clearly identified, and the distinction from OwnerId is useful and specific.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Parent_Distributor__c",
+      "action": "keep",
+      "suggested_description": "Reference to the Account record of the wholesale distributor responsible for supplying and invoicing this retail account. Used in the distributor hierarchy for territory-level revenue rollup and for routing support cases to the correct distributor contact.",
+      "reasoning": "The description identifies the related object and the distributor role clearly enough for integrations and developers.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Escalation_Owner__c",
+      "action": "keep",
+      "suggested_description": "Reference to the User record of the senior support agent or manager who owns this case during an active escalation. Separate from OwnerId, which reflects the primary assignee. Used to drive escalation-specific SLA timers and notification rules.",
+      "reasoning": "The description identifies the lookup target, distinguishes it from OwnerId, and explains the escalation purpose clearly enough for admins and developers.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Portal_User__c",
+      "action": "keep",
+      "suggested_description": "Reference to the Experience Cloud User record linked to this contact. Populated automatically when the contact activates their B2B portal account. Used to control portal access and to associate portal activity with the correct CRM contact record.",
+      "reasoning": "The description states the related record, when it is populated, and why the link exists, so it is sufficiently specific.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Primary_Contact__c",
+      "action": "keep",
+      "suggested_description": "Reference to the Contact record of the main point of contact for this opportunity on the buyer side. Used to address proposal documents, route contract signature requests, and log call activity against the correct individual.",
+      "reasoning": "The description clearly explains the lookup role and downstream business use without needing additional context.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Active_Product_Lines__c",
+      "action": "keep",
+      "suggested_description": "Product lines currently stocked or ordered by this account. Values: Alpine Hardware, Technical Apparel, Footwear, Camping and Bivouac, Ski Touring, Navigation and Safety, Hydration and Nutrition. Updated annually during catalogue review.",
+      "reasoning": "The description names the multiselect values and explains the field purpose, making it adequate as written.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Preferred_Gear_Category__c",
+      "action": "keep",
+      "suggested_description": "Product categories this account primarily purchases, as recorded during onboarding or updated by the account manager. Values: Apparel, Footwear, Climbing Hardware, Camping Equipment, Navigation, Hydration, Avalanche Safety. Used to personalise product recommendations and catalogue mailings.",
+      "reasoning": "The description covers the categories, lists the values, and explains the intended use clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Activity_Discipline__c",
+      "action": "keep",
+      "suggested_description": "Outdoor disciplines this contact actively participates in, as recorded during onboarding or updated by the account manager. Values: Alpine Climbing, Trail Running, Ski Touring, Trekking, Via Ferrata, Mountaineering, Canyoning. Used to personalise product recommendations and event invitations.",
+      "reasoning": "The field purpose and all picklist values are clearly documented, so no rewrite is needed.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Gear_Categories_In_Scope__c",
+      "action": "keep",
+      "suggested_description": "Product categories included in this opportunity's scope. Values: Alpine Hardware, Technical Apparel, Footwear, Camping Equipment, Ski Touring, Navigation and Safety, Hydration. Used to route fulfilment tasks to the correct warehouse picking teams.",
+      "reasoning": "The description is specific, includes every multiselect value, and explains the operational meaning well enough.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "CSAT_Score__c",
+      "action": "keep",
+      "suggested_description": "Most recent customer satisfaction score recorded for this account. Scale 1-10. Updated after each survey.",
+      "reasoning": "The description states the metric, scale, and update timing clearly enough for the field type.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Days_Since_Last_Order__c",
+      "action": "keep",
+      "suggested_description": "Number of calendar days elapsed since the date recorded in Last_Order_Date__c. Calculated daily by a scheduled formula. Used to trigger re-engagement workflows when the value exceeds 90 days for active accounts.",
+      "reasoning": "The formula-based calculation and business threshold are explicit, so the description is sufficiently useful.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Demo_Equipment_On_Loan__c",
+      "action": "keep",
+      "suggested_description": "Count of individual demo units currently on loan to this account from the field demonstration programme. Updated by the logistics team when items are dispatched or returned. Used to enforce the maximum concurrent loan limit per account.",
+      "reasoning": "The description clearly defines the count, the source of updates, and the business limit it supports.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Lifetime_Orders_Count__c",
+      "action": "keep",
+      "suggested_description": "Roll-up count of all confirmed purchase orders ever placed by this account, aggregated from the child Order records via a Master-Detail relationship. Used to classify accounts as New, Returning, or Key Customer in loyalty tier calculations.",
+      "reasoning": "The description is specific, explains the roll-up source and downstream classification use, and is adequate as written.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Strategic_Value__c",
+      "action": "rewrite",
+      "suggested_description": "Strategic value score for this account, from 1 to 5. Set by sales leadership in yearly account planning; 5 = most strategic.",
+      "reasoning": "The original was too vague; the rewrite adds the org-defined 1\u20135 scale and what the score means.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Warranty_Registration_Count__c",
+      "action": "keep",
+      "suggested_description": "Roll-up count of active product warranty registrations linked to this account via the Warranty Registration child object. Used to validate warranty claim eligibility and to track post-sale product usage across the account's fleet.",
+      "reasoning": "The description clearly states what is counted, where it comes from, and why it matters.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Altitude_Of_Incident__c",
+      "action": "keep",
+      "suggested_description": "Altitude in metres at which the reported product failure or incident occurred, as stated by the customer. Stored as a whole number. Used by the product quality team to assess whether high-altitude conditions contributed to the failure.",
+      "reasoning": "The description is specific, type-consistent, and gives the measurement context and team usage.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Reopen_Count__c",
+      "action": "keep",
+      "suggested_description": "Number of times this case has been reopened after being set to Closed or Resolved status. Incremented automatically by the reopen workflow. Cases with a count above 2 are automatically flagged for a quality review by the support manager.",
+      "reasoning": "The description clearly defines the count, the trigger for increments, and the threshold-based consequence.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Resolution_Time_Hours__c",
+      "action": "keep",
+      "suggested_description": "Total number of business hours from case creation to the first Resolved status, calculated by the SLA workflow. Stored as a decimal number. Used to measure resolution speed against SLA targets in the support performance dashboard.",
+      "reasoning": "The description explains the calculation, unit, and reporting use clearly enough to stand alone.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Time_To_First_Response__c",
+      "action": "keep",
+      "suggested_description": "Number of business hours elapsed between case creation and the first substantive response sent to the customer. Calculated automatically by the SLA management workflow on first outbound email. Used in SLA compliance reporting.",
+      "reasoning": "The description clearly identifies the event timing, calculation, and reporting purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Guided_Tours_Completed__c",
+      "action": "keep",
+      "suggested_description": "Count of guided tours and expeditions completed by this contact through the company's guided adventures programme. Updated by the events team after each trip debrief. Used to determine eligibility for the loyalty expedition rewards tier.",
+      "reasoning": "The description is specific about what is counted, who updates it, and how it affects eligibility.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Shoe_Size_EU__c",
+      "action": "keep",
+      "suggested_description": "EU shoe size of this contact, recorded for footwear fitting events and demo day equipment pre-preparation. Stored as a numeric EU size (e.g. 42, 43.5). Populated by the contact via the customer portal profile or by the account manager during onboarding.",
+      "reasoning": "The description is specific, type-aligned, and includes the supported size format and sources.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Years_of_Experience__c",
+      "action": "keep",
+      "suggested_description": "Number of years of active outdoor experience reported by this contact during registration. Stored as a whole number. Used to segment contacts for appropriate product recommendations and guided tour difficulty matching.",
+      "reasoning": "The description clearly states the value stored, source context, and how it is applied.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contract_Term_Months__c",
+      "action": "keep",
+      "suggested_description": "Duration of the supply or wholesale agreement in months as agreed in the final negotiation. Common values: 12, 24, 36. Used to calculate total contract value, set the renewal opportunity creation date, and determine volume discount eligibility.",
+      "reasoning": "The description is specific, states the unit and common values, and explains downstream use clearly enough.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Discount_Percent__c",
+      "action": "keep",
+      "suggested_description": "Discount percentage applied to the list price of this opportunity, expressed as a decimal between 0 and 100. Set by the sales rep and subject to deal desk approval above the threshold defined in the pricing policy. Used to calculate the net Amount field.",
+      "reasoning": "The description clearly defines the value, range, approval rule, and calculation role.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Emergency_Contact_Phone__c",
+      "action": "keep",
+      "suggested_description": "Phone number of the emergency contact nominated by this individual. Stored alongside Emergency_Contact_Name__c. Must include country code. Required when the contact is registered for any guided high-altitude or technical mountaineering activity.",
+      "reasoning": "The description is specific, type-aligned, and includes the required format and condition.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Account_Segment__c",
+      "action": "keep",
+      "suggested_description": "Commercial segment assigned to this account based on annual revenue and purchase frequency. Values: Consumer Direct, Specialty Retail, Corporate Fleet, Wholesale Distributor. Drives pricing tier, minimum order quantities, and assigned account manager pool.",
+      "reasoning": "The picklist values are named and the description clearly explains what the segment affects.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Account_Status__c",
+      "action": "keep",
+      "suggested_description": "Current operational status of this account in the customer lifecycle. Values: Prospect, Active, On Hold, Suspended, Churned, Reactivated. Controls order acceptance rules and automated outreach eligibility.",
+      "reasoning": "The description is clear, names every picklist value, and states the operational effect.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Altitude_Certification__c",
+      "action": "keep",
+      "suggested_description": "Highest altitude certification level held by the account's primary guide or technical staff, verified during corporate account onboarding. Values: None, 3000m, 4000m, 6000m, 8000m+. Determines eligibility for high-altitude technical equipment purchase without additional safety compliance approval.",
+      "reasoning": "The description names all values and explains the qualification and approval impact clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Payment_Terms__c",
+      "action": "keep",
+      "suggested_description": "Agreed payment terms for invoices issued to this account. Values: Net 15, Net 30, Net 60, Prepayment Required, Cash on Delivery. Set by the finance team during account approval and used by the billing integration to set invoice due dates.",
+      "reasoning": "The description is specific, covers all picklist values, and explains the invoicing impact.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Primary_Activity__c",
+      "action": "keep",
+      "suggested_description": "Main outdoor discipline associated with this account's purchasing profile. Values: Alpine Climbing, Trail Running, Ski Touring, Trekking, Via Ferrata, Mountaineering, Mixed Ice and Rock. Used to route accounts to the correct product specialist and tailor catalogue contents.",
+      "reasoning": "The description is clear, specific, and includes all picklist values with a concrete purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Seasonal_Buying_Pattern__c",
+      "action": "keep",
+      "suggested_description": "Observed purchasing seasonality for this account based on historical order data. Values: Spring-Summer Peak, Autumn-Winter Peak, Year-Round Steady, Pre-Season Bulk. Used by the demand planning team to forecast stock requirements and schedule account manager outreach.",
+      "reasoning": "The description defines the scale, lists all values, and gives a useful business purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Case_Source_Channel__c",
+      "action": "keep",
+      "suggested_description": "Intake channel supplementing the standard Origin field. Values: Direct Email, Support Portal Ticket, Live Chat, Social Media, In-Store Staff Entry, Phone IVR, Partner Submission. Used for detailed channel attribution in support reporting.",
+      "reasoning": "The description distinguishes the field from standard Origin, lists all values, and states its reporting role.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Closure_Category__c",
+      "action": "keep",
+      "suggested_description": "Category describing how this case was ultimately resolved. Values: Fixed by Agent, Customer Self-Resolved, Workaround Accepted, Replacement Issued, Refund Processed, No Action Required, Duplicate Closed. Required before case can be set to Closed.",
+      "reasoning": "Description is specific, lists all picklist values, and states the closing requirement clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Customer_Impact_Level__c",
+      "action": "keep",
+      "suggested_description": "Severity of the business or personal impact reported by the customer. Values: Critical, High, Medium, Low. Set at intake and used to override default SLA timers when the declared impact exceeds the case priority level.",
+      "reasoning": "Description names the values and explains the override behavior in enough detail for admins and integrations.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Handling_Priority__c",
+      "action": "keep",
+      "suggested_description": "Internal handling priority assigned by the support team lead to manage workload during high-volume periods. Values: Standard Queue, Fast Track, Hold, VIP Direct. Overrides the default queue assignment without changing the customer-facing Priority field.",
+      "reasoning": "Description is concrete, includes all picklist values, and clearly distinguishes this field from the customer-facing priority.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Product_Area__c",
+      "action": "keep",
+      "suggested_description": "Product category related to the reported issue. Values: Alpine Hardware, Technical Apparel, Footwear, Camping Equipment, Ski Touring, Navigation and Safety, Hydration, Order and Delivery, Warranty, Returns. Used to route to the correct specialist team.",
+      "reasoning": "Description is specific, lists every value, and gives a clear operational purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Root_Cause_Category__c",
+      "action": "keep",
+      "suggested_description": "Root cause assigned after investigation. Values: Product Defect, User Error, Shipping Damage, Incorrect Item Sent, Size or Fit Issue, Missing Component, Documentation Error. Required before the case can be set to Resolved.",
+      "reasoning": "Description is specific, names all values, and states the workflow requirement clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Clothing_Size__c",
+      "action": "keep",
+      "suggested_description": "Apparel size of this contact for technical gear fitting events and sponsored athlete kit preparation. Values: XS, S, M, L, XL, XXL. Populated during onboarding or updated by the contact through the self-service portal.",
+      "reasoning": "Description clearly states the field purpose and includes the exact size values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Communication_Channel__c",
+      "action": "keep",
+      "suggested_description": "Primary channel through which this contact prefers to receive communications. Values: Email, SMS, Post, Phone, App Notification. Used by the marketing automation platform to route outbound messages to the correct delivery channel.",
+      "reasoning": "Description is specific, lists the picklist values, and explains the delivery behavior.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contact_Source__c",
+      "action": "keep",
+      "suggested_description": "Channel through which this contact was originally acquired. Values: Web Registration, Trade Show, Referral, Staff Entry, B2B Portal Import, Expedition Sign-Up, Partner Transfer. Used for acquisition channel analysis and to set default communication preferences.",
+      "reasoning": "Description names all values and gives a clear enough source-of-record purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Contact_Status__c",
+      "action": "keep",
+      "suggested_description": "Current lifecycle status of this contact record. Values: Active, Inactive, Prospect, Churned, Deceased, Merged. Controls inclusion in marketing campaigns and order processing eligibility checks.",
+      "reasoning": "Description is concrete, complete, and explains the operational impact of the status values.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Preferred_Demo_Location__c",
+      "action": "keep",
+      "suggested_description": "Retail location or outdoor venue this contact prefers for equipment demo and fitting events. Values: Geneva Store, Zurich Store, Chamonix Partner, Innsbruck Partner, Online Virtual. Used by the events team to allocate demo day invitations to the nearest location.",
+      "reasoning": "Description is specific, names every picklist value, and states the assignment purpose clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Primary_Role__c",
+      "action": "keep",
+      "suggested_description": "Buying or influencing role this contact plays in the account's purchasing process. Values: Economic Buyer, Technical Evaluator, End User, Champion, Procurement, Gatekeeper. Used to prioritise engagement and tailor communication cadence.",
+      "reasoning": "Description is specific, names all picklist values, and explains how the role is applied.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Approval_Status__c",
+      "action": "keep",
+      "suggested_description": "Current deal desk approval status for this opportunity. Values: Not Submitted, Pending Review, Approved, Rejected, Recalled. Controlled by the approval workflow; not editable directly by the sales rep once submitted.",
+      "reasoning": "Description clearly states the stored status, lists the values, and captures the workflow behavior.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Competitor__c",
+      "action": "keep",
+      "suggested_description": "Primary competitor identified during the sales cycle. Values: Competitor A, Competitor B, Competitor C, Competitor D, None. Populated by the sales rep during discovery. Used in win/loss analysis and competitive intelligence reporting.",
+      "reasoning": "Description is specific, includes all picklist values, and explains how the field is applied.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Deal_Type__c",
+      "action": "keep",
+      "suggested_description": "Classification of this opportunity by commercial motion. Values: New Logo, Expansion, Renewal, Reactivation. Set at opportunity creation. Drives commission calculation rules and separates new business metrics from retention metrics in revenue reporting.",
+      "reasoning": "Description is clear, value-complete, and specific enough for integrations and reporting.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Implementation_Complexity__c",
+      "action": "keep",
+      "suggested_description": "Estimated complexity of fulfilling and onboarding this opportunity, assessed by the sales engineer during scoping. Values: Low, Medium, High, Very High. Drives post-sale resource allocation and implementation timeline estimates.",
+      "reasoning": "Description explains the meaning of the values and the field's purpose clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Loss_Reason__c",
+      "action": "keep",
+      "suggested_description": "Primary reason this opportunity was lost. Values: Price, Competitor, No Decision, Timing, Product Gap, Budget Frozen, Key Contact Left. Required when StageName is set to Closed Lost. Used in win/loss analysis and product roadmap prioritisation.",
+      "reasoning": "Description is specific, includes all values, and captures the key business rule.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Pipeline_Flag__c",
+      "action": "keep",
+      "suggested_description": "Internal pipeline management flag used by the sales operations team to mark opportunities requiring attention in the weekly pipeline review. Values: Clean, Watch, At Risk, Escalated. Updated by the sales ops analyst after each review session.",
+      "reasoning": "Description is concrete, names the values, and explains the operational context well.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Primary_Product_Line__c",
+      "action": "rewrite",
+      "suggested_description": "Main product category driving the revenue in this opportunity. Values: Alpine Hardware, Technical Apparel, Footwear, Camping and Bivouac, Ski Touring Equipment, Navigation and Safety, Hydration and Nutrition. Routes to product specialist.",
+      "reasoning": "The original missed an exact picklist value; I corrected the value list and kept the stated routing purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Seasonal_Delivery_Window__c",
+      "action": "rewrite",
+      "suggested_description": "Target delivery season agreed with the buyer for the goods in this opportunity. Values: Pre-Winter (Sep-Oct); Winter (Nov-Jan); Pre-Summer (Mar-Apr); Summer (May-Jul); Year-Round. Logistics schedules warehouse allocation and carrier booking.",
+      "reasoning": "The original used mismatched value formatting; I aligned the picklist values exactly and kept the logistics purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Legacy_ERP_Code__c",
+      "action": "keep",
+      "suggested_description": "Account identifier used in the pre-2021 ERP system before migration to Salesforce. Retained for cross-referencing historical order records and resolving legacy invoice queries. Read-only after the migration freeze date of 2021-06-30.",
+      "reasoning": "Description is specific, identifies the legacy system, and preserves the read-only migration constraint.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Onboarding_Notes__c",
+      "action": "keep",
+      "suggested_description": "Free-text notes captured by the customer success manager during the onboarding process, covering equipment training completed, portal access confirmed, first order placed, and any account-specific delivery or invoicing preferences agreed during the kickoff call.",
+      "reasoning": "The description is specific about who captures the notes, when they are captured, and the exact onboarding topics covered.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Partner_Agreement_Notes__c",
+      "action": "keep",
+      "suggested_description": "Free-text field storing notes on the partnership agreement for this account, including commercial terms, amendments, and exceptions approved outside the standard approval matrix. Updated by the channel manager.",
+      "reasoning": "It clearly states what the field stores, what content belongs in it, and who updates it.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Territory_Assignment_Notes__c",
+      "action": "keep",
+      "suggested_description": "Free-text notes recorded by the territory operations team to document exceptions to the standard rules-based territory assignment for this account. Should not exceed two sentences. Reviewed annually during territory planning.",
+      "reasoning": "The description is specific enough and preserves the documented limit and review cadence.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Account"
+    },
+    {
+      "field_api_name": "Info_Store__c",
+      "action": "rewrite",
+      "suggested_description": "Free-text field storing case notes.",
+      "reasoning": "The original was too vague to explain what the field contains, so I rewrote it into a minimal but specific description supported by the text.",
+      "assumptions": [],
+      "missing": [
+        "What specific case information belongs in this field?"
+      ],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Legacy_Ticket_Id__c",
+      "action": "keep",
+      "suggested_description": "Ticket identifier from the pre-2023 helpdesk system, retained for cross-referencing historical support records and resolving warranty disputes predating the Salesforce migration. Read-only after the migration cutover date of 2023-02-01.",
+      "reasoning": "The description is concrete, preserves the legacy-system context, and states the read-only cutover date.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Linked_Bug_Id__c",
+      "action": "keep",
+      "suggested_description": "Identifier of the defect record in the internal engineering bug tracker linked to this case. Format: BUG-XXXXX. Populated when the case is escalated to engineering. Used to track resolution progress and notify affected customers when the fix is released.",
+      "reasoning": "It identifies the linked record, gives the format, and explains the downstream handling clearly enough.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Product_Serial_Number__c",
+      "action": "keep",
+      "suggested_description": "Serial number of the specific product unit associated with this case, as provided by the customer or retrieved from the warranty registration system. Used to look up manufacturing batch records and identify potential product safety issues.",
+      "reasoning": "The description is specific about the item identified, the possible sources, and why the serial number matters.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Return_Authorisation_Number__c",
+      "action": "keep",
+      "suggested_description": "Unique return authorisation code issued to the customer when a product return or exchange is approved. Format: RA-XXXXXXXX. Populated by the returns team and communicated to the customer via the case resolution email.",
+      "reasoning": "It clearly defines the code, its format, and the business process around it.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "SLA_Breach_Reason__c",
+      "action": "keep",
+      "suggested_description": "Free-text explanation entered by the support manager when this case has breached its SLA target. Required when SLA_Breached__c is true. Used in the weekly SLA review and reported to the VP of Support on a monthly basis.",
+      "reasoning": "The description states when the field is required and how the explanation is consumed, so it is actionable as written.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Technical_Notes__c",
+      "action": "keep",
+      "suggested_description": "Free-text field for the support engineer to record technical findings during case investigation, including diagnostic steps taken, tools used, and intermediate conclusions reached before final root cause is confirmed.",
+      "reasoning": "It clearly describes the contents and timing of the notes without relying on field-name context.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    },
+    {
+      "field_api_name": "Emergency_Contact_Name__c",
+      "action": "keep",
+      "suggested_description": "Full name of the emergency contact nominated by this individual for corporate expedition and guided tour bookings. Stored alongside Emergency_Contact_Phone__c. Required when the contact is registered for any guided high-altitude activity.",
+      "reasoning": "The description clearly states what the text field stores, where it is paired, and when it is required.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Expedition_History__c",
+      "action": "keep",
+      "suggested_description": "Free-text summary of notable expeditions completed by this contact, as self-reported during registration or updated by the account manager. Used by the events team to match contacts with appropriate guided tour difficulty levels.",
+      "reasoning": "The description is specific, identifies the source of the text, and explains its operational purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Legacy_Customer_Id__c",
+      "action": "keep",
+      "suggested_description": "Customer identifier from the pre-2022 retail system, retained for cross-referencing historical purchase records and resolving warranty queries from before the platform migration. Read-only after the migration cutover date of 2022-03-01.",
+      "reasoning": "This description is clear, specific, and preserves the legacy-system and read-only details.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Loyalty_Card_Number__c",
+      "action": "keep",
+      "suggested_description": "Unique identifier assigned to this contact's Summit Rewards loyalty card. Format: SR- followed by 8 digits (e.g. SR-00123456). Used by the POS integration to look up the contact at the point of purchase and apply loyalty points to their account.",
+      "reasoning": "The description gives the identifier format and its business role with enough precision for integrations and developers.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Nationality__c",
+      "action": "keep",
+      "suggested_description": "Nationality of the contact as stated during registration. Used for export compliance checks when processing orders that include restricted technical equipment such as high-altitude avalanche airbag systems or satellite communication devices.",
+      "reasoning": "The description is specific and links the field to a concrete compliance process.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Ref_Code__c",
+      "action": "rewrite",
+      "suggested_description": "Reference code for this contact.",
+      "reasoning": "The original was too vague to be useful, so I tightened it to a plain description without inventing meaning.",
+      "assumptions": [],
+      "missing": [
+        "What does the reference code identify?",
+        "What format or source system does the code come from?"
+      ],
+      "object": "Contact"
+    },
+    {
+      "field_api_name": "Deal_Size_Category__c",
+      "action": "keep",
+      "suggested_description": "Categorical classification of the opportunity by net Amount. Calculated by formula: Small (<CHF 10k), Mid-Market (CHF 10k\u2013100k), Enterprise (>CHF 100k). Used to apply the correct approval thresholds and route to the appropriate deal desk queue.",
+      "reasoning": "The description matches the formula thresholds and explains how the category is operationally used.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Legacy_Opp_Id__c",
+      "action": "keep",
+      "suggested_description": "Opportunity identifier from the pre-2022 CRM system, retained for cross-referencing historical deal records and resolving commission disputes from before the platform migration. Read-only after the migration cutover date of 2022-06-01.",
+      "reasoning": "The description is specific, preserves the legacy context, and clearly states the read-only status.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Negotiation_Summary__c",
+      "action": "keep",
+      "suggested_description": "Free-text summary of key negotiation points for this opportunity, including discount rationale, non-standard terms agreed, and any side commitments made by the sales rep. Reviewed by deal desk before final approval.",
+      "reasoning": "The description clearly states the content captured and the review step, so it is fit for purpose.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Ops_Reference__c",
+      "action": "rewrite",
+      "suggested_description": "Operations reference code for this deal.",
+      "reasoning": "The original was too generic, so I replaced it with a concise description that matches the field name without adding unsupported detail.",
+      "assumptions": [],
+      "missing": [
+        "What does the operations reference identify?",
+        "What format or source system does the reference use?"
+      ],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Partner_Name__c",
+      "action": "keep",
+      "suggested_description": "Name of the channel partner who sourced or co-sold this opportunity. Required when Partner_Sourced__c is true. Used to calculate partner referral fees and to attribute revenue in the channel partner performance report.",
+      "reasoning": "The description is specific, states when the field is required, and explains its reporting and fee-related purpose clearly enough.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Win_Probability_Band__c",
+      "action": "keep",
+      "suggested_description": "Qualitative probability band derived from the Probability field. Calculated by formula: Low (0\u201330%), Medium (31\u201360%), High (61\u201399%), Won (100%). Used in pipeline visualisation dashboards and in manager review filters.",
+      "reasoning": "The description reflects the formula, names the band values, and explains the field's reporting use clearly.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Opportunity"
+    },
+    {
+      "field_api_name": "Resolution_KB_Article__c",
+      "action": "keep",
+      "suggested_description": "URL of the Knowledge Base article used to resolve this case. Populated by the agent before closing. Used to identify which articles are most effective at resolving cases and to surface them in the agent-facing recommended articles panel.",
+      "reasoning": "The description clearly states what the URL points to, who populates it, and how it is used in the agent workflow.",
+      "assumptions": [],
+      "missing": [],
+      "object": "Case"
+    }
+  ]
+}
