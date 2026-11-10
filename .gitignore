@@ -8,3 +8,6 @@ PLAN.md
 PROGRESS.md
 __pycache__/
 logs_and_observations.md
+
+# Generated Salesforce DX source for the demo org (scripts/seed_demo_org.py)
+demo_org/

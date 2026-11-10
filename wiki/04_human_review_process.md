@@ -221,7 +221,7 @@ Script 2 does not blindly deploy everything. It first validates the spreadsheet.
 It checks that:
 - every row in **Tab A** and **Tab B** has a decision
 - every row marked **Edit** has text in **Admin Version**
-- no description exceeds Salesforce’s 255-character limit
+- no description exceeds Salesforce’s 1,000-character limit for field descriptions
 
 If any of these checks fail, the script stops and nothing is written.
 

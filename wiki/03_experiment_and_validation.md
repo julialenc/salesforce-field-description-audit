@@ -222,7 +222,7 @@ A suggested description is considered acceptable if it meets all of the followin
 
 **Length**
 - Minimum 30 characters
-- Maximum 255 characters (hard Salesforce limit)
+- Maximum 255 characters (the pipeline's own target; Salesforce allows 1,000)
 - Target range for a well-written description: 60–180 characters
 
 **Clarity — no vague terms**
