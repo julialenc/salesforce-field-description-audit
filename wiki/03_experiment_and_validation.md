@@ -34,7 +34,7 @@ The experiment runs the **same scripts** as production. There is no separate exp
 
 | Seam | Experiment Mode | Production Mode |
 |---|---|---|
-| Data input | Reads from a local JSON file (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Calls Salesforce Tooling API |
+| Data input | Reads from a local JSON file (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Reads the org through the Salesforce CLI (`source: org`) |
 | LLM calls | Free open-weight model (gpt-oss-120b on Cerebras), or Azure OpenAI | Company-approved provider (e.g. Azure OpenAI) |
 | Write-back (Script 2) | Dry-run — logs decisions but does not call Metadata API | Calls Salesforce Metadata API |
 
@@ -62,7 +62,8 @@ This means the experiment validates the real pipeline, not a toy version of it.
 ## LLM Provider Selection in `config.yml`
 
 ```yaml
-mode: experiment        # experiment | production
+source: file            # file | org
+write_back: "off"       # off | export | deploy (quoted: YAML reads a bare off as false)
 
 data_source:
   experiment_file: data/sf_metadata_raw_training.json   # switch to sf_metadata_raw_test.json for final validation
@@ -80,7 +81,7 @@ objects:
   - Case
 ```
 
-Setting `mode: experiment` tells Script 2 to run in dry-run — decisions are validated and logged, but no call is made to the Salesforce Metadata API.
+`source: file` reads a synthetic dataset and never touches Salesforce. `write_back: "off"` tells Script 2 to run as a dry run: decisions are validated and logged, nothing is written. (Configs from before November 2026 used `mode: experiment | production`; it is still read, `production` meaning `source: org`.)
 
 ---
 

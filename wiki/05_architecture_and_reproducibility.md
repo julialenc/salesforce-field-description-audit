@@ -24,7 +24,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 | Aspect | Experiment | MVP | Production |
 |---|---|---|---|
 | Purpose | Validate the pipeline safely | Prove the pipeline in a real org | Operate the same pipeline with a stronger operational shell |
-| Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live Salesforce metadata via **Tooling API** | Live Salesforce metadata via **Tooling API** |
+| Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live org metadata through the **Salesforce CLI** (read-only metadata retrieve) | Same |
 | LLM provider | Free hosted open-weight model (gpt-oss-120b on Cerebras' free trial; Groq's free tier until the prompts outgrew it) or Azure OpenAI | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
 | Write-back | Dry-run only — no live write to Salesforce | Live write-back via **Metadata API** | Live write-back via **Metadata API** |
 | Runtime interface | Manual scripts, local configuration | Manual scripts, local configuration in `config.yml` | More user-friendly operating layer, such as CLI parameters, a service wrapper, or a simple web UI |
@@ -188,7 +188,7 @@ The system can be understood as a small set of architectural layers with clear h
 
 The **configuration layer** defines the runtime scope of the pipeline.
 
-In the current implementation, runtime settings live in `config.yml`, created locally from `config.example.yml`. This layer controls which Salesforce objects are processed, which operating mode is active, and which provider settings are used.
+In the current implementation, runtime settings live in `config.yml`, created locally from `config.example.yml`. This layer controls which Salesforce objects are processed, where fields come from (`source: file | org`), where approved changes go (`write_back: off | export | deploy`), which org (`salesforce.target_org`, a Salesforce CLI alias) and which provider settings are used. No Salesforce credentials are stored: the CLI holds the login.
 
 ### Data Input Layer
 
@@ -198,7 +198,7 @@ It is intentionally designed as a seam:
 - in **experiment**, it reads from one of two local synthetic files:
   - `data/sf_metadata_raw_training.json` — used during classifier development and prompt iteration
   - `data/sf_metadata_raw_test.json` — used only for final held-out validation once the pipeline is stable
-- in **MVP** and **production**, it reads from Salesforce through the **Tooling API**
+- in **MVP** and **production** (`source: org`), it reads the org through the **Salesforce CLI**: a read-only metadata retrieve of each object, parsed into the same field format (`scripts/sf_cli.py`). Describe calls are not used because they hide fields without field-level access
 
 Which experiment file is active is controlled by `data_source.experiment_file` in `config.yml`. As long as the input structure remains consistent, the downstream pipeline does not need to change.
 
@@ -332,7 +332,7 @@ In the current **MVP workflow**, the pipeline is operated locally and directly:
 - deployment is triggered manually after review is complete
 
 This is intentionally lightweight, but the pipeline is already real:
-- live ingestion through the **Tooling API**
+- live ingestion through the **Salesforce CLI** (read-only metadata retrieve)
 - real LLM calls
 - human review in the spreadsheet
 - real write-back through the **Metadata API**
