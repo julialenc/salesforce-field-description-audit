@@ -11,3 +11,13 @@ logs_and_observations.md
 
 # Generated Salesforce DX source for the demo org (scripts/seed_demo_org.py)
 demo_org/
+
+# Run outputs: every run writes new ones. Committed examples are in data/sample/
+data/llm_response*.json
+data/sf_classified*.json
+data/review_queue_*.xlsx
+data/write_log_*.xlsx
+data/approved_descriptions_*.csv
+data/review_sample_*.xlsx
+data/review_test_*.xlsx
+/review_sample_*.xlsx

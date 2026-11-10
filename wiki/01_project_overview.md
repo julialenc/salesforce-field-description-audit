@@ -28,20 +28,24 @@ Nothing is written to Salesforce without explicit human approval.
 
 ## Why This Matters Now
 
-Salesforce Agentforce does not ask humans what a field means.
-It reads the description.
+An AI agent does not ask a colleague what a field means. It reads the metadata. When a field description is missing, it has the API name and nothing more; when it is vague, it misreads the field; when it contradicts the field's configuration, it acts on wrong information. Most Salesforce orgs have years of undocumented fields. This tool makes the cleanup systematic, reviewable and repeatable.
 
-- When a field description is missing, the **AI guesses.**
+### Salesforce AI Products in 2026
 
-- When it is vague, the **AI misinterprets.**
+Salesforce renamed much of its AI line-up during 2025 and 2026, and many Admins and Architects find the names hard to follow. What they have in common: each reads the same object and field metadata this tool improves.
 
-- When it contradicts the actual field configuration, the **AI acts on wrong information.**
+| Name (checked 10 November 2026) | Since | What it is | Why field descriptions matter to it |
+|---|---|---|---|
+| **Agentforce** (launched as Agentforce 360) | October 2025 | Salesforce's own agents: service, sales, the Coworker assistant, custom agents | They choose fields and actions by reading object and field descriptions |
+| **Data 360** (formerly Data Cloud) | October 2025 | The data layer that gives agents business context. Same product, new name | Context is only as clear as the fields it is built from |
+| **Headless 360** (now listed as Headless Toolkit) | April 2026 | Salesforce capabilities offered as APIs, MCP tools and CLI commands, so agents can work without the browser | Outside agents and coding tools (Claude, ChatGPT, Cursor, Codex) read the org's schema, descriptions included |
+| **AIforce**, with **Claudeforce** and **Slackforce** | August–September 2026 | Salesforce data and actions inside Claude and Slack, under the org's existing permissions | An answer about a deal in Claude or Slack is built on the same field metadata |
 
-This is not a cosmetic problem. Poor metadata causes wrong answers, wrong actions,
-and support escalations in AI-powered orgs.
+The core clouds were renamed after Agentforce in 2025 ("Agentforce Sales", "Agentforce Service"). Salesforce's product pages call them Sales Cloud and Service Cloud again (checked 10 November 2026), while the Winter '27 release notes, written in August, still use the Agentforce names. Expect to meet both for a while.
 
-Most Salesforce orgs have accumulated years of undocumented fields.
-This tool makes the cleanup systematic, reviewable, and repeatable.
+Whether a given agent or integration actually uses the description depends on how it retrieves metadata. Salesforce's Trailhead unit on agent access says that a blank field description "returns the developer API name and nothing else" through its MCP Describe tool.
+
+Sources: Salesforce's announcements of [Headless 360](https://www.salesforce.com/news/stories/salesforce-headless-360-announcement/) and [Claudeforce](https://www.salesforce.com/news/press-releases/2026/08/26/salesforce-and-anthropic-announce-claudeforce/), its [Dreamforce 2026 summary](https://www.salesforce.com/blog/dreamforce-2026-announcements/), its [Data 360 guide](https://www.salesforce.com/data/guide/), its [products page](https://www.salesforce.com/products/), and the Trailhead unit [Prepare Your Data for Headless Functionality](https://trailhead.salesforce.com/content/learn/modules/data-foundation-for-headless-functionality/prepare-your-data-for-headless-functionality).
 
 ---
 
@@ -81,10 +85,13 @@ Intended users:
 │   ├── sf_metadata_raw_training.json  # Synthetic training set — 288 fields across 4 objects, used during classifier development and prompt iteration
 │   ├── sf_metadata_raw_test.json      # Synthetic test set — 144 fields across 4 objects, held out for final validation only
 │   ├── org_context_synthetic.md       # Example org context file for the synthetic org (glossary, systems, teams, conventions); _glossary.md is the glossary part only
-│   ├── sf_classified.json             # Classifier output — each field labelled FLAGGED, UNCERTAIN, REVIEWED, or SKIPPED. Committed as experiment reference only
-│   ├── llm_response.json              # Raw LLM suggestions before human review. Committed as experiment reference only
-│   ├── review_queue_{timestamp}.xlsx  # Generated review file — one row per field, three tabs (FLAGGED, UNCERTAIN, Reference). Committed as experiment reference only
-│   └── write_log_{timestamp}.xlsx     # Deployment audit log — one row per field write attempt, with decision and outcome. Committed as experiment reference only
+│   └── sample/                        # Outputs of one real run, for reference (249 fields read from a Developer Edition org, Azure gpt-5.4-mini)
+│       ├── sf_classified_sample.json  # Classifier output — each field labelled FLAGGED, UNCERTAIN, REVIEWED, or SKIPPED
+│       ├── llm_response_sample.json   # LLM suggestions with Unverified and Missing, before review
+│       ├── review_queue_sample.xlsx   # The review file — Tab A (FLAGGED), Tab B (UNCERTAIN + proposed rewrites), Tab C (reference)
+│       └── write_log_sample.xlsx      # Script 2's audit log from the write-back test: SUCCESS, UNCHANGED, SKIPPED, FAILED
+│   # Each run writes sf_classified.json, llm_response.json, review_queue_<timestamp>.xlsx,
+│   # approved_descriptions_<timestamp>.csv and write_log_<timestamp>.xlsx into data/ (not committed)
 ├── prompts/
 │   ├── system_prompt.md               # Quality criteria and instructions — injected once per session for all LLM calls
 │   ├── golden_examples.json           # High-quality descriptions of invented fields (in neither dataset) used for few-shot grounding
@@ -92,11 +99,15 @@ Intended users:
 │   ├── prompt_b_uncertain_fields.md   # Task instruction for UNCERTAIN fields — borderline cases requiring LLM judgment (Rules 6–9)
 │   └── prompt_c_reviewed_fields.md    # Task instruction for REVIEWED fields — passed all rules; LLM keeps unless clearly inadequate
 ├── scripts/
-│   ├── 01_ingest_classify_send.py     # Extract from Salesforce (or synthetic file), classify, call LLM, produce review file
-│   ├── 02_deploy_approved.py          # Read human decisions, validate review file, write approved descriptions back to Salesforce
+│   ├── 01_ingest_classify_send.py     # Read fields (synthetic file or org), classify, call the LLM, produce the review file
+│   ├── 02_deploy_approved.py          # Validate the Admin's decisions; dry run, CSV export or deploy to the org
+│   ├── check_setup.py                 # Check Python, packages, config, LLM connection and Salesforce CLI login, with a fix per failure
+│   ├── sf_cli.py                      # Salesforce CLI helpers: read-only metadata retrieve, CLI calls
+│   ├── seed_demo_org.py               # Create the training set's custom fields in a Developer Edition org; reset them
+│   ├── check_org_parity.py            # Check that reading from the org gives the same input as the training file
 │   ├── validate_classifier.py         # Compare classifier output with the dataset labels; list every mismatch
 │   ├── evaluate_suggestions.py        # Automatic quality check of LLM suggestions: pass rate per prompt and rule
-│   └── review_sample.py               # Draw a 40-field human review sample from a review file, re-review it after a change, and score it
+│   └── review_sample.py               # Draw a 40-field review sample from a review file, re-review it after a change, and score it
 ├── tests/
 │   ├── test_classifier.py             # Unit tests for the R1–R9 rules and the known classifier fixes
 │   ├── test_cache.py                  # Unit tests for the cache key
@@ -115,6 +126,7 @@ Intended users:
 ├── NOTICE
 ├── ONBOARDING.md                      # Guide for a new maintainer
 ├── README.md
-├── config.example.yml                 # Copy, rename to config.yml, fill in credentials, object list, and experiment file path before running
+├── ROADMAP.md                         # What is left, most important first
+├── config.example.yml                 # Copy to config.yml and fill in PART 1 (the LLM settings)
 └── requirements.txt
 ```

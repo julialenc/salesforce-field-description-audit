@@ -70,7 +70,7 @@ In the current implementation, these seams are controlled mainly through `config
 Salesforce metadata source
 (experiment: `data/sf_metadata_raw_training.json`
              `data/sf_metadata_raw_test.json`
- MVP / production: Tooling API)
+ org: Salesforce CLI, read-only metadata retrieve)
              ↓
 [1] Ingestion
     Extract field metadata for configured objects
@@ -176,6 +176,19 @@ R1-R5 trigger   R6-R9 trigger       fired)         not writable)
 
 - **Script 1** prepares proposals but cannot modify Salesforce.
 - **Human review** is the approval gate, and **Script 2** is the only stage that can trigger live write-back through the Metadata API.
+
+### Tech Stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Language | **Python 3.10+** with PyYAML, requests, openpyxl | The whole pipeline; no other packages |
+| Salesforce access | **Salesforce CLI** (`sf`) | Read-only metadata retrieve; deploy of approved descriptions; holds the login, so no credentials in `config.yml` |
+| Review interface | **Excel (`.xlsx`)** | Approve / Edit / Reject decisions |
+| Configuration | **YAML** (`config.example.yml` → `config.yml`) | LLM, source, write-back, objects, options |
+| Experiment input | `data/sf_metadata_raw_training.json` (288 fields), `data/sf_metadata_raw_test.json` (144 fields) | Synthetic metadata for a fictional outdoor-equipment retailer |
+| LLM providers | Any **OpenAI-compatible API** (Cerebras, OpenAI, …) and **Azure OpenAI**. Amazon Bedrock and Google Vertex AI are not implemented | Suggestions, with Unverified and Missing lists |
+| Prompt assets | **Markdown + JSON** (`prompts/`) | Quality rules, examples, one task prompt per status |
+| Checks | `tests/`, `scripts/check_setup.py`, `scripts/validate_classifier.py`, `scripts/evaluate_suggestions.py`, `scripts/check_org_parity.py` | Setup, classifier, suggestion and org-input checks; only the setup check calls an LLM (one tiny request) |
 
 ---
 
@@ -396,7 +409,7 @@ What no automatic check can judge (whether a suggestion is true and worth approv
 
 ### Synthetic Datasets for Experiment Mode
 
-In experiment mode, the pipeline uses synthetic metadata rather than a live Salesforce org. Two files are provided:
+With `source: file` (experiment mode), the pipeline uses synthetic metadata rather than a live Salesforce org. Two files are provided:
 
 - `data/sf_metadata_raw_training.json` — **288 fields** across four objects, used during classifier development and prompt iteration
 - `data/sf_metadata_raw_test.json` — **144 fields** across four objects, held out until the pipeline is considered stable, then used once for final validation
@@ -432,7 +445,7 @@ The **classifier** is deterministic, but the **LLM** is not fully deterministic,
 
 With those elements held constant, repeated runs should lead to **comparable outcomes**, even if the exact wording of suggestions is not identical every time.
 
-Measured on the training set, this holds across providers as well: an open-weight model on Groq (`gpt-oss-120b`) and Azure OpenAI (`gpt-5.4-mini`) chose the same action (rewrite, shorten or keep) for all 271 fields sent. They differed only in wording. Between repeated runs of the same prompts, pass rates moved by one or two fields out of 74.
+Measured on the training set, this holds across providers as well: an open-weight model (`gpt-oss-120b`, on Groq) and Azure OpenAI (`gpt-5.4-mini`) chose the same action (rewrite, shorten or keep) for all 271 fields sent. They differed only in wording. Between repeated runs of the same prompts, pass rates moved by one or two fields out of 74.
 
 ---
 

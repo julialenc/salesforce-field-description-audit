@@ -227,11 +227,16 @@ If any of these checks fail, the script stops and nothing is written.
 
 Only when validation succeeds does Script 2 begin writing approved descriptions back to Salesforce.
 
-The deployment logic is simple:
+The deployment logic, row by row:
 
-- **Approve** → write the LLM suggestion
-- **Edit** → write the Admin version
-- **Reject** → skip the field
+| Decision in the review file | What is written | Status in the write log |
+|---|---|---|
+| **Approve** | the text in **LLM Suggestion** | SUCCESS (deploy), EXPORTED (CSV) or DRY_RUN |
+| **Edit** | the text in **Admin Version**: the LLM's text is ignored (the LLM suggests "ABCD", the Admin writes "ADDD", "ADDD" goes into Salesforce) | as above |
+| **Approve**, but the suggestion equals the current description (e.g. the LLM kept a retired field's honest note and asks whether it can be deleted) | nothing, there is nothing to change | UNCHANGED |
+| **Reject** | nothing, the current description stays | SKIPPED |
+| **Approve** or **Edit** for a field deleted or renamed since Script 1 ran | nothing for that field; all other approved rows are still written | FAILED, with the reason |
+| no decision | nothing at all: Script 2 stops before writing and lists the rows without a decision | — |
 
 Fields in **Tab C** are never written.
 
