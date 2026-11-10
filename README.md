@@ -82,7 +82,7 @@ macOS / Linux: the same with `source venv/bin/activate` and `cp config.example.y
 
 **2. Configure.** Open `config.yml` and fill in PART 1: `llm.api_key`, plus `endpoint` and `model` if you don't use Cerebras. Everything else has a working default: the synthetic training set as input and a CSV export as output. Keep `config.yml` on your machine; never commit it.
 
-**3. Check the setup:** `python scripts/check_setup.py` checks Python, packages, config, the input file and the LLM connection, and says how to fix anything that fails.
+**3. Check the setup:** `python scripts/00_check_setup.py` checks Python, packages, config, the input file and the LLM connection, and says how to fix anything that fails.
 
 **4. Run Script 1:** `python scripts/01_ingest_classify_send.py` checks 288 synthetic fields, sends 271 to the LLM and writes `data/review_queue_<timestamp>.xlsx` (about 12 minutes on Cerebras).
 
@@ -93,9 +93,9 @@ macOS / Linux: the same with `source venv/bin/activate` and `cp config.example.y
 ### On a Salesforce org
 
 1. A free Developer Edition (https://developer.salesforce.com/signup) or a sandbox, and the Salesforce CLI (the Windows installer at https://developer.salesforce.com/tools/salesforcecli is faster than npm). Log in once: `sf org login web --alias sfdesc-dev`
-2. For a demo: `python scripts/seed_demo_org.py validate`, then `deploy`, creates the training set's 231 custom fields with their deliberately messy descriptions; `reset` puts them back after a test
+2. For a demo: `python scripts/00_a_seed_demo_org.py validate`, then `deploy`, creates the training set's 231 custom fields with their deliberately messy descriptions; `reset` puts them back after a test
 3. In `config.yml`: `source: org`, `salesforce.target_org: <your alias>`, the `objects` to audit, and an approved LLM provider. Keep `write_back: export` for the audit; set `deploy` only when you decide to write to the org
-4. Run `check_setup.py`, Script 1, review, Script 2 as above
+4. Run `00_check_setup.py`, Script 1, review, Script 2 as above
 
 ---
 
@@ -133,7 +133,7 @@ Measured on synthetic data with the recommended setup (Azure gpt-5.4-mini, reaso
 
 On the unseen fields, 12 of 20 suggestions were ready as written, 6 were correct but waited for one fact only the business has (what a checkbox means, what a tier stands for), and 2 had a wrong or lost fact that the review caught. The org context file had been written for the training fields and covered the new ones less well. **Write an org context file for the objects you audit**; it was the largest single improvement in the experiment.
 
-The samples were reviewed against a written Approve / Edit / Reject rubric with an AI assistant, not by an independent Salesforce Admin. Treat 12 of 20 as a reason to run a pilot, not as a basis for estimating effort in your org: [ROADMAP.md](ROADMAP.md), item 1, lists what to measure in one.
+The samples were reviewed against a written Approve / Edit / Reject rubric with an AI assistant, not by an independent Salesforce Admin. The four reviewed workbooks, with a note on every row, are in [`data/review_evidence/`](data/review_evidence/). Treat 12 of 20 as a reason to run a pilot, not as a basis for estimating effort in your org: [ROADMAP.md](ROADMAP.md), item 1, lists what to measure in one.
 
 **Cost:** about 2.3 CHF of LLM cost per 1,000 fields on Azure gpt-5.4-mini (script estimate; the real charge was about 70% of it).
 
@@ -147,7 +147,7 @@ The samples were reviewed against a written Approve / Edit / Reject rubric with 
 - [wiki 04](wiki/04_human_review_process.md) — the Admin's review, step by step, and what Script 2 does with each decision
 - [wiki 05](wiki/05_architecture_and_reproducibility.md) — architecture, configuration, tech stack, safety and failure handling
 - [wiki 06](wiki/06_lessons_learned.md) — what building it taught, for engineers new to LLM pipelines
-- [ONBOARDING.md](ONBOARDING.md) for a new maintainer · [ROADMAP.md](ROADMAP.md) for what is left · [CONTRIBUTING.md](CONTRIBUTING.md) to contribute
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to change the code safely and check a change · [ROADMAP.md](ROADMAP.md) — what is left, most important first
 
 ---
 

@@ -3,7 +3,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-seed_demo_org.py
+00_a_seed_demo_org.py
 
 Creates the training set's custom fields, with their deliberately messy
 descriptions, in a free Salesforce Developer Edition org, so the pipeline can
@@ -14,14 +14,14 @@ The script writes Salesforce DX source (one .field-meta.xml per field) into
 demo_org/ and calls the Salesforce CLI. Nothing is sent to the org unless you
 pass "deploy", and deploy asks for a typed confirmation first.
 
-  python scripts/seed_demo_org.py generate
+  python scripts/00_a_seed_demo_org.py generate
       Writes demo_org/ only. Lists the fields, nothing goes to any org.
-  python scripts/seed_demo_org.py validate [--target-org sfdesc-dev]
+  python scripts/00_a_seed_demo_org.py validate [--target-org sfdesc-dev]
       Check-only deploy: Salesforce compiles everything and reports errors,
       but saves nothing in the org.
-  python scripts/seed_demo_org.py deploy [--target-org sfdesc-dev] [--skip Object.Field__c,...]
+  python scripts/00_a_seed_demo_org.py deploy [--target-org sfdesc-dev] [--skip Object.Field__c,...]
       Deploys the fields. Asks you to type the org alias before it starts.
-  python scripts/seed_demo_org.py reset [--target-org sfdesc-dev]
+  python scripts/00_a_seed_demo_org.py reset [--target-org sfdesc-dev]
       Same as deploy: puts every field's original, messy description back
       after a write-back test, so the demo can be run again.
 
@@ -42,6 +42,8 @@ DATASET     = ROOT / "data" / "sf_metadata_raw_training.json"
 OUT_DIR     = ROOT / "demo_org"
 API_VERSION = "62.0"
 DEFAULT_ORG = "sfdesc-dev"
+# Training fields Salesforce rejects: the formula subtracts a DateTime (CreatedDate) from a Date
+ALWAYS_SKIP = {"Opportunity.Days_To_Close__c"}
 
 TEXT_LENGTH      = 255
 NUMBER_PRECISION = 18
@@ -179,7 +181,7 @@ def main() -> int:
     args    = sys.argv[1:]
     command = args[0] if args else "generate"
     org     = args[args.index("--target-org") + 1] if "--target-org" in args else DEFAULT_ORG
-    skip    = set(args[args.index("--skip") + 1].split(",")) if "--skip" in args else set()
+    skip    = ALWAYS_SKIP | (set(args[args.index("--skip") + 1].split(",")) if "--skip" in args else set())
 
     fields = generate(skip)
     by_object: dict[str, int] = {}

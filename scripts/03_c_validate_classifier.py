@@ -3,16 +3,16 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-validate_classifier.py
+03_c_validate_classifier.py
 
 Compares classifier output with the ground truth in each field
 (_expected_status / _expected_rule). Prints accuracy per expected rule
 and lists every mismatch.
 
 Usage:
-  python scripts/validate_classifier.py
+  python scripts/03_c_validate_classifier.py
       Reads data/sf_classified.json (written by Script 1).
-  python scripts/validate_classifier.py data/sf_metadata_raw_training.json
+  python scripts/03_c_validate_classifier.py data/sf_metadata_raw_training.json
       Classifies a raw dataset directly — no LLM call, no config needed.
 
 Exit code is 1 if there is any mismatch, 0 otherwise.

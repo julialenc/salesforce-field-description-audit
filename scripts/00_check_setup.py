@@ -3,15 +3,15 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-check_setup.py
+00_check_setup.py
 
 Checks everything the pipeline needs before a first run and says how to fix
 what is missing: Python version, packages, config.yml, the input file, the
 LLM connection (one tiny request, a few tokens) and, when config.yml uses a
 Salesforce org, the Salesforce CLI and its login.
 
-  python scripts/check_setup.py           all checks
-  python scripts/check_setup.py --no-llm  skip the LLM request
+  python scripts/00_check_setup.py           all checks
+  python scripts/00_check_setup.py --no-llm  skip the LLM request
 
 Exit code 0 when every check passes.
 """

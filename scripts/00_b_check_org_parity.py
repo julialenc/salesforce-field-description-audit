@@ -3,16 +3,16 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 
 """
-check_org_parity.py
+00_b_check_org_parity.py
 
 Checks that reading fields from an org gives the pipeline the same input as
 the training file: for every custom field of the training set that exists in
-the org (seeded with seed_demo_org.py), the description, type, picklist
+the org (seeded with 00_a_seed_demo_org.py), the description, type, picklist
 values, formula and lookup target must match, and the classifier must give
 the same status and rule. Read-only: nothing is written to the org and no
 LLM is called.
 
-  python scripts/check_org_parity.py [--target-org sfdesc-dev]
+  python scripts/00_b_check_org_parity.py [--target-org sfdesc-dev]
 
 Exit code 0 when every seeded field matches.
 """
