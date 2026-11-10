@@ -13,7 +13,7 @@ The same workbook earns its keep without any agent project: when you take over a
 > **Status (November 2026): v0.1, works end to end, tested on synthetic data only.**
 >
 > - **Tested:** the whole cycle on synthetic fields (a fictional outdoor-equipment retailer): reading the fields from a free Developer Edition org, drafting suggestions, reviewing them in Excel, exporting them to CSV and deploying them back to the org.
-> - **Not tested:** a real organization's metadata. That pilot is handed over; [ROADMAP.md](ROADMAP.md), item 1, describes it for whoever takes the project on, for example a Salesforce Admin trainee.
+> - **Not tested:** a real organization's metadata. That pilot is handed over; [ROADMAP.md](ROADMAP.md), item 1, describes it for whoever takes the project on: a Salesforce Admin or Architect working with an NGO or a small business.
 > - Prompt and classifier tuning is closed. The project is looking for a maintainer.
 
 ---

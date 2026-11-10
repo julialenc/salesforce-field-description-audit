@@ -4,7 +4,7 @@ What is left after v0.1 (November 2026), most important first. The measured stat
 
 ## 1. Pilot with a real organization
 
-The project was planned in three stages: an experiment on synthetic data, the full cycle on a Developer Edition org "as if it were real", and a pilot with a real organization. The first two are done; the third is handed over. It suits someone who wants to learn Salesforce administration on a real case, for example an Admin trainee working with an NGO or a small business.
+The project was planned in three stages: an experiment on synthetic data, the full cycle on a Developer Edition org "as if it were real", and a pilot with a real organization. The first two are done; the third is handed over. It suits a Salesforce Admin or Architect working with an NGO or a small business: someone who knows how an org is run day to day, or who can follow a field into the flows, Apex and integrations that use it. Both are needed to judge whether a suggestion is right.
 
 What to do:
 - Agree with the organization to work in a **sandbox**, never in production, and on a few objects first (e.g. Account and Contact)
