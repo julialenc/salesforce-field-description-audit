@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 NS = {"m": "http://soap.sforce.com/2006/04/metadata"}
+API_VERSION = "62.0"   # metadata API version for package.xml files written by the scripts
 
 # Metadata <type> -> the field type names the pipeline and datasets use
 TYPE_NAMES = {"Url": "URL"}
@@ -40,15 +41,15 @@ def find_sf() -> str:
     return sf
 
 
-def run(args: list[str], cwd: Path | None = None) -> dict:
-    """Run an sf command with --json and return the parsed result. Exits with the CLI's message on failure."""
+def run(args: list[str], cwd: Path | None = None, check: bool = True) -> dict:
+    """Run an sf command with --json and return the parsed result. With check, exits with the CLI's message on failure."""
     proc = subprocess.run([find_sf(), *args, "--json"], cwd=cwd, capture_output=True, text=True, encoding="utf-8")
     try:
         data = json.loads(proc.stdout)
     except json.JSONDecodeError:
         print(proc.stdout[-2000:], proc.stderr[-2000:])
         sys.exit(2)
-    if data.get("status", 1) != 0:
+    if check and data.get("status", 1) != 0:
         print(f"Salesforce CLI error: {data.get('message', data)}")
         sys.exit(2)
     return data
@@ -56,9 +57,9 @@ def run(args: list[str], cwd: Path | None = None) -> dict:
 
 def read_fields(org: str, objects: list[str], include_standard: bool = False) -> list[dict]:
     """Every field of the given objects, from a read-only metadata retrieve. Custom fields only unless include_standard."""
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:    # Windows: the CLI may still hold the folder
         run(["project", "retrieve", "start", "--target-org", org, "--target-metadata-dir", tmp,
-             "--unzip", "--wait", "30", "--metadata", *[f"CustomObject:{o}" for o in objects]], cwd=Path(tmp))
+             "--unzip", "--wait", "30", "--metadata", *[f"CustomObject:{o}" for o in objects]])
         fields = []
         for obj in objects:
             files = list(Path(tmp).rglob(f"objects/{obj}.object"))

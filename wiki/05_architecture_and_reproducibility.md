@@ -26,7 +26,7 @@ This project uses **one pipeline** across experiment, MVP, and production. The c
 | Purpose | Validate the pipeline safely | Prove the pipeline in a real org | Operate the same pipeline with a stronger operational shell |
 | Data source | Synthetic files (`sf_metadata_raw_training.json` or `sf_metadata_raw_test.json`) | Live org metadata through the **Salesforce CLI** (read-only metadata retrieve) | Same |
 | LLM provider | Free hosted open-weight model (gpt-oss-120b on Cerebras' free trial; Groq's free tier until the prompts outgrew it) or Azure OpenAI | Real provider, such as **Azure OpenAI** | Real provider, potentially with stronger enterprise controls |
-| Write-back | Dry-run only — no live write to Salesforce | Live write-back via **Metadata API** | Live write-back via **Metadata API** |
+| Write-back | Dry run or CSV export — no live write | CSV export by default; live write through the **Salesforce CLI** (`write_back: deploy`) | Same |
 | Runtime interface | Manual scripts, local configuration | Manual scripts, local configuration in `config.yml` | More user-friendly operating layer, such as CLI parameters, a service wrapper, or a simple web UI |
 | Human review | Required | Required | Required |
 | Core pipeline logic | Same | Same | Same |
@@ -158,8 +158,7 @@ R1-R5 trigger   R6-R9 trigger       fired)         not writable)
     - no description exceeds Salesforce limits
                      ↓
 [8] Write-back
-    experiment: dry-run only
-    MVP / production: Metadata API
+    write_back: off (dry run) | export (CSV, default) | deploy (Salesforce CLI)
                      ↓
     Decision handling:
     - Approve → write LLM suggestion
@@ -250,8 +249,9 @@ This is the approval gate of the architecture: the machine prepares proposals, a
 The **deployment layer**, implemented by `02_deploy_approved.py`, reads the completed review file, validates it, maps decisions to write actions, and executes only permitted changes.
 
 This layer is also a seam:
-- in **experiment**, it runs as a dry-run
-- in **MVP** and **production**, it writes through the **Metadata API**
+- `write_back: "off"`: dry run, decisions are validated and logged
+- `write_back: export` (default): approved descriptions go to a CSV the Admin applies by hand
+- `write_back: deploy` (opt-in): Script 2 retrieves the approved fields' metadata through the Salesforce CLI, changes only the description and deploys it back
 
 Its primary audit output is:
 
@@ -335,7 +335,7 @@ This is intentionally lightweight, but the pipeline is already real:
 - live ingestion through the **Salesforce CLI** (read-only metadata retrieve)
 - real LLM calls
 - human review in the spreadsheet
-- real write-back through the **Metadata API**
+- real write-back through the **Salesforce CLI** (`write_back: deploy`)
 
 ### Production Workflow
 
@@ -481,7 +481,7 @@ This record is stored in `data/write_log_{timestamp}.xlsx`.
 
 A failed field update does not invalidate the rest of the deployment.
 
-If the Metadata API rejects an individual field update, that field is logged as failed and the pipeline continues with the remaining approved rows. A single write error does not corrupt earlier successes or silently terminate the run.
+If Salesforce rejects an individual field update, or the field no longer exists, that field is logged as failed and the remaining approved rows are still written (the deploy is not all-or-nothing). A single write error does not corrupt earlier successes or silently terminate the run.
 
 ### Experiment Mode Avoids Live Risk Entirely
 
@@ -491,7 +491,7 @@ That is the purpose of **experiment mode**. In experiment mode:
 - input comes from synthetic metadata
 - the same core pipeline still runs
 - Script 2 validates and logs decisions
-- no call is made to the Salesforce Metadata API
+- nothing is written to Salesforce (`write_back: "off"` or `export`)
 
 This allows classifier logic, prompt behavior, review flow, and artifact generation to be tested without risk to a live org.
 

@@ -21,6 +21,9 @@ pass "deploy", and deploy asks for a typed confirmation first.
       but saves nothing in the org.
   python scripts/seed_demo_org.py deploy [--target-org sfdesc-dev] [--skip Object.Field__c,...]
       Deploys the fields. Asks you to type the org alias before it starts.
+  python scripts/seed_demo_org.py reset [--target-org sfdesc-dev]
+      Same as deploy: puts every field's original, messy description back
+      after a write-back test, so the demo can be run again.
 
 Needs the Salesforce CLI (sf) and a logged-in org:
   sf org login web --alias sfdesc-dev
@@ -192,8 +195,8 @@ def main() -> int:
     if command == "validate":
         print(f"Check-only deploy to {org}: nothing is saved in the org.")
         return report(run_cli(["project", "deploy", "validate", *source]))
-    if command == "deploy":
-        print(f"This creates {len(fields)} custom fields in the org '{org}'.")
+    if command in ("deploy", "reset"):
+        print(f"This creates or resets {len(fields)} custom fields in the org '{org}' (original descriptions).")
         if input(f"Type the org alias ({org}) to continue: ").strip() != org:
             print("Cancelled. Nothing was deployed.")
             return 1
